@@ -158,7 +158,7 @@
                             </div>
                             <div class="list-group list-group-flush" style="max-height: 290px; overflow-y: auto;">
                                 {% for n in recent_notifications %}
-                                    <a href="{% url 'notifications:mark_as_read' n.id %}" class="list-group-item list-group-item-action list-group-item-dark p-3 text-white border-secondary notification-item {% if not n.is_read %}bg-opacity-25 bg-primary border-start border-primary border-3{% endif %}">
+                                    <a href="{% url 'notifications:notification_detail' n.id %}" class="list-group-item list-group-item-action list-group-item-dark p-3 text-white border-secondary notification-item {% if not n.is_read %}bg-opacity-25 bg-primary border-start border-primary border-3{% endif %}">
                                         <div class="d-flex align-items-start">
                                             <div class="me-2 mt-1">
                                                 {% if not n.is_read %}

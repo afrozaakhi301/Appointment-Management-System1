@@ -51,6 +51,65 @@ def notification_list_view(request):
 
 
 @login_required
+def notification_detail_view(request, notification_id):
+    """
+    Displays full details of a specific notification for both Clients and Engineers.
+    Automatically marks unread notification as read upon viewing.
+    """
+    notification = get_object_or_404(
+        Notification.objects.select_related(
+            "appointment__client__client_profile",
+            "appointment__engineer__engineer_profile",
+            "appointment__service",
+            "user"
+        ),
+        id=notification_id,
+        user=request.user
+    )
+
+    # Auto mark as read if viewing for the first time
+    if not notification.is_read:
+        notification.is_read = True
+        notification.save(update_fields=["is_read"])
+
+    return render(
+        request,
+        "notifications/notification_detail.html",
+        {
+            "notification": notification,
+            "appointment": notification.appointment,
+        }
+    )
+
+
+@login_required
+def toggle_notification_read_view(request, notification_id):
+    """
+    Toggles the read/unread status of a notification for the logged-in user.
+    """
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    notification.is_read = not notification.is_read
+    notification.save(update_fields=["is_read"])
+    status_str = "Read" if notification.is_read else "Unread"
+    messages.success(request, f"Notification marked as {status_str}.")
+    next_url = request.GET.get("next")
+    if next_url:
+        return redirect(next_url)
+    return redirect("notifications:notification_list")
+
+
+@login_required
+def delete_notification_view(request, notification_id):
+    """
+    Deletes a notification owned by the logged-in user.
+    """
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    notification.delete()
+    messages.success(request, "Notification removed successfully.")
+    return redirect("notifications:notification_list")
+
+
+@login_required
 def mark_as_read_view(request, notification_id):
     notification = get_object_or_404(Notification, id=notification_id, user=request.user)
     notification.is_read = True
@@ -69,3 +128,4 @@ def mark_all_as_read_view(request):
     else:
         messages.info(request, "All notifications are already marked as read.")
     return redirect("notifications:notification_list")
+

@@ -64,37 +64,40 @@
             {% if notifications %}
                 <div class="list-group list-group-flush">
                     {% for n in notifications %}
-                        <div class="list-group-item p-3 d-flex justify-content-between align-items-center {% if not n.is_read %}bg-primary-subtle bg-opacity-25 border-start border-primary border-4{% endif %}">
+                        <div class="list-group-item p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 {% if not n.is_read %}bg-primary-subtle bg-opacity-25 border-start border-primary border-4{% endif %}">
                             <div class="d-flex align-items-start">
-                                <div class="p-2 rounded-circle me-3 {% if not n.is_read %}bg-primary text-white{% else %}bg-light text-muted border{% endif %}">
+                                <div class="p-2 rounded-circle me-3 {% if not n.is_read %}bg-primary text-white shadow-sm{% else %}bg-light text-muted border{% endif %} flex-shrink-0">
                                     <i class="bi {% if not n.is_read %}bi-bell-fill{% else %}bi-bell{% endif %}"></i>
                                 </div>
                                 <div>
-                                    <div class="d-flex align-items-center gap-2 mb-1">
-                                        <p class="mb-0 {% if not n.is_read %}fw-semibold text-dark{% else %}text-muted{% endif %}">
+                                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                        <a href="{% url 'notifications:notification_detail' n.id %}" class="text-decoration-none {% if not n.is_read %}fw-bold text-dark{% else %}text-secondary{% endif %}">
                                             {{ n.message }}
-                                        </p>
+                                        </a>
                                         {% if not n.is_read %}
-                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">New</span>
+                                            <span class="badge bg-primary px-2 py-1 small">New</span>
                                         {% endif %}
                                     </div>
-                                    <small class="text-muted">
-                                        <i class="bi bi-clock me-1"></i>{{ n.created_at|timesince }} ago &bull; {{ n.created_at|date:"M d, Y h:i A" }}
-                                    </small>
+                                    <div class="d-flex align-items-center gap-2 text-muted small flex-wrap">
+                                        <span><i class="bi bi-clock me-1"></i>{{ n.created_at|timesince }} ago &bull; {{ n.created_at|date:"M d, Y h:i A" }}</span>
+                                        {% if n.appointment %}
+                                            <span class="badge bg-light text-dark border"><i class="bi bi-calendar-event me-1 text-primary"></i>Appointment #{{ n.appointment.id }}</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
-                            <div class="ms-3 d-flex align-items-center gap-2">
+                            <div class="ms-md-3 d-flex align-items-center gap-2 flex-shrink-0">
+                                <a href="{% url 'notifications:notification_detail' n.id %}" class="btn btn-primary btn-sm text-nowrap fw-semibold">
+                                    <i class="bi bi-eye me-1"></i>View Details
+                                </a>
                                 {% if n.appointment %}
-                                    <a href="{% url 'notifications:mark_as_read' n.id %}" class="btn btn-primary btn-sm text-nowrap">
-                                        View Details <i class="bi bi-arrow-right ms-1"></i>
+                                    <a href="{% url 'appointments:appointment_detail' n.appointment.id %}" class="btn btn-outline-secondary btn-sm text-nowrap" title="Jump to Appointment">
+                                        <i class="bi bi-box-arrow-up-right"></i>
                                     </a>
-                                {% else %}
-                                    {% if not n.is_read %}
-                                        <a href="{% url 'notifications:mark_as_read' n.id %}" class="btn btn-outline-secondary btn-sm" title="Mark as read">
-                                            <i class="bi bi-check"></i> Mark read
-                                        </a>
-                                    {% endif %}
                                 {% endif %}
+                                <a href="{% url 'notifications:delete_notification' n.id %}" class="btn btn-outline-danger btn-sm" title="Delete" onclick="return confirm('Delete this notification?');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
                             </div>
                         </div>
                     {% endfor %}

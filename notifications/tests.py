@@ -163,3 +163,59 @@ class NotificationsTests(TestCase):
         q_messages = [item.message for item in res_q.context["notifications"]]
         self.assertIn("Important deployment alert", q_messages)
         self.assertNotIn("General weekly summary", q_messages)
+
+    def test_notification_detail_client_access(self):
+        n = create_notification(self.user1, "Your appointment was confirmed by the engineer.", appointment=self.appointment)
+        self.client.login(username="notif_client", password="Password123!")
+
+        response = self.client.get(reverse("notifications:notification_detail", args=[n.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Notification Details")
+        self.assertContains(response, "Your appointment was confirmed by the engineer.")
+        self.assertContains(response, "Cloud Migration Audit")
+        
+        # Verify auto-mark as read
+        n.refresh_from_db()
+        self.assertTrue(n.is_read)
+
+    def test_notification_detail_engineer_access(self):
+        n = create_notification(self.user2, "New consultation request submitted by client.", appointment=self.appointment)
+        self.client.login(username="notif_engineer", password="Password123!")
+
+        response = self.client.get(reverse("notifications:notification_detail", args=[n.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Notification Details")
+        self.assertContains(response, "New consultation request submitted by client.")
+        self.assertContains(response, "Cloud Migration Audit")
+
+        n.refresh_from_db()
+        self.assertTrue(n.is_read)
+
+    def test_notification_detail_idor_forbidden(self):
+        n = create_notification(self.user2, "Confidential engineer notification.")
+        # Client tries to view engineer's notification detail
+        self.client.login(username="notif_client", password="Password123!")
+
+        response = self.client.get(reverse("notifications:notification_detail", args=[n.id]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_toggle_notification_read(self):
+        n = create_notification(self.user1, "Test status toggle")
+        n.is_read = True
+        n.save()
+
+        self.client.login(username="notif_client", password="Password123!")
+        response = self.client.get(reverse("notifications:toggle_read", args=[n.id]))
+        self.assertRedirects(response, reverse("notifications:notification_list"))
+
+        n.refresh_from_db()
+        self.assertFalse(n.is_read)
+
+    def test_delete_notification(self):
+        n = create_notification(self.user1, "Notification to be deleted")
+        self.client.login(username="notif_client", password="Password123!")
+
+        response = self.client.get(reverse("notifications:delete_notification", args=[n.id]))
+        self.assertRedirects(response, reverse("notifications:notification_list"))
+        self.assertFalse(Notification.objects.filter(id=n.id).exists())
+
