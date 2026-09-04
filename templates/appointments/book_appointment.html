@@ -270,8 +270,16 @@
 
         if (matchingSelectionFound) {
             engineerSelect.value = currentSelected;
-        } else if (currentSelected && !matchingSelectionFound) {
+        } else if (targetList.length === 1) {
+            // Exactly 1 matching engineer found -> auto-select
+            engineerSelect.value = String(targetList[0].id);
+            const singleOption = engineerSelect.querySelector('option[value="' + targetList[0].id + '"]');
+            if (singleOption) {
+                singleOption.selected = true;
+            }
+        } else {
             engineerSelect.value = "";
+            defaultOption.selected = true;
         }
 
         // Trigger change event to refresh schedule availability checker
