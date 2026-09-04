@@ -50,13 +50,14 @@ class Appointment(models.Model):
     def clean(self):
         super().clean()
         from .services import validate_appointment_booking
-        validate_appointment_booking(
-            engineer=self.engineer,
-            appointment_date=self.appointment_date,
-            start_time=self.start_time,
-            end_time=self.end_time,
-            exclude_appointment_id=self.id
-        )
+        if getattr(self, "engineer_id", None) and self.appointment_date and self.start_time and self.end_time:
+            validate_appointment_booking(
+                engineer=self.engineer,
+                appointment_date=self.appointment_date,
+                start_time=self.start_time,
+                end_time=self.end_time,
+                exclude_appointment_id=self.id
+            )
 
     def can_reschedule(self):
         return self.status in [self.Status.PENDING, self.Status.APPROVED, self.Status.RESCHEDULED]
