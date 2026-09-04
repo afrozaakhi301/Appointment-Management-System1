@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}My Profile | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-person-gear me-2 text-primary"></i>User Profile Settings</h4>
+                    <span class="badge bg-primary px-3 py-2 fs-6">{{ user.role }}</span>
+                </div>
+                <div class="card-body p-4">
+                    
+                    {% if user.role == "Engineer" and engineer_profile.profile_photo %}
+                        <div class="text-center mb-4">
+                            <img src="{{ engineer_profile.profile_photo.url }}" alt="{{ user.get_full_name }}" class="avatar-lg shadow-sm border border-2 border-primary mb-2">
+                            <p class="text-muted small mb-0">{{ engineer_profile.designation }}</p>
+                        </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <h5 class="fw-bold mb-3 text-secondary border-bottom pb-2">Account Information</h5>
+                        {{ u_form|crispy }}
+
+                        {% if p_form %}
+                            <h5 class="fw-bold mt-4 mb-3 text-secondary border-bottom pb-2">
+                                {% if user.role == "Client" %}Company / Organization Details{% else %}Professional Profile{% endif %}
+                            </h5>
+                            {{ p_form|crispy }}
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <a href="{% url 'accounts:redirect_after_login' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                                <i class="bi bi-save me-1"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Book Software Consultation | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            
+            <!-- Booking Header & Steps Wizard -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4 text-center">
+                    <h2 class="fw-bold mb-1">Book a Software Consultation</h2>
+                    <p class="text-muted small mb-4">Follow the steps below to schedule a technical architecture session with a TNS engineer</p>
+                    
+                    <div class="row g-2 text-center small fw-semibold">
+                        <div class="col-4">
+                            <div class="p-2 bg-primary text-white rounded">1. Select Service & Engineer</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 bg-primary-subtle text-primary rounded">2. Choose Date & Time</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 bg-primary-subtle text-primary rounded">3. Project Scope & Submit</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Form -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Service & Engineer Selection -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                                <i class="bi bi-person-badge-fill me-2 text-primary"></i>1. Consultation Domain & Engineer
+                            </h5>
+
+                            <!-- Interactive Service Icon Grid (Click to Mark) -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark small mb-2">
+                                    <i class="bi bi-grid-fill text-primary me-1"></i>Select Service Domain <span class="text-danger">*</span>
+                                </label>
+                                <div class="row g-3 mb-2" id="serviceCardGrid">
+                                    {% for svc in services %}
+                                        <div class="col-md-6 col-lg-4">
+                                            <div class="service-select-card h-100 d-flex flex-column justify-content-between" 
+                                                 data-service-id="{{ svc.id }}" 
+                                                 data-service-name="{{ svc.name }}"
+                                                 onclick="selectServiceCard('{{ svc.id }}')">
+                                                
+                                                <!-- Top Checkmark Mark Badge -->
+                                                <div class="service-mark-badge" id="mark-badge-{{ svc.id }}" title="Service Selected">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </div>
+
+                                                <div>
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <div class="service-icon-box me-3">
+                                                            {% if "Cloud" in svc.name or "AWS" in svc.name %}
+                                                                <i class="bi bi-cloud-arrow-up-fill"></i>
+                                                            {% elif "Database" in svc.name or "Backend" in svc.name %}
+                                                                <i class="bi bi-database-fill-gear"></i>
+                                                            {% elif "DevOps" in svc.name or "CI/CD" in svc.name or "Infrastructure" in svc.name %}
+                                                                <i class="bi bi-hdd-network-fill"></i>
+                                                            {% elif "Microservice" in svc.name or "API" in svc.name %}
+                                                                <i class="bi bi-diagram-3-fill"></i>
+                                                            {% elif "Python" in svc.name or "Django" in svc.name or "Code Review" in svc.name %}
+                                                                <i class="bi bi-code-slash"></i>
+                                                            {% else %}
+                                                                <i class="bi bi-cpu-fill"></i>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="pe-3">
+                                                            <h6 class="fw-bold text-dark mb-0 fs-6">{{ svc.name }}</h6>
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-muted small mb-2 line-clamp-2" style="font-size: 0.8rem;">
+                                                        {{ svc.description|truncatewords:14 }}
+                                                    </p>
+                                                </div>
+
+                                                <div class="pt-2 border-top d-flex align-items-center justify-content-between">
+                                                    <span class="service-mark-text" id="mark-text-{{ svc.id }}">Click to Select</span>
+                                                    <span class="badge bg-light text-muted border small">Service #{{ svc.id }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    {{ form.service|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.engineer|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Schedule & Dynamic Slot Checker -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                                <i class="bi bi-calendar2-week-fill me-2 text-primary"></i>2. Schedule & Slot Selection
+                            </h5>
+
+                            <!-- Dynamic Live Availability Feedback Box -->
+                            <div id="schedule-availability-info" class="mb-3 d-none"></div>
+
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    {{ form.appointment_date|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.start_time|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.end_time|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Scope & Requirements -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                                <i class="bi bi-code-square me-2 text-primary"></i>3. Project Details & Optional Documents
+                            </h5>
+                            <div class="mb-3">
+                                {{ form.project_title|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.project_description|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.requirements|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.document|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Non-field error alert if any -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <div><i class="bi bi-exclamation-triangle-fill me-1"></i> {{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                                <i class="bi bi-send-check me-2"></i>Submit Consultation Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateMarkedServiceUI(selectedId) {
+        document.querySelectorAll(".service-select-card").forEach(function(card) {
+            const cardId = card.getAttribute("data-service-id");
+            const badge = document.getElementById("mark-badge-" + cardId);
+            const text = document.getElementById("mark-text-" + cardId);
+
+            if (cardId === String(selectedId) && selectedId !== "") {
+                card.classList.add("is-marked");
+                if (badge) badge.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+                if (text) text.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Marked & Selected</span>';
+            } else {
+                card.classList.remove("is-marked");
+                if (badge) badge.innerHTML = '<i class="bi bi-check-lg"></i>';
+                if (text) text.innerText = 'Click to Select';
+            }
+        });
+    }
+
+    function selectServiceCard(serviceId) {
+        const serviceSelect = document.getElementById("id_service");
+        if (serviceSelect) {
+            serviceSelect.value = serviceId;
+            serviceSelect.dispatchEvent(new Event("change"));
+        }
+        updateMarkedServiceUI(serviceId);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const serviceSelect = document.getElementById("id_service");
+        if (serviceSelect) {
+            // Sync on load (e.g., initial or GET ?service= param)
+            updateMarkedServiceUI(serviceSelect.value);
+
+            // Sync on dropdown change
+            serviceSelect.addEventListener("change", function() {
+                updateMarkedServiceUI(this.value);
+            });
+        }
+    });
+</script>
+{% endblock %}

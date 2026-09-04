@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Clients | Admin | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Manage Registered Clients</h2>
+            <p class="text-muted small mb-0">View client accounts, organizations, and manage active access status</p>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by client username, name, email, or organization...">
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">Search</button>
+                    {% if query %}
+                        <a href="{% url 'dashboard:manage_clients' %}" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Clients Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Username</th>
+                            <th>Full Name</th>
+                            <th>Email & Phone</th>
+                            <th>Organization</th>
+                            <th>Registered On</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for client in clients %}
+                            <tr>
+                                <td class="text-muted fw-bold">{{ client.id }}</td>
+                                <td class="fw-bold">{{ client.username }}</td>
+                                <td>{{ client.get_full_name|default:"-" }}</td>
+                                <td>
+                                    <div><i class="bi bi-envelope me-1 text-muted"></i>{{ client.email }}</div>
+                                    {% if client.phone_number %}
+                                        <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ client.phone_number }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ client.client_profile.organization|default:"-" }}
+                                </td>
+                                <td>{{ client.date_joined|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if client.is_active %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <form method="post" class="d-inline" onsubmit="return confirm('Change active status for {{ client.username }}?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="toggle_active">
+                                        <input type="hidden" name="client_id" value="{{ client.id }}">
+                                        {% if client.is_active %}
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Deactivate Client">
+                                                <i class="bi bi-person-x"></i> Deactivate
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" class="btn btn-outline-success btn-sm" title="Activate Client">
+                                                <i class="bi bi-person-check"></i> Activate
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    No client accounts found.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

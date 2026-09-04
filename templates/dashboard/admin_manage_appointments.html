@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Appointments | Admin | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Appointment Master Registry</h2>
+            <p class="text-muted small mb-0">System-wide consultation registry with full audit and lifecycle control</p>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by title, client, engineer, or service...">
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">-- All Statuses --</option>
+                        {% for st_val, st_lbl in status_choices %}
+                            <option value="{{ st_val }}" {% if status_filter == st_val %}selected{% endif %}>{{ st_lbl }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="engineer" class="form-select">
+                        <option value="">-- All Engineers --</option>
+                        {% for eng in engineers %}
+                            <option value="{{ eng.id }}" {% if selected_engineer == eng.id|stringformat:"s" %}selected{% endif %}>
+                                {{ eng.get_full_name|default:eng.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">Filter</button>
+                    {% if query or status_filter or selected_engineer %}
+                        <a href="{% url 'dashboard:manage_appointments' %}" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Appointments Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Project Title</th>
+                            <th>Client</th>
+                            <th>Engineer</th>
+                            <th>Service</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appt in appointments %}
+                            <tr>
+                                <td class="text-muted fw-bold">#{{ appt.id }}</td>
+                                <td class="fw-bold">
+                                    <a href="{% url 'appointments:appointment_detail' appt.id %}" class="text-dark text-decoration-none">
+                                        {{ appt.project_title }}
+                                    </a>
+                                </td>
+                                <td>{{ appt.client.username }}</td>
+                                <td>{{ appt.engineer.username }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ appt.service.name }}</span></td>
+                                <td>
+                                    {{ appt.appointment_date }} <small class="text-muted d-block">{{ appt.start_time|time:"h:i A" }} - {{ appt.end_time|time:"h:i A" }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge badge-status-{{ appt.status|lower }} px-2 py-1">
+                                        {{ appt.status }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'appointments:appointment_detail' appt.id %}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    No appointment records found.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

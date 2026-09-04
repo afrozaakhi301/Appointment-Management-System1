@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Appointment #{{ appointment.id }} - {{ appointment.project_title }} | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    
+    <!-- Top Bar Navigation & Status -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge badge-status-{{ appointment.status|lower }} fs-6 px-3 py-2 fw-semibold">
+                    <i class="bi bi-tag-fill me-1"></i>{{ appointment.status }}
+                </span>
+                <span class="text-muted">Appointment #{{ appointment.id }}</span>
+            </div>
+            <h2 class="fw-bold mb-0">{{ appointment.project_title }}</h2>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            {% if user.role == "Client" %}
+                <a href="{% url 'appointments:client_appointments' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>My Appointments
+                </a>
+            {% elif user.role == "Engineer" %}
+                <a href="{% url 'appointments:engineer_schedule' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>My Schedule
+                </a>
+            {% elif user.role == "Admin" or user.is_superuser %}
+                <a href="{% url 'dashboard:manage_appointments' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>All Appointments
+                </a>
+            {% endif %}
+
+            <!-- Role Action Buttons -->
+            {% if appointment.status == "Pending" and user.role == "Engineer" or user.role == "Admin" or user.is_superuser %}
+                <a href="{% url 'appointments:appointment_approve' appointment.id %}" class="btn btn-success fw-semibold" onclick="return confirm('Approve this appointment?');">
+                    <i class="bi bi-check-circle me-1"></i>Approve
+                </a>
+                <a href="{% url 'appointments:appointment_reject' appointment.id %}" class="btn btn-outline-danger fw-semibold" onclick="return confirm('Reject this appointment?');">
+                    <i class="bi bi-x-circle me-1"></i>Reject
+                </a>
+            {% endif %}
+
+            {% if appointment.can_complete and user.role == "Engineer" or user.role == "Admin" or user.is_superuser %}
+                <a href="{% url 'appointments:appointment_complete' appointment.id %}" class="btn btn-success fw-semibold" onclick="return confirm('Mark this consultation as Completed?');">
+                    <i class="bi bi-check-all me-1"></i>Mark Completed
+                </a>
+            {% endif %}
+
+            {% if appointment.can_reschedule %}
+                <a href="{% url 'appointments:appointment_reschedule' appointment.id %}" class="btn btn-outline-warning fw-semibold">
+                    <i class="bi bi-calendar-week me-1"></i>Reschedule
+                </a>
+            {% endif %}
+
+            {% if appointment.can_cancel %}
+                <a href="{% url 'appointments:appointment_cancel' appointment.id %}" class="btn btn-outline-danger fw-semibold" onclick="return confirm('Cancel this appointment?');">
+                    <i class="bi bi-x-circle me-1"></i>Cancel
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left: Overview & Scope -->
+        <div class="col-lg-8">
+            <!-- Project Scope Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-file-earmark-text me-2 text-primary"></i>Consultation Scope & Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-secondary text-uppercase small">Project Overview & Objectives</h6>
+                        <p class="text-dark bg-light p-3 rounded" style="white-space: pre-line;">{{ appointment.project_description }}</p>
+                    </div>
+
+                    {% if appointment.requirements %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-secondary text-uppercase small">Specific Requirements & Deliverables</h6>
+                            <p class="text-dark bg-light p-3 rounded" style="white-space: pre-line;">{{ appointment.requirements }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Documents Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-paperclip me-2 text-primary"></i>Project Attachments & Documents</h5>
+                    <span class="badge bg-secondary">{{ documents.count }} Files</span>
+                </div>
+                <div class="card-body p-4">
+                    {% if documents %}
+                        <ul class="list-group list-group-flush mb-3">
+                            {% for doc in documents %}
+                                <li class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-file-earmark-arrow-down text-primary fs-5 me-2"></i>
+                                        <a href="{{ doc.file.url }}" target="_blank" class="fw-semibold text-decoration-none">
+                                            {{ doc.filename }}
+                                        </a>
+                                        <small class="text-muted d-block ms-4">Uploaded on {{ doc.uploaded_at|date:"M d, Y h:i A" }}</small>
+                                    </div>
+                                    <a href="{{ doc.file.url }}" target="_blank" class="btn btn-outline-primary btn-sm" download>
+                                        <i class="bi bi-download"></i> Download
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted small mb-3">No document attachments uploaded for this consultation.</p>
+                    {% endif %}
+
+                    <!-- Upload Form -->
+                    <form method="post" action="{% url 'appointments:appointment_upload_doc' appointment.id %}" enctype="multipart/form-data" class="pt-3 border-top">
+                        {% csrf_token %}
+                        <div class="row g-2 align-items-center">
+                            <div class="col-sm-8">
+                                <label class="form-label small fw-semibold text-muted mb-1">Attach additional document</label>
+                                <input type="file" name="file" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-sm-4 mt-sm-4">
+                                <button type="submit" class="btn btn-outline-primary btn-sm w-100 fw-semibold">
+                                    <i class="bi bi-upload me-1"></i>Upload File
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- After Appointment: Feedback & Rating Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-success-subtle text-success fw-semibold me-2">After Appointment</span>
+                        <h5 class="fw-bold mb-0 text-dark d-inline">
+                            <i class="bi bi-star-fill text-warning me-2"></i>Consultation Rating & Feedback
+                        </h5>
+                    </div>
+                    {% if user.role == "Client" %}
+                        <a href="{% url 'feedback:my_feedback' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-clock-history me-1"></i>View Previous Feedback
+                        </a>
+                    {% elif user.role == "Engineer" %}
+                        <a href="{% url 'feedback:engineer_reviews' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-star-half me-1"></i>All Client Reviews
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="card-body p-4">
+                    {% if feedback %}
+                        <div class="bg-light p-4 rounded-3 border">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 pb-2 border-bottom gap-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-4 text-warning">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= feedback.rating %}★{% else %}☆{% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <strong class="fs-5 text-dark">({{ feedback.rating }} / 5 Stars)</strong>
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="bi bi-calendar-check me-1"></i>Submitted on {{ feedback.created_at|date:"M d, Y h:i A" }}
+                                </div>
+                            </div>
+                            
+                            <h6 class="fw-bold text-secondary text-uppercase small mb-2">Client Feedback & Comments</h6>
+                            <p class="mb-3 text-dark bg-white p-3 rounded border" style="white-space: pre-line;">{{ feedback.comments }}</p>
+
+                            {% if user == appointment.client %}
+                                <div class="d-flex justify-content-end gap-2 pt-2">
+                                    <a href="{% url 'feedback:submit_feedback' appointment.id %}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-pencil-square me-1"></i>Edit My Review
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        {% if appointment.status == "Completed" %}
+                            {% if user == appointment.client %}
+                                <div class="text-center py-4 bg-light rounded-3 border p-4">
+                                    <div class="text-warning fs-1 mb-2">
+                                        <i class="bi bi-star-half"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-1">Your Consultation is Completed!</h5>
+                                    <p class="text-muted mb-3 mx-auto" style="max-width: 480px;">
+                                        Please take a moment to rate your experience and provide constructive technical feedback for your software consultant.
+                                    </p>
+                                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                        <a href="{% url 'feedback:submit_feedback' appointment.id %}" class="btn btn-warning fw-bold px-4 py-2 shadow-sm">
+                                            <i class="bi bi-star-fill me-1"></i>Give Rating & Write Feedback
+                                        </a>
+                                        <a href="{% url 'feedback:my_feedback' %}" class="btn btn-outline-secondary px-3 py-2">
+                                            <i class="bi bi-clock-history me-1"></i>View Previous Feedback
+                                        </a>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4 text-muted">
+                                    <i class="bi bi-hourglass-split fs-2 d-block mb-2 text-secondary"></i>
+                                    <p class="mb-0">Consultation has been completed. Awaiting client review and rating submission.</p>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="alert alert-secondary mb-0 d-flex align-items-center" role="alert">
+                                <i class="bi bi-info-circle-fill me-2 fs-5 text-secondary"></i>
+                                <div>
+                                    <strong>After Appointment Features:</strong> Rating and feedback submission will become available once this consultation is marked as <strong>Completed</strong>.
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Parties & Time Summary -->
+        <div class="col-lg-4">
+            
+            <!-- Schedule Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-calendar-event me-2 text-primary"></i>Schedule Summary</h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Consultation Service</small>
+                        <strong class="fs-6 text-primary">{{ appointment.service.name }}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Date</small>
+                        <strong class="fs-6">{{ appointment.appointment_date }}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Time Slot</small>
+                        <strong class="fs-6">{{ appointment.start_time|time:"h:i A" }} - {{ appointment.end_time|time:"h:i A" }}</strong>
+                    </div>
+                    <div class="pt-2 border-top">
+                        <small class="text-muted d-block">Created on</small>
+                        <span class="small text-secondary">{{ appointment.created_at|date:"M d, Y h:i A" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client & Engineer Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-people me-2 text-primary"></i>Participants</h6>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Client -->
+                    <div class="mb-3 pb-3 border-bottom">
+                        <span class="badge bg-secondary-subtle text-secondary small mb-1">Client</span>
+                        <h6 class="fw-bold mb-0">{{ appointment.client.get_full_name|default:appointment.client.username }}</h6>
+                        <small class="text-muted d-block"><i class="bi bi-envelope me-1"></i>{{ appointment.client.email }}</small>
+                        {% if appointment.client.phone_number %}
+                            <small class="text-muted d-block"><i class="bi bi-telephone me-1"></i>{{ appointment.client.phone_number }}</small>
+                        {% endif %}
+                        {% if appointment.client.client_profile.organization %}
+                            <small class="text-muted d-block"><i class="bi bi-building me-1"></i>{{ appointment.client.client_profile.organization }}</small>
+                        {% endif %}
+                    </div>
+
+                    <!-- Engineer -->
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary small mb-1">Software Consultant</span>
+                        <h6 class="fw-bold mb-0">{{ appointment.engineer.get_full_name|default:appointment.engineer.username }}</h6>
+                        <small class="text-primary d-block fw-semibold">{{ appointment.engineer.engineer_profile.designation|default:"Software Engineer" }}</small>
+                        <small class="text-muted d-block"><i class="bi bi-envelope me-1"></i>{{ appointment.engineer.email }}</small>
+                        {% if appointment.engineer.phone_number %}
+                            <small class="text-muted d-block"><i class="bi bi-telephone me-1"></i>{{ appointment.engineer.phone_number }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

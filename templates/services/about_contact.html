@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}About & Contact | Touch & Solve (TNS){% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Top Row: About & Contact Information -->
+    <div class="row g-5 align-items-start mb-5">
+        <!-- Left: About Touch & Solve -->
+        <div class="col-lg-6">
+            <span class="badge bg-primary text-white mb-2 px-3 py-2 fw-semibold">About Touch & Solve</span>
+            <h1 class="fw-bold display-5 mb-3">Empowering Tech Teams Through Expert Guidance</h1>
+            <p class="lead text-muted">
+                <strong>Touch & Solve (TNS)</strong> is a technology and software consulting organization delivering high-impact consultations, architecture assessments, and hands-on technical solutions.
+            </p>
+            <p class="text-muted">
+                Our Appointment Management System (AMS) enables clients to connect directly with specialized software engineers and system architects based on verified expertise, real-time weekly availability, and domain specialties.
+            </p>
+            
+            <div class="row g-3 mt-3">
+                <div class="col-sm-6">
+                    <div class="p-3 bg-white border rounded shadow-sm">
+                        <h4 class="fw-bold text-primary mb-1">100%</h4>
+                        <small class="text-muted">Direct Engineer Booking</small>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 bg-white border rounded shadow-sm">
+                        <h4 class="fw-bold text-primary mb-1">0%</h4>
+                        <small class="text-muted">Schedule Conflicts Guaranteed</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4 rounded-4 overflow-hidden shadow-sm">
+                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80" 
+                     alt="Touch & Solve Office Environment" 
+                     class="img-fluid w-100 object-fit-cover" 
+                     style="max-height: 220px;">
+            </div>
+
+            <div class="mt-4 p-3 bg-white border rounded-3 shadow-sm">
+                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shield-check text-success me-2"></i>What We Offer</h6>
+                <ul class="text-muted small mb-0 ps-3">
+                    <li class="mb-1">Direct booking with senior software consultants</li>
+                    <li class="mb-1">Real-time schedule conflict prevention & automated time-slot verification</li>
+                    <li class="mb-1">Architecture documents, requirements sharing, and review tracking</li>
+                    <li>Transparent post-consultation ratings & client feedback</li>
+                </ul>
+            </div>
+        </div>
+
+
+        <!-- Right: Contact Information Card -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg p-4 bg-white rounded-3">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="bg-primary text-white rounded p-2 px-3 me-3 fs-4 shadow-sm">
+                        <i class="bi bi-building"></i>
+                    </span>
+                    <div>
+                        <h4 class="fw-bold mb-0 text-dark">Contact Information</h4>
+                        <small class="text-muted">Touch & Solve (TNS) Office</small>
+                    </div>
+                </div>
+                <p class="text-muted small mb-4">Have questions regarding software consultation, technical reviews, or enterprise solutions? Get in touch with our team.</p>
+                
+                <ul class="list-unstyled mb-4">
+                    <!-- Address -->
+                    <li class="d-flex align-items-start mb-4">
+                        <div class="bg-primary-subtle text-primary p-2 rounded-circle me-3 mt-1">
+                            <i class="bi bi-geo-alt-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <strong class="text-dark">Office Address:</strong><br>
+                            <span class="text-muted">Plot 6 (3rd Floor &amp; 6th Floor), Road 1/A, Sector 17, Uttara, Dhaka 1230, Bangladesh.</span>
+                        </div>
+                    </li>
+
+                    <!-- Phone -->
+                    <li class="d-flex align-items-start mb-4">
+                        <div class="bg-success-subtle text-success p-2 rounded-circle me-3 mt-1">
+                            <i class="bi bi-telephone-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <strong class="text-dark">Phone:</strong><br>
+                            <span class="text-muted">Mobile: <a href="tel:+8801958227203" class="text-decoration-none fw-semibold text-dark">+880 1958227203</a></span>
+                        </div>
+                    </li>
+
+                    <!-- Email -->
+                    <li class="d-flex align-items-start mb-3">
+                        <div class="bg-warning-subtle text-warning p-2 rounded-circle me-3 mt-1">
+                            <i class="bi bi-envelope-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <strong class="text-dark">Email:</strong><br>
+                            <a href="mailto:info@touchandsolve.com" class="text-primary text-decoration-none fw-semibold">info@touchandsolve.com</a>
+                        </div>
+                    </li>
+                </ul>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2 pt-3 border-top">
+                    <a href="mailto:info@touchandsolve.com" class="btn btn-primary btn-sm fw-semibold flex-grow-1 py-2">
+                        <i class="bi bi-envelope me-1"></i>Email Us
+                    </a>
+                    <a href="tel:+8801958227203" class="btn btn-outline-success btn-sm fw-semibold flex-grow-1 py-2">
+                        <i class="bi bi-telephone me-1"></i>Call Us
+                    </a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Plot+6,+Road+1/A,+Sector+17,+Uttara,+Dhaka+1230,+Bangladesh" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm fw-semibold py-2" title="Open in Google Maps">
+                        <i class="bi bi-map me-1"></i>Map
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Row: Google Map Embed Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+                <div class="card-header bg-white py-3 px-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-geo-alt-fill text-danger me-2"></i>Find Our Office Location
+                        </h5>
+                        <small class="text-muted">Plot 6 (3rd &amp; 6th Floor), Road 1/A, Sector 17, Uttara, Dhaka 1230</small>
+                    </div>
+                    <div>
+                        <a href="https://www.google.com/maps/search/?api=1&query=Plot+6,+Road+1/A,+Sector+17,+Uttara,+Dhaka+1230,+Bangladesh" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="btn btn-outline-primary btn-sm fw-semibold">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>Open in Google Maps
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="ratio ratio-21x9" style="min-height: 380px;">
+                        <iframe 
+                            src="https://maps.google.com/maps?q=Plot%206%2C%20Road%201%2FA%2C%20Sector%2017%2C%20Uttara%2C%20Dhaka%201230%2C%20Bangladesh&t=&z=16&ie=UTF8&iwloc=&output=embed" 
+                            style="border:0; width: 100%; height: 100%;" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="Touch & Solve Office Location Map">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

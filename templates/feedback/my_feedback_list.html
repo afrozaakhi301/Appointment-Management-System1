@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}My Previous Feedback & Reviews | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">My Previous Feedback & Reviews</h2>
+            <p class="text-muted small mb-0">Review consultation ratings and technical feedback you have provided to software engineers</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'appointments:client_appointments' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-calendar-check me-1"></i>My Appointments
+            </a>
+            <a href="{% url 'appointments:book_appointment' %}" class="btn btn-primary fw-semibold">
+                <i class="bi bi-calendar-plus me-1"></i>Book New Consultation
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-md-4">
+            <div class="card border-0 shadow-sm p-3 d-flex flex-row align-items-center">
+                <div class="bg-primary-subtle text-primary p-3 rounded-circle me-3">
+                    <i class="bi bi-chat-square-quote fs-4"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ total_submitted }}</h3>
+                    <small class="text-muted">Total Reviews Given</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4">
+            <div class="card border-0 shadow-sm p-3 d-flex flex-row align-items-center">
+                <div class="bg-warning-subtle text-warning p-3 rounded-circle me-3">
+                    <i class="bi bi-star-fill fs-4"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ avg_rating_given }} <span class="fs-6 text-muted">/ 5.0</span></h3>
+                    <small class="text-muted">Average Rating Given</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4">
+            <div class="card border-0 shadow-sm p-3 d-flex flex-row align-items-center">
+                <div class="bg-info-subtle text-info p-3 rounded-circle me-3">
+                    <i class="bi bi-hourglass-split fs-4"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ pending_feedback_appointments.count }}</h3>
+                    <small class="text-muted">Completed Awaiting Review</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Reviews Section (if any completed appointments are missing reviews) -->
+    {% if pending_feedback_appointments %}
+        <div class="card border-0 shadow-sm mb-4 border-start border-warning border-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-exclamation-circle-fill text-warning me-2"></i>Consultations Awaiting Your Review
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Project Title</th>
+                                <th>Consultant</th>
+                                <th>Service</th>
+                                <th>Completed Date</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appt in pending_feedback_appointments %}
+                                <tr>
+                                    <td class="fw-bold">
+                                        <a href="{% url 'appointments:appointment_detail' appt.id %}" class="text-dark text-decoration-none">
+                                            {{ appt.project_title }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {{ appt.engineer.get_full_name|default:appt.engineer.username }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary-subtle text-secondary">{{ appt.service.name }}</span>
+                                    </td>
+                                    <td>
+                                        <i class="bi bi-calendar-check text-success me-1"></i>{{ appt.appointment_date }}
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'feedback:submit_feedback' appt.id %}" class="btn btn-warning btn-sm fw-bold">
+                                            <i class="bi bi-star-fill me-1"></i>Rate & Write Feedback
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Submitted Previous Feedback List -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-clock-history me-2 text-primary"></i>Previous Consultation Feedback & Ratings History
+            </h5>
+            <span class="badge bg-secondary">{{ feedbacks.count }} Reviews</span>
+        </div>
+        <div class="card-body p-4">
+            {% if feedbacks %}
+                <div class="row g-4">
+                    {% for fb in feedbacks %}
+                        <div class="col-12">
+                            <div class="card border rounded-3 p-3 p-md-4 shadow-none bg-white">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-3 gap-2">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                            <span class="fs-5 text-warning">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= fb.rating %}★{% else %}☆{% endif %}
+                                                {% endfor %}
+                                            </span>
+                                            <span class="badge bg-warning-subtle text-dark fw-bold px-2 py-1">
+                                                {{ fb.rating }} / 5 Stars
+                                            </span>
+                                            <span class="badge bg-light text-secondary border">
+                                                {{ fb.appointment.service.name }}
+                                            </span>
+                                        </div>
+                                        <h5 class="fw-bold mb-1">
+                                            <a href="{% url 'appointments:appointment_detail' fb.appointment.id %}" class="text-decoration-none text-dark">
+                                                {{ fb.appointment.project_title }}
+                                            </a>
+                                        </h5>
+                                        <small class="text-muted">
+                                            <i class="bi bi-person-badge me-1"></i>Consultant: <strong>{{ fb.appointment.engineer.get_full_name|default:fb.appointment.engineer.username }}</strong>
+                                            <span class="mx-2">•</span>
+                                            <i class="bi bi-calendar-event me-1"></i>Consultation: {{ fb.appointment.appointment_date }}
+                                            <span class="mx-2">•</span>
+                                            <i class="bi bi-clock me-1"></i>Reviewed on: {{ fb.created_at|date:"M d, Y" }}
+                                        </small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'feedback:submit_feedback' fb.appointment.id %}" class="btn btn-outline-secondary btn-sm" title="Edit Feedback">
+                                            <i class="bi bi-pencil-square me-1"></i>Edit Review
+                                        </a>
+                                        <a href="{% url 'appointments:appointment_detail' fb.appointment.id %}" class="btn btn-outline-primary btn-sm" title="View Appointment">
+                                            <i class="bi bi-eye me-1"></i>Appointment
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="bg-light p-3 rounded border">
+                                    <p class="mb-0 text-dark" style="white-space: pre-line;">{{ fb.comments }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-star fs-1 d-block mb-3 text-secondary opacity-50"></i>
+                    <h5 class="fw-bold">No Feedback Submitted Yet</h5>
+                    <p class="small text-muted mb-3">You have not submitted feedback for any completed consultations yet.</p>
+                    <a href="{% url 'appointments:client_appointments' %}" class="btn btn-outline-primary btn-sm">
+                        View My Completed Consultations
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

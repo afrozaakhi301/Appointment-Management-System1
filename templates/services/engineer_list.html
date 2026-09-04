@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Software Engineers & Consultants | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <span class="badge bg-primary px-3 py-2 text-white mb-2 fw-semibold">Consultant Directory</span>
+        <h1 class="fw-bold mb-2">Our Lead Software Engineers</h1>
+        <p class="text-muted">Find, filter, and schedule consultations with top-tier software architects and specialists</p>
+    </div>
+
+    <!-- Quick Domain Category Pills -->
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+        <a href="{% url 'services:engineer_list' %}" 
+           class="btn btn-sm {% if not selected_tag %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-secondary bg-white{% endif %} rounded-pill px-3">
+            All Domains
+        </a>
+        <a href="{% url 'services:engineer_list' %}?tag=cloud" 
+           class="btn btn-sm {% if selected_tag == 'cloud' %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-secondary bg-white{% endif %} rounded-pill px-3">
+            <i class="bi bi-cloud-arrow-up-fill me-1 text-info"></i>Cloud Architecture
+        </a>
+        <a href="{% url 'services:engineer_list' %}?tag=python" 
+           class="btn btn-sm {% if selected_tag == 'python' %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-secondary bg-white{% endif %} rounded-pill px-3">
+            <i class="bi bi-code-slash me-1 text-warning"></i>Python & Django
+        </a>
+        <a href="{% url 'services:engineer_list' %}?tag=database" 
+           class="btn btn-sm {% if selected_tag == 'database' %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-secondary bg-white{% endif %} rounded-pill px-3">
+            <i class="bi bi-database-fill-gear me-1 text-success"></i>Database & Caching
+        </a>
+        <a href="{% url 'services:engineer_list' %}?tag=devops" 
+           class="btn btn-sm {% if selected_tag == 'devops' %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-secondary bg-white{% endif %} rounded-pill px-3">
+            <i class="bi bi-hdd-network-fill me-1 text-danger"></i>DevOps & CI/CD
+        </a>
+        <a href="{% url 'services:engineer_list' %}?tag=microservices" 
+           class="btn btn-sm {% if selected_tag == 'microservices' %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-secondary bg-white{% endif %} rounded-pill px-3">
+            <i class="bi bi-diagram-3-fill me-1 text-primary"></i>Microservices & gRPC
+        </a>
+        <a href="{% url 'services:engineer_list' %}?tag=security" 
+           class="btn btn-sm {% if selected_tag == 'security' %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-secondary bg-white{% endif %} rounded-pill px-3">
+            <i class="bi bi-shield-check me-1 text-success"></i>Security & QA
+        </a>
+    </div>
+
+    <!-- Advanced Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3 p-md-4">
+            <form method="get" id="engineerFilterForm" class="row g-3 align-items-end">
+                {% if selected_tag %}
+                    <input type="hidden" name="tag" value="{{ selected_tag }}">
+                {% endif %}
+
+                <!-- Keyword Search -->
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label small fw-semibold text-muted mb-1">Search Keywords</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" value="{{ query }}" class="form-control bg-light border-start-0" placeholder="Search by name, skill, bio, designation...">
+                    </div>
+                </div>
+
+                <!-- Expertise Domain Filter -->
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-semibold text-muted mb-1">Specific Expertise</label>
+                    <select name="expertise" class="form-select bg-light" onchange="this.form.submit()">
+                        <option value="">All Tech Stacks</option>
+                        {% for exp in expertises %}
+                            <option value="{{ exp.id }}" {% if selected_expertise == exp.id|stringformat:"s" %}selected{% endif %}>
+                                {{ exp.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Experience Filter -->
+                <div class="col-lg-2 col-md-4">
+                    <label class="form-label small fw-semibold text-muted mb-1">Experience</label>
+                    <select name="experience" class="form-select bg-light" onchange="this.form.submit()">
+                        <option value="">Any Experience</option>
+                        <option value="junior" {% if selected_experience == 'junior' %}selected{% endif %}>0 - 3 Years</option>
+                        <option value="mid" {% if selected_experience == 'mid' %}selected{% endif %}>4 - 6 Years</option>
+                        <option value="senior" {% if selected_experience == 'senior' %}selected{% endif %}>7 - 9 Years</option>
+                        <option value="lead" {% if selected_experience == 'lead' %}selected{% endif %}>10+ Years (Lead)</option>
+                    </select>
+                </div>
+
+                <!-- Sort By -->
+                <div class="col-lg-2 col-md-4">
+                    <label class="form-label small fw-semibold text-muted mb-1">Sort By</label>
+                    <select name="sort" class="form-select bg-light" onchange="this.form.submit()">
+                        <option value="exp_desc" {% if selected_sort == 'exp_desc' %}selected{% endif %}>Experience (High to Low)</option>
+                        <option value="exp_asc" {% if selected_sort == 'exp_asc' %}selected{% endif %}>Experience (Low to High)</option>
+                        <option value="name_asc" {% if selected_sort == 'name_asc' %}selected{% endif %}>Name (A to Z)</option>
+                        <option value="name_desc" {% if selected_sort == 'name_desc' %}selected{% endif %}>Name (Z to A)</option>
+                        <option value="rating_desc" {% if selected_sort == 'rating_desc' %}selected{% endif %}>Rating (High to Low)</option>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="col-lg-1 col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold" title="Apply Filters">
+                        <i class="bi bi-funnel-fill"></i>
+                    </button>
+                    {% if active_filters_count > 0 %}
+                        <a href="{% url 'services:engineer_list' %}" class="btn btn-outline-danger" title="Clear All Filters">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Active Filters Summary Banner -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 text-muted small">
+        <div>
+            Showing <strong class="text-dark">{{ total_count }}</strong> software engineer{{ total_count|pluralize }}
+            {% if query %}
+                matching "<span class="text-primary fw-semibold">{{ query }}</span>"
+            {% endif %}
+            {% if selected_tag %}
+                in <span class="badge bg-primary-subtle text-primary text-uppercase">{{ selected_tag }}</span>
+            {% endif %}
+        </div>
+        {% if active_filters_count > 0 %}
+            <div>
+                <a href="{% url 'services:engineer_list' %}" class="text-danger text-decoration-none fw-semibold">
+                    <i class="bi bi-trash me-1"></i>Reset All Filters ({{ active_filters_count }} active)
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Engineers Grid -->
+    <div class="row g-4">
+        {% for eng in engineers %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 card-hover border-0 shadow-sm d-flex flex-column">
+                    <div class="card-body p-4 d-flex flex-column text-center">
+                        {% if eng.engineer_profile.profile_photo %}
+                            <img src="{{ eng.engineer_profile.profile_photo.url }}" alt="{{ eng.get_full_name }}" class="avatar-lg mx-auto mb-3 shadow-sm border border-2 border-primary object-fit-cover">
+                        {% else %}
+                            <div class="avatar-lg mx-auto mb-3 bg-primary text-white d-flex align-items-center justify-content-center fs-2 fw-bold shadow-sm">
+                                {{ eng.first_name|first|default:eng.username|first|upper }}
+                            </div>
+                        {% endif %}
+                        
+                        <h5 class="fw-bold mb-1 text-dark">{{ eng.get_full_name|default:eng.username }}</h5>
+                        <p class="text-primary small fw-semibold mb-2">{{ eng.engineer_profile.designation|default:"Software Engineer" }}</p>
+                        
+                        <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+                            <span class="badge bg-light text-dark border px-2 py-1 small">
+                                <i class="bi bi-briefcase me-1 text-primary"></i>{{ eng.engineer_profile.years_of_experience }} Yrs Experience
+                            </span>
+                            {% if eng.avg_rating %}
+                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2 py-1 small">
+                                    <i class="bi bi-star-fill text-warning me-1"></i>{{ eng.avg_rating|floatformat:1 }}★ ({{ eng.review_count }})
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <p class="text-muted small mb-3 text-start flex-grow-1" style="font-size: 0.85rem; line-height: 1.5;">
+                            {{ eng.engineer_profile.bio|default:"Experienced software engineer available for architectural planning and technical review."|truncatewords:22 }}
+                        </p>
+
+                        <!-- Expertise Badges -->
+                        <div class="mb-4 text-start">
+                            <small class="text-muted fw-bold text-uppercase d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.04em;">Assigned Skills</small>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for ee in eng.engineer_expertises.all %}
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.75rem;">
+                                        {{ ee.expertise.name }} <small class="text-muted opacity-75">({{ ee.proficiency_level }})</small>
+                                    </span>
+                                {% empty %}
+                                    <span class="text-muted small">General Software Engineering</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 pt-3 border-top mt-auto">
+                            <a href="{% url 'services:engineer_detail' eng.id %}" class="btn btn-outline-secondary btn-sm flex-fill fw-semibold">
+                                <i class="bi bi-person-lines-fill me-1"></i>Profile
+                            </a>
+                            <a href="{% url 'appointments:book_appointment' %}?engineer={{ eng.id }}" class="btn btn-primary btn-sm flex-fill fw-semibold shadow-sm">
+                                <i class="bi bi-calendar-plus me-1"></i>Book
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 text-muted">
+                <div class="p-5 bg-white rounded-3 shadow-sm border">
+                    <i class="bi bi-person-x fs-1 text-muted d-block mb-3"></i>
+                    <h4 class="fw-bold text-dark">No engineers found</h4>
+                    <p class="text-muted">No consultants matched your current search and filter combination.</p>
+                    <a href="{% url 'services:engineer_list' %}" class="btn btn-primary fw-semibold mt-2">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>Clear Filters & View All
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

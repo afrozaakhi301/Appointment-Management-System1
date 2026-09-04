@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if existing_feedback %}Edit Feedback for Appointment #{{ appointment.id }}{% else %}Submit Feedback for Appointment #{{ appointment.id }}{% endif %} | TNS AMS
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <!-- Breadcrumb Navigation -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'appointments:client_appointments' %}">My Appointments</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'appointments:appointment_detail' appointment.id %}">Appointment #{{ appointment.id }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{% if existing_feedback %}Edit Feedback{% else %}Give Rating & Feedback{% endif %}</li>
+                </ol>
+            </nav>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-success-subtle text-success fw-semibold mb-1">
+                            <i class="bi bi-check-circle me-1"></i>After Appointment
+                        </span>
+                        <h4 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-star-fill me-2 text-warning"></i>
+                            {% if existing_feedback %}Edit Consultation Feedback{% else %}Give Rating & Write Feedback{% endif %}
+                        </h4>
+                    </div>
+                    {% if existing_feedback %}
+                        <span class="badge bg-info-subtle text-info fs-7">Previously Submitted</span>
+                    {% endif %}
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Consultation Summary Box -->
+                    <div class="bg-light p-3 rounded-3 mb-4 border">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5 class="fw-bold mb-1 text-primary">{{ appointment.project_title }}</h5>
+                                <div class="text-muted small mb-1">
+                                    <i class="bi bi-person-badge me-1"></i>Consultant: <strong>{{ appointment.engineer.get_full_name|default:appointment.engineer.username }}</strong>
+                                    {% if appointment.engineer.engineer_profile.designation %}
+                                        <span class="text-secondary">({{ appointment.engineer.engineer_profile.designation }})</span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="bi bi-hdd-stack me-1"></i>Service: <strong>{{ appointment.service.name }}</strong>
+                                    <span class="mx-2">•</span>
+                                    <i class="bi bi-calendar-check me-1"></i>Completed on: <strong>{{ appointment.appointment_date }}</strong>
+                                </div>
+                            </div>
+                            <span class="badge badge-status-completed px-2 py-1">Completed</span>
+                        </div>
+                    </div>
+
+                    {% if existing_feedback %}
+                        <div class="alert alert-info py-2 px-3 small d-flex align-items-center mb-4" role="alert">
+                            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                            <div>
+                                You previously submitted a <strong>{{ existing_feedback.rating }}★</strong> review on {{ existing_feedback.created_at|date:"M d, Y" }}. You can update your rating and comments below.
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Star Rating Interactive Selector -->
+                    <div class="mb-4 text-center p-3 rounded bg-light border">
+                        <label class="form-label fw-bold text-dark mb-2 d-block">Select Your Consultation Rating</label>
+                        <div class="d-flex justify-content-center align-items-center gap-2 star-picker" id="starPickerContainer" style="font-size: 2.2rem; cursor: pointer;">
+                            <span class="star-btn text-muted" data-rating="1" title="1 - Poor">★</span>
+                            <span class="star-btn text-muted" data-rating="2" title="2 - Fair">★</span>
+                            <span class="star-btn text-muted" data-rating="3" title="3 - Good">★</span>
+                            <span class="star-btn text-muted" data-rating="4" title="4 - Very Good">★</span>
+                            <span class="star-btn text-muted" data-rating="5" title="5 - Excellent">★</span>
+                        </div>
+                        <div id="starRatingLabel" class="fw-semibold text-warning mt-1" style="min-height: 1.5rem;">
+                            <!-- Dynamic rating label updated via JS -->
+                        </div>
+                    </div>
+
+                    <form method="post" id="feedbackForm" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            {{ form.rating|as_crispy_field }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.comments|as_crispy_field }}
+                            <div class="form-text text-muted">
+                                Please mention the clarity of advice, technical value, problem resolution, and any suggestions for the engineer.
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top gap-2 flex-wrap">
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'appointments:appointment_detail' appointment.id %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>Back to Appointment
+                                </a>
+                                <a href="{% url 'feedback:my_feedback' %}" class="btn btn-outline-dark">
+                                    <i class="bi bi-clock-history me-1"></i>View Previous Feedback
+                                </a>
+                            </div>
+                            <button type="submit" class="btn btn-warning fw-bold px-4 shadow-sm">
+                                <i class="bi bi-send-check me-1"></i>
+                                {% if existing_feedback %}Update Feedback{% else %}Submit Rating & Feedback{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const selectElem = document.getElementById("rating-select");
+    const starButtons = document.querySelectorAll(".star-btn");
+    const labelElem = document.getElementById("starRatingLabel");
+
+    const descriptions = {
+        1: "★☆☆☆☆ (1 - Poor: Did not meet expectations)",
+        2: "★★☆☆☆ (2 - Fair: Basic assistance provided)",
+        3: "★★★☆☆ (3 - Good: Helpful consultation)",
+        4: "★★★★☆ (4 - Very Good: High technical expertise)",
+        5: "★★★★★ (5 - Excellent: Outstanding consultation and recommendations)"
+    };
+
+    function updateStars(val) {
+        val = parseInt(val) || 0;
+        starButtons.forEach(btn => {
+            const btnVal = parseInt(btn.dataset.rating);
+            if (btnVal <= val) {
+                btn.classList.remove("text-muted");
+                btn.classList.add("text-warning");
+            } else {
+                btn.classList.remove("text-warning");
+                btn.classList.add("text-muted");
+            }
+        });
+        if (descriptions[val]) {
+            labelElem.textContent = descriptions[val];
+        } else {
+            labelElem.textContent = "Click a star above to rate";
+        }
+    }
+
+    // Initial setup from select value
+    if (selectElem) {
+        updateStars(selectElem.value);
+        selectElem.addEventListener("change", function() {
+            updateStars(this.value);
+        });
+    }
+
+    // Interactive star click
+    starButtons.forEach(btn => {
+        btn.addEventListener("click", function() {
+            const rating = this.dataset.rating;
+            if (selectElem) {
+                selectElem.value = rating;
+                updateStars(rating);
+            }
+        });
+
+        // Hover effect preview
+        btn.addEventListener("mouseenter", function() {
+            const rating = parseInt(this.dataset.rating);
+            starButtons.forEach(b => {
+                const bVal = parseInt(b.dataset.rating);
+                if (bVal <= rating) {
+                    b.classList.remove("text-muted");
+                    b.classList.add("text-warning");
+                } else {
+                    b.classList.remove("text-warning");
+                    b.classList.add("text-muted");
+                }
+            });
+            if (descriptions[rating]) {
+                labelElem.textContent = descriptions[rating];
+            }
+        });
+
+        btn.addEventListener("mouseleave", function() {
+            if (selectElem) {
+                updateStars(selectElem.value);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Engineers | Admin | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Manage Software Engineers</h2>
+            <p class="text-muted small mb-0">Oversee engineer profiles, skills, active statuses, and onboard new consultants</p>
+        </div>
+        <div>
+            <a href="{% url 'dashboard:add_engineer' %}" class="btn btn-primary fw-semibold shadow-sm">
+                <i class="bi bi-person-plus-fill me-1"></i>Add New Engineer
+            </a>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by name, skill, email, or designation...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Account Statuses</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Consultants Only</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive / Deactivated Only</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                        <i class="bi bi-funnel-fill me-1"></i>Filter
+                    </button>
+                    {% if query or status_filter %}
+                        <a href="{% url 'dashboard:manage_engineers' %}" class="btn btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Engineers Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Engineer</th>
+                            <th>Designation & Exp</th>
+                            <th>Contact</th>
+                            <th>Assigned Skills</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for eng in engineers %}
+                            <tr>
+                                <td class="text-muted fw-bold">{{ eng.id }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if eng.engineer_profile.profile_photo %}
+                                            <img src="{{ eng.engineer_profile.profile_photo.url }}" alt="{{ eng.get_full_name }}" class="avatar-img me-2 border">
+                                        {% else %}
+                                            <div class="avatar-img bg-primary text-white d-flex align-items-center justify-content-center fw-bold me-2">
+                                                {{ eng.first_name|first|default:eng.username|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <strong>{{ eng.get_full_name|default:eng.username }}</strong>
+                                            <small class="text-muted d-block">@{{ eng.username }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>{{ eng.engineer_profile.designation|default:"Software Engineer" }}</div>
+                                    <small class="text-muted">{{ eng.engineer_profile.years_of_experience }} Years Exp.</small>
+                                </td>
+                                <td>
+                                    <small class="d-block"><i class="bi bi-envelope me-1 text-muted"></i>{{ eng.email }}</small>
+                                    {% if eng.phone_number %}
+                                        <small class="d-block text-muted"><i class="bi bi-telephone me-1"></i>{{ eng.phone_number }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for ee in eng.engineer_expertises.all %}
+                                            <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.75rem;">
+                                                {{ ee.expertise.name }}
+                                            </span>
+                                        {% empty %}
+                                            <small class="text-muted">None</small>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if eng.is_active %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'services:engineer_detail' eng.id %}" class="btn btn-outline-primary" title="View Public Profile">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <form method="post" class="d-inline" onsubmit="return confirm('Change active status for {{ eng.username }}?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="toggle_active">
+                                            <input type="hidden" name="engineer_id" value="{{ eng.id }}">
+                                            {% if eng.is_active %}
+                                                <button type="submit" class="btn btn-outline-danger" title="Deactivate">
+                                                    <i class="bi bi-person-x"></i>
+                                                </button>
+                                            {% else %}
+                                                <button type="submit" class="btn btn-outline-success" title="Activate">
+                                                    <i class="bi bi-person-check"></i>
+                                                </button>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    No engineers found. Click "Add New Engineer" to create one.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

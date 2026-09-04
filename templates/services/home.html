@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Touch & Solve (TNS) AMS | Software Engineering Consultation Platform{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-gradient py-5 text-white position-relative overflow-hidden">
+    <div class="container py-lg-4">
+        <div class="row align-items-center gy-4">
+            <div class="col-lg-7 text-center text-lg-start">
+                <span class="badge bg-primary text-white mb-3 px-3 py-2 fw-semibold fs-6 shadow-sm">
+                    <i class="bi bi-rocket-takeoff-fill me-1"></i> Professional Software Consultations
+                </span>
+                <h1 class="display-4 fw-bold mb-3">Book 1-on-1 Consultations with Senior Software Engineers</h1>
+                <p class="lead text-light opacity-90 mb-4">
+                    Solve architecture bottlenecks, conduct deep code reviews, plan cloud migrations, and accelerate software delivery with verified Touch & Solve (TNS) experts.
+                </p>
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+                    {% if user.is_authenticated %}
+                        {% if user.role == "Client" %}
+                            <a href="{% url 'appointments:book_appointment' %}" class="btn btn-primary btn-lg px-4 fw-bold shadow">
+                                <i class="bi bi-calendar-plus me-2"></i>Book Consultation
+                            </a>
+                            <a href="{% url 'dashboard:client_dashboard' %}" class="btn btn-outline-light btn-lg px-4">
+                                <i class="bi bi-speedometer2 me-2"></i>My Dashboard
+                            </a>
+                        {% else %}
+                            <a href="{% url 'accounts:redirect_after_login' %}" class="btn btn-primary btn-lg px-4 fw-bold shadow">
+                                <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg px-4 fw-bold shadow">
+                            <i class="bi bi-person-plus me-2"></i>Get Started as Client
+                        </a>
+                        <a href="{% url 'services:engineer_list' %}" class="btn btn-outline-light btn-lg px-4">
+                            <i class="bi bi-search me-2"></i>Browse Engineers
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-lg overflow-hidden rounded-4 text-dark bg-white">
+                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80" 
+                         alt="Software Engineering Consultation Team" 
+                         class="img-fluid" 
+                         style="height: 220px; object-fit: cover;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-shield-check text-primary fs-2 me-3"></i>
+                            <div>
+                                <h5 class="mb-0 fw-bold">Enterprise-Grade Expertise</h5>
+                                <small class="text-muted">Direct consultation with lead engineers</small>
+                            </div>
+                        </div>
+                        <ul class="list-unstyled mb-0 small text-muted">
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2 fs-6"></i>Real-time schedule and slot conflict checking</li>
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2 fs-6"></i>Targeted domain & technical stack matching</li>
+                            <li class="mb-2"><i class="bi bi-check2-circle text-success me-2 fs-6"></i>Secure project requirements & document sharing</li>
+                            <li><i class="bi bi-check2-circle text-success me-2 fs-6"></i>Verified ratings and structured feedback tracking</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="py-5 bg-white">
+    <div class="container py-3">
+        <div class="text-center mb-5">
+            <span class="text-primary fw-bold text-uppercase small tracking-wide">Consulting Domains</span>
+            <h2 class="fw-bold mt-1">Our Core Consultation Services</h2>
+            <p class="text-muted">Select an area of technology to connect with the right software architects</p>
+        </div>
+
+        <div class="row g-4">
+            {% for service in services %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 service-catalog-card border-0 shadow-sm overflow-hidden rounded-3"
+                         id="home-service-{{ service.id }}"
+                         onclick="markHomeService('{{ service.id }}')">
+                        <!-- Related Category Picture from Web -->
+                        <div class="position-relative" style="height: 160px; overflow: hidden;">
+                            {% if "Cloud" in service.name %}
+                                <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                            {% elif "Database" in service.name or "Backend" in service.name %}
+                                <img src="https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                            {% elif "DevOps" in service.name or "Infrastructure" in service.name %}
+                                <img src="https://images.unsplash.com/photo-1618401471353-b98aedd04e11?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                            {% elif "Code Review" in service.name or "Python" in service.name or "Django" in service.name %}
+                                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                            {% elif "Microservice" in service.name or "API" in service.name %}
+                                <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                            {% endif %}
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-dark bg-opacity-75 px-2 py-1 small">
+                                    <i class="bi bi-tag-fill me-1 text-primary"></i>Consulting
+                                </span>
+                            </div>
+                            <div class="catalog-mark-icon" id="home-mark-{{ service.id }}">
+                                <i class="bi bi-bookmark-check-fill"></i> <span class="mark-label">Select</span>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="service-icon-box me-2" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                                    {% if "Cloud" in service.name or "AWS" in service.name %}
+                                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                                    {% elif "Database" in service.name or "Backend" in service.name %}
+                                        <i class="bi bi-database-fill-gear"></i>
+                                    {% elif "DevOps" in service.name or "CI/CD" in service.name or "Infrastructure" in service.name %}
+                                        <i class="bi bi-hdd-network-fill"></i>
+                                    {% elif "Microservice" in service.name or "API" in service.name %}
+                                        <i class="bi bi-diagram-3-fill"></i>
+                                    {% elif "Python" in service.name or "Django" in service.name or "Code Review" in service.name %}
+                                        <i class="bi bi-code-slash"></i>
+                                    {% else %}
+                                        <i class="bi bi-cpu-fill"></i>
+                                    {% endif %}
+                                </div>
+                                <h5 class="card-title fw-bold mb-0 text-dark">{{ service.name }}</h5>
+                            </div>
+                            <p class="card-text text-muted small mb-4 flex-grow-1">{{ service.description|truncatewords:20 }}</p>
+                            <a href="{% url 'appointments:book_appointment' %}?service={{ service.id }}" class="btn btn-outline-primary btn-sm w-100 fw-semibold">
+                                <i class="bi bi-calendar-check me-1"></i>Book for this Service
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center text-muted py-4">
+                    <p>No active services listed yet.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'services:service_list' %}" class="btn btn-link text-primary fw-bold text-decoration-none">
+                View All Services <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Visual Feature / How It Works Section with Web Picture -->
+<section class="py-5 bg-light border-top border-bottom">
+    <div class="container py-3">
+        <div class="row align-items-center gy-4">
+            <div class="col-lg-6 order-lg-2">
+                <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80" 
+                     alt="Software Consultation in Action" 
+                     class="img-fluid rounded-4 shadow-lg w-100" 
+                     style="max-height: 400px; object-fit: cover;">
+            </div>
+            <div class="col-lg-6 order-lg-1">
+                <span class="text-primary fw-bold text-uppercase small tracking-wide">Why Touch & Solve</span>
+                <h2 class="fw-bold mt-1 mb-3">Structured, High-Impact Technical Advice</h2>
+                <p class="text-muted mb-4">
+                    We eliminate the guesswork in software decisions. From architectural spike investigations to complex distributed cloud migrations, our engineers provide clear, actionable direction.
+                </p>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="d-flex">
+                            <i class="bi bi-1-circle-fill text-primary fs-3 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Select Domain</h6>
+                                <p class="small text-muted mb-0">Choose your service and required engineering expertise.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex">
+                            <i class="bi bi-2-circle-fill text-primary fs-3 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Pick Available Slot</h6>
+                                <p class="small text-muted mb-0">Book directly from verified engineer working hours.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex">
+                            <i class="bi bi-3-circle-fill text-primary fs-3 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Collaborate & Review</h6>
+                                <p class="small text-muted mb-0">Share requirements and attend focused technical session.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex">
+                            <i class="bi bi-4-circle-fill text-primary fs-3 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Rate & Track</h6>
+                                <p class="small text-muted mb-0">Submit ratings and maintain consultation history.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Engineers Section -->
+<section class="py-5 bg-white">
+    <div class="container py-3">
+        <div class="text-center mb-5">
+            <span class="text-primary fw-bold text-uppercase small tracking-wide">Engineering Talent</span>
+            <h2 class="fw-bold mt-1">Meet Our Lead Consultants</h2>
+            <p class="text-muted">Top-tier software professionals ready to review and elevate your architecture</p>
+        </div>
+
+        <div class="row g-4">
+            {% for engineer in engineers %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 card-hover border-0 shadow-sm text-center p-3 rounded-3">
+                        <div class="card-body">
+                            {% if engineer.engineer_profile.profile_photo %}
+                                <img src="{{ engineer.engineer_profile.profile_photo.url }}" alt="{{ engineer.get_full_name }}" class="avatar-lg mb-3 shadow-sm border border-2 border-primary object-fit-cover">
+                            {% else %}
+                                <div class="avatar-lg mx-auto mb-3 bg-primary text-white d-flex align-items-center justify-content-center fs-2 fw-bold shadow-sm">
+                                    {{ engineer.first_name|first|default:engineer.username|first|upper }}
+                                </div>
+                            {% endif %}
+                            <h5 class="fw-bold mb-1 text-dark">{{ engineer.get_full_name|default:engineer.username }}</h5>
+                            <p class="text-primary small fw-semibold mb-1">{{ engineer.engineer_profile.designation|default:"Software Engineer" }}</p>
+                            <p class="text-muted small mb-3"><i class="bi bi-briefcase me-1"></i>{{ engineer.engineer_profile.years_of_experience }} Years Exp.</p>
+                            
+                            <div class="mb-3 d-flex flex-wrap justify-content-center gap-1">
+                                {% for ee in engineer.engineer_expertises.all|slice:":3" %}
+                                    <span class="badge bg-primary-subtle text-primary small">{{ ee.expertise.name }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <a href="{% url 'services:engineer_detail' engineer.id %}" class="btn btn-outline-dark btn-sm w-100 fw-semibold">
+                                View Profile & Schedule
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center text-muted py-4">
+                    <p>No engineers currently listed.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'services:engineer_list' %}" class="btn btn-primary px-4 fw-semibold shadow-sm">
+                <i class="bi bi-people me-1"></i>Search All Engineers
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function markHomeService(serviceId) {
+        document.querySelectorAll(".service-catalog-card").forEach(function(card) {
+            const cardId = card.id.replace("home-service-", "");
+            const badge = document.getElementById("home-mark-" + cardId);
+            if (cardId === String(serviceId)) {
+                card.classList.toggle("is-marked");
+                const isNowMarked = card.classList.contains("is-marked");
+                if (badge) {
+                    badge.innerHTML = isNowMarked 
+                        ? '<i class="bi bi-check-circle-fill text-warning"></i> <span class="mark-label">Marked</span>'
+                        : '<i class="bi bi-bookmark-check-fill"></i> <span class="mark-label">Select</span>';
+                }
+            } else {
+                card.classList.remove("is-marked");
+                if (badge) {
+                    badge.innerHTML = '<i class="bi bi-bookmark-check-fill"></i> <span class="mark-label">Select</span>';
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

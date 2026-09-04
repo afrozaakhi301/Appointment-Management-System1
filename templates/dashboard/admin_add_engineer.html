@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Add New Software Engineer | Admin | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h4 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-person-plus-fill me-2 text-primary"></i>Onboard New Software Engineer
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-4">Create an authorized engineer account. Public registration cannot create engineer roles.</p>
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <a href="{% url 'dashboard:manage_engineers' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary fw-bold px-4">
+                                <i class="bi bi-check-circle me-1"></i>Create Engineer Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

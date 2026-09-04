@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Activity Logs | Admin | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-journal-text text-primary me-2"></i>System Activity Logs</h2>
+            <p class="text-muted small mb-0">Audit trail of all administrative, consultation, and user actions</p>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-6">
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by action description or username...">
+                </div>
+                <div class="col-md-4">
+                    <select name="user_id" class="form-select">
+                        <option value="">-- All Users / Actors --</option>
+                        {% for u in users %}
+                            <option value="{{ u.id }}" {% if selected_user == u.id|stringformat:"s" %}selected{% endif %}>
+                                {{ u.username }} ({{ u.role }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">Filter</button>
+                    {% if query or selected_user %}
+                        <a href="{% url 'dashboard:admin_activity_logs' %}" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Activity Logs Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User / Actor</th>
+                            <th>Role</th>
+                            <th>Action Performed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                            <tr>
+                                <td class="text-muted small">
+                                    <i class="bi bi-clock me-1"></i>{{ log.timestamp|date:"M d, Y h:i:s A" }}
+                                </td>
+                                <td>
+                                    {% if log.user %}
+                                        <strong>{{ log.user.username }}</strong>
+                                        <small class="text-muted d-block">{{ log.user.get_full_name }}</small>
+                                    {% else %}
+                                        <span class="text-muted">System / Anonymous</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if log.user %}
+                                        <span class="badge bg-secondary">{{ log.user.role }}</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-dark border">System</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-dark">
+                                    {{ log.action }}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    No activity logs found.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

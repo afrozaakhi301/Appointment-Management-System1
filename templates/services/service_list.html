@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Software Consultation Services | Touch & Solve (TNS){% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <span class="badge bg-primary text-white mb-2 px-3 py-2 fw-semibold">Consultation Domains</span>
+        <h1 class="fw-bold mb-2">Our Consultation Services</h1>
+        <p class="text-muted">Specialized software engineering domains available for booking with Touch & Solve engineers</p>
+    </div>
+
+    <div class="row g-4">
+        {% for service in services %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 service-catalog-card border-0 shadow-sm overflow-hidden rounded-3" 
+                     id="catalog-service-{{ service.id }}" 
+                     onclick="markCatalogService('{{ service.id }}')">
+                    
+                    <!-- Related Service Image from Web -->
+                    <div class="position-relative" style="height: 170px; overflow: hidden;">
+                        {% if "Cloud" in service.name %}
+                            <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                        {% elif "Database" in service.name or "Backend" in service.name %}
+                            <img src="https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                        {% elif "DevOps" in service.name or "Infrastructure" in service.name %}
+                            <img src="https://images.unsplash.com/photo-1618401471353-b98aedd04e11?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                        {% elif "Code Review" in service.name or "Python" in service.name or "Django" in service.name %}
+                            <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                        {% elif "Microservice" in service.name or "API" in service.name %}
+                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                        {% endif %}
+                        
+                        <div class="position-absolute top-0 start-0 m-2">
+                            <span class="badge bg-primary px-2 py-1 small">
+                                <i class="bi bi-cpu-fill me-1"></i>Engineering Domain
+                            </span>
+                        </div>
+
+                        <!-- Top-Right Marked Icon Badge -->
+                        <div class="catalog-mark-icon" id="cat-mark-{{ service.id }}">
+                            <i class="bi bi-bookmark-check-fill"></i> <span class="mark-label">Select</span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="service-icon-box me-2" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                                {% if "Cloud" in service.name or "AWS" in service.name %}
+                                    <i class="bi bi-cloud-arrow-up-fill"></i>
+                                {% elif "Database" in service.name or "Backend" in service.name %}
+                                    <i class="bi bi-database-fill-gear"></i>
+                                {% elif "DevOps" in service.name or "CI/CD" in service.name or "Infrastructure" in service.name %}
+                                    <i class="bi bi-hdd-network-fill"></i>
+                                {% elif "Microservice" in service.name or "API" in service.name %}
+                                    <i class="bi bi-diagram-3-fill"></i>
+                                {% elif "Python" in service.name or "Django" in service.name or "Code Review" in service.name %}
+                                    <i class="bi bi-code-slash"></i>
+                                {% else %}
+                                    <i class="bi bi-cpu-fill"></i>
+                                {% endif %}
+                            </div>
+                            <h5 class="fw-bold mb-0 text-dark">{{ service.name }}</h5>
+                        </div>
+                        <p class="text-muted small flex-grow-1 mb-4">{{ service.description }}</p>
+                        <div class="pt-3 border-top mt-auto">
+                            <a href="{% url 'appointments:book_appointment' %}?service={{ service.id }}" class="btn btn-primary w-100 fw-semibold">
+                                <i class="bi bi-calendar-plus me-1"></i>Book This Consultation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                <h5>No consultation services currently available</h5>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function markCatalogService(serviceId) {
+        document.querySelectorAll(".service-catalog-card").forEach(function(card) {
+            const cardId = card.id.replace("catalog-service-", "");
+            const badge = document.getElementById("cat-mark-" + cardId);
+            if (cardId === String(serviceId)) {
+                card.classList.toggle("is-marked");
+                const isNowMarked = card.classList.contains("is-marked");
+                if (badge) {
+                    badge.innerHTML = isNowMarked 
+                        ? '<i class="bi bi-check-circle-fill text-warning"></i> <span class="mark-label">Marked</span>'
+                        : '<i class="bi bi-bookmark-check-fill"></i> <span class="mark-label">Select</span>';
+                }
+            } else {
+                card.classList.remove("is-marked");
+                if (badge) {
+                    badge.innerHTML = '<i class="bi bi-bookmark-check-fill"></i> <span class="mark-label">Select</span>';
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

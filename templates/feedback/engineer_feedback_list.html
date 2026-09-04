@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Client Reviews & Ratings | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Client Consultation Reviews & Ratings</h2>
+            <p class="text-muted small mb-0">Track your consultation feedback, ratings, and technical recommendations from clients</p>
+        </div>
+        <div>
+            <a href="{% url 'appointments:engineer_schedule' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-calendar3 me-1"></i>My Schedule & History
+            </a>
+        </div>
+    </div>
+
+    <!-- Rating Summary Overview Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="row align-items-center gy-4">
+                <!-- Average Score Box -->
+                <div class="col-md-4 text-center border-md-end">
+                    <h1 class="display-3 fw-bold text-dark mb-0">{{ avg_rating }}</h1>
+                    <div class="fs-4 text-warning mb-1">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= avg_rating|floatformat:"0" %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                    </div>
+                    <p class="text-muted small mb-0">Based on <strong>{{ total_reviews }}</strong> client review{{ total_reviews|pluralize }}</p>
+                </div>
+
+                <!-- Star Breakdown Progress Bars -->
+                <div class="col-md-8">
+                    <h6 class="fw-bold text-secondary mb-3 text-uppercase small">Rating Distribution</h6>
+                    {% for stars, count in rating_counts.items reversed %}
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="small fw-semibold text-nowrap me-2" style="width: 60px;">{{ stars }} Stars</span>
+                            <div class="progress flex-grow-1" style="height: 8px;">
+                                <div class="progress-bar bg-warning" role="progressbar" 
+                                     style="width: {% if total_reviews > 0 %}{% widthratio count total_reviews 100 %}{% else %}0{% endif %}%" 
+                                     aria-valuenow="{{ count }}" aria-valuemin="0" aria-valuemax="{{ total_reviews }}">
+                                </div>
+                            </div>
+                            <span class="small text-muted ms-3" style="width: 45px; text-align: right;">{{ count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Stream -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-chat-left-heart me-2 text-primary"></i>All Client Feedback
+            </h5>
+            <span class="badge bg-secondary">{{ feedbacks.count }} Reviews</span>
+        </div>
+        <div class="card-body p-4">
+            {% if feedbacks %}
+                <div class="row g-4">
+                    {% for fb in feedbacks %}
+                        <div class="col-12">
+                            <div class="card border rounded-3 p-3 p-md-4 shadow-none bg-white">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-3 gap-2">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                            <span class="fs-5 text-warning">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= fb.rating %}★{% else %}☆{% endif %}
+                                                {% endfor %}
+                                            </span>
+                                            <span class="badge bg-warning-subtle text-dark fw-bold px-2 py-1">
+                                                {{ fb.rating }} / 5 Stars
+                                            </span>
+                                            <span class="badge bg-light text-secondary border">
+                                                {{ fb.appointment.service.name }}
+                                            </span>
+                                        </div>
+                                        <h5 class="fw-bold mb-1">
+                                            <a href="{% url 'appointments:appointment_detail' fb.appointment.id %}" class="text-decoration-none text-dark">
+                                                {{ fb.appointment.project_title }}
+                                            </a>
+                                        </h5>
+                                        <small class="text-muted">
+                                            <i class="bi bi-person-circle me-1"></i>Client: <strong>{{ fb.appointment.client.get_full_name|default:fb.appointment.client.username }}</strong>
+                                            {% if fb.appointment.client.client_profile.organization %}
+                                                ({{ fb.appointment.client.client_profile.organization }})
+                                            {% endif %}
+                                            <span class="mx-2">•</span>
+                                            <i class="bi bi-calendar-check me-1"></i>Consultation: {{ fb.appointment.appointment_date }}
+                                            <span class="mx-2">•</span>
+                                            <i class="bi bi-clock me-1"></i>Received on: {{ fb.created_at|date:"M d, Y" }}
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'appointments:appointment_detail' fb.appointment.id %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-eye me-1"></i>Consultation Details
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="bg-light p-3 rounded border">
+                                    <p class="mb-0 text-dark" style="white-space: pre-line;">{{ fb.comments }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-chat-square-text fs-1 d-block mb-3 text-secondary opacity-50"></i>
+                    <h5 class="fw-bold">No Client Reviews Yet</h5>
+                    <p class="small text-muted mb-0">Client feedback and ratings will appear here once consultations are completed and reviewed.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

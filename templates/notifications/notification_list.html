@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}My Notifications | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Notifications</h2>
+            <p class="text-muted small mb-0">Stay updated on your consultation requests, schedule approvals, and reviews</p>
+        </div>
+        <div>
+            {% if notifications %}
+                <a href="{% url 'notifications:mark_all_as_read' %}" class="btn btn-outline-primary btn-sm fw-semibold">
+                    <i class="bi bi-check2-all me-1"></i>Mark All as Read
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Filter Controls Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <!-- Status Filter Pills -->
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="?status=all{% if query %}&q={{ query }}{% endif %}" 
+                       class="btn btn-sm rounded-pill px-3 fw-semibold {% if status_filter == 'all' or not status_filter %}btn-primary shadow-sm{% else %}btn-outline-secondary bg-white{% endif %}">
+                        All <span class="badge {% if status_filter == 'all' or not status_filter %}bg-white text-primary{% else %}bg-secondary text-white{% endif %} ms-1">{{ total_count }}</span>
+                    </a>
+                    <a href="?status=unread{% if query %}&q={{ query }}{% endif %}" 
+                       class="btn btn-sm rounded-pill px-3 fw-semibold {% if status_filter == 'unread' %}btn-danger shadow-sm{% else %}btn-outline-danger bg-white{% endif %}">
+                        <i class="bi bi-bell-fill me-1"></i>Unread <span class="badge {% if status_filter == 'unread' %}bg-white text-danger{% else %}bg-danger text-white{% endif %} ms-1">{{ unread_count }}</span>
+                    </a>
+                    <a href="?status=read{% if query %}&q={{ query }}{% endif %}" 
+                       class="btn btn-sm rounded-pill px-3 fw-semibold {% if status_filter == 'read' %}btn-secondary shadow-sm{% else %}btn-outline-secondary bg-white{% endif %}">
+                        <i class="bi bi-check2-all me-1"></i>Read History <span class="badge {% if status_filter == 'read' %}bg-white text-dark{% else %}bg-light text-muted border{% endif %} ms-1">{{ read_count }}</span>
+                    </a>
+                </div>
+
+                <!-- Search Form -->
+                <form method="get" class="d-flex gap-2">
+                    {% if status_filter %}
+                        <input type="hidden" name="status" value="{{ status_filter }}">
+                    {% endif %}
+                    <div class="input-group input-group-sm" style="max-width: 280px;">
+                        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search notification text...">
+                        <button type="submit" class="btn btn-primary" title="Filter / Search">
+                            <i class="bi bi-funnel-fill"></i>
+                        </button>
+                    </div>
+                    {% if query or status_filter != 'all' %}
+                        <a href="{% url 'notifications:notification_list' %}" class="btn btn-sm btn-outline-secondary" title="Clear Filter">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            {% if notifications %}
+                <div class="list-group list-group-flush">
+                    {% for n in notifications %}
+                        <div class="list-group-item p-3 d-flex justify-content-between align-items-center {% if not n.is_read %}bg-primary-subtle bg-opacity-25 border-start border-primary border-4{% endif %}">
+                            <div class="d-flex align-items-start">
+                                <div class="p-2 rounded-circle me-3 {% if not n.is_read %}bg-primary text-white{% else %}bg-light text-muted border{% endif %}">
+                                    <i class="bi {% if not n.is_read %}bi-bell-fill{% else %}bi-bell{% endif %}"></i>
+                                </div>
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <p class="mb-0 {% if not n.is_read %}fw-semibold text-dark{% else %}text-muted{% endif %}">
+                                            {{ n.message }}
+                                        </p>
+                                        {% if not n.is_read %}
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">New</span>
+                                        {% endif %}
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-1"></i>{{ n.created_at|timesince }} ago &bull; {{ n.created_at|date:"M d, Y h:i A" }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="ms-3 d-flex align-items-center gap-2">
+                                {% if n.appointment %}
+                                    <a href="{% url 'notifications:mark_as_read' n.id %}" class="btn btn-primary btn-sm text-nowrap">
+                                        View Details <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                {% else %}
+                                    {% if not n.is_read %}
+                                        <a href="{% url 'notifications:mark_as_read' n.id %}" class="btn btn-outline-secondary btn-sm" title="Mark as read">
+                                            <i class="bi bi-check"></i> Mark read
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if notifications.has_other_pages %}
+                    <div class="card-footer bg-white border-top py-3 d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            Showing page {{ notifications.number }} of {{ notifications.paginator.num_pages }} ({{ total_count }} total notifications)
+                        </small>
+                        <nav aria-label="Notification pagination">
+                            <ul class="pagination pagination-sm mb-0">
+                                {% if notifications.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ notifications.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}">Previous</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                                {% endif %}
+
+                                {% for i in notifications.paginator.page_range %}
+                                    {% if notifications.number == i %}
+                                        <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link" href="?page={{ i }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if notifications.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ notifications.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}">Next</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                {% endif %}
+
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-bell-slash fs-1 d-block mb-2 text-secondary"></i>
+                    <h5>No notifications found</h5>
+                    <p class="small mb-0">You're all caught up! When updates or requests occur, they will appear here.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Add New Administrator | Admin | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h4 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-shield-plus me-2 text-dark"></i>Create System Administrator
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-4">Add a new admin user with elevated governance privileges.</p>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <a href="{% url 'dashboard:admin_dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-dark fw-bold px-4">
+                                <i class="bi bi-shield-check me-1"></i>Create Administrator
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

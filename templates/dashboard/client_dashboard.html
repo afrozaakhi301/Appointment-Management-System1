@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Client Dashboard | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Welcome Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Welcome, {{ user.first_name|default:user.username }}!</h2>
+            <p class="text-muted small mb-0">Manage your software consultation bookings and architectural sessions</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'feedback:my_feedback' %}" class="btn btn-outline-secondary fw-semibold">
+                <i class="bi bi-star me-1"></i>My Reviews
+            </a>
+            <a href="{% url 'appointments:book_appointment' %}" class="btn btn-primary fw-bold shadow-sm px-4">
+                <i class="bi bi-calendar-plus me-2"></i>Book New Consultation
+            </a>
+        </div>
+    </div>
+
+
+    <!-- KPI Metric Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="metric-card d-flex align-items-center shadow-sm">
+                <div class="metric-icon bg-primary-subtle text-primary me-3">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ total_count }}</h3>
+                    <small class="text-muted">Total Consultations</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="metric-card d-flex align-items-center shadow-sm">
+                <div class="metric-icon bg-warning-subtle text-warning me-3">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ pending_count }}</h3>
+                    <small class="text-muted">Pending Review</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="metric-card d-flex align-items-center shadow-sm">
+                <div class="metric-icon bg-info-subtle text-info me-3">
+                    <i class="bi bi-calendar3-event"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ upcoming_count }}</h3>
+                    <small class="text-muted">Confirmed Upcoming</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="metric-card d-flex align-items-center shadow-sm">
+                <div class="metric-icon bg-success-subtle text-success me-3">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ completed_count }}</h3>
+                    <small class="text-muted">Completed Sessions</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Next Upcoming Consultation Card (if any) -->
+    {% if next_appointment %}
+        <div class="card border-0 shadow-sm mb-4 bg-primary text-white">
+            <div class="card-body p-4">
+                <div class="row align-items-center gy-3">
+                    <div class="col-md-8">
+                        <span class="badge bg-white text-primary mb-2 fw-semibold px-2 py-1">Next Upcoming Session</span>
+                        <h4 class="fw-bold mb-1">{{ next_appointment.project_title }}</h4>
+                        <p class="mb-0 opacity-90">
+                            With <strong>{{ next_appointment.engineer.get_full_name|default:next_appointment.engineer.username }}</strong> 
+                            ({{ next_appointment.service.name }}) on 
+                            <strong>{{ next_appointment.appointment_date }}</strong> at 
+                            <strong>{{ next_appointment.start_time|time:"h:i A" }} - {{ next_appointment.end_time|time:"h:i A" }}</strong>
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <a href="{% url 'appointments:appointment_detail' next_appointment.id %}" class="btn btn-light fw-bold px-4">
+                            View Session Details <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Recent Appointments Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0"><i class="bi bi-list-check me-2 text-primary"></i>Recent Consultations</h5>
+            <a href="{% url 'appointments:client_appointments' %}" class="btn btn-link text-primary btn-sm p-0 fw-semibold text-decoration-none">
+                View All Appointments <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Project Title</th>
+                            <th>Consultant</th>
+                            <th>Service</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appt in recent_appointments %}
+                            <tr>
+                                <td class="text-muted fw-bold">#{{ appt.id }}</td>
+                                <td class="fw-bold">{{ appt.project_title }}</td>
+                                <td>{{ appt.engineer.get_full_name|default:appt.engineer.username }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ appt.service.name }}</span></td>
+                                <td>
+                                    {{ appt.appointment_date }} <small class="text-muted">({{ appt.start_time|time:"h:i A" }})</small>
+                                </td>
+                                <td>
+                                    <span class="badge badge-status-{{ appt.status|lower }} px-2 py-1 fw-semibold">
+                                        {{ appt.status }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'appointments:appointment_detail' appt.id %}" class="btn btn-outline-primary btn-sm">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    No consultation requests yet. Click "Book New Consultation" to get started!
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}{{ engineer.get_full_name|default:engineer.username }} | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Engineer Profile Card -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm text-center overflow-hidden rounded-3">
+                <div class="position-relative" style="height: 110px; background: #0f172a;">
+                    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80" 
+                         alt="Code Banner" 
+                         class="w-100 h-100 object-fit-cover opacity-50">
+                </div>
+                <div class="card-body p-4 pt-0 position-relative">
+                    <div style="margin-top: -60px;">
+                        {% if profile.profile_photo %}
+                            <img src="{{ profile.profile_photo.url }}" alt="{{ engineer.get_full_name }}" class="avatar-xl mx-auto mb-3 shadow border border-3 border-white object-fit-cover">
+                        {% else %}
+                            <div class="avatar-xl mx-auto mb-3 bg-primary text-white d-flex align-items-center justify-content-center fs-1 fw-bold shadow border border-3 border-white">
+                                {{ engineer.first_name|first|default:engineer.username|first|upper }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <h3 class="fw-bold mb-1">{{ engineer.get_full_name|default:engineer.username }}</h3>
+                    <p class="text-primary fw-semibold mb-2">{{ profile.designation|default:"Software Engineer" }}</p>
+                    <p class="text-muted small mb-3"><i class="bi bi-clock-history me-1"></i>{{ profile.years_of_experience }} Years of Industry Experience</p>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'appointments:book_appointment' %}?engineer={{ engineer.id }}" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                            <i class="bi bi-calendar-plus me-2"></i>Book Consultation
+                        </a>
+                        <a href="{% url 'services:engineer_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Engineers
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Details, Bio & Schedule -->
+        <div class="col-lg-8">
+            <!-- Bio & Background -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-file-earmark-person me-2 text-primary"></i>About Consultant</h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-0" style="white-space: pre-line;">{{ profile.bio|default:"No detailed bio provided yet." }}</p>
+                </div>
+            </div>
+
+            <!-- Technical Expertise -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-award-fill me-2 text-primary"></i>Verified Technical Expertise</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        {% for ee in expertises %}
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-3 border d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="fw-bold mb-0">{{ ee.expertise.name }}</h6>
+                                        <small class="text-muted">Proficiency</small>
+                                    </div>
+                                    <span class="badge bg-primary px-2 py-1">{{ ee.proficiency_level }}</span>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12 text-muted">
+                                <p class="mb-0">No specific expertise records listed.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Working Availability -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-calendar-week me-2 text-primary"></i>Weekly Consultation Availability</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Day of Week</th>
+                                    <th>Available Time Range</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for a in availabilities %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ a.get_day_of_week_display }}</td>
+                                        <td>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                                <i class="bi bi-clock me-1"></i>{{ a.start_time|time:"h:i A" }} - {{ a.end_time|time:"h:i A" }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="2" class="text-muted text-center py-3">No standard working hours defined yet.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

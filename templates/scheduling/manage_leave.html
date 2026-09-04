@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Manage Leave Periods | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Schedule Leave Form -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-calendar-x-fill me-2 text-danger"></i>Schedule Leave / Time Off</h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-3">Dates within your leave period will be strictly blocked from client bookings.</p>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-danger fw-semibold">
+                                <i class="bi bi-calendar-plus me-1"></i>Apply Leave Period
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Leaves List -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>My Leave History & Upcoming Time-Off</h5>
+                    <span class="badge bg-secondary">{{ leaves.count }} Records</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Reason</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leave in leaves %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ leave.start_date }}</td>
+                                        <td class="fw-semibold">{{ leave.end_date }}</td>
+                                        <td>
+                                            <small class="text-muted">{{ leave.reason|default:"Personal Leave" }}</small>
+                                        </td>
+                                        <td class="text-end">
+                                            <form method="post" class="d-inline" onsubmit="return confirm('Cancel this leave period?');">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="item_id" value="{{ leave.id }}">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-x-circle"></i> Cancel
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">
+                                            No leave periods scheduled.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
