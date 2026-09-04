@@ -4,12 +4,43 @@ from .models import User, ClientProfile, EngineerProfile
 
 
 class ClientRegistrationForm(UserCreationForm):
-    first_name = forms.CharField(max_length=150, required=True)
-    last_name = forms.CharField(max_length=150, required=True)
-    email = forms.EmailField(required=True)
-    phone_number = forms.CharField(max_length=20, required=False)
-    organization = forms.CharField(max_length=150, required=False, help_text="Company or project organization")
-    address = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), required=False)
+    first_name = forms.CharField(
+        max_length=150, 
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g., John"})
+    )
+    last_name = forms.CharField(
+        max_length=150, 
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g., Doe"})
+    )
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "john.doe@company.com"})
+    )
+    phone_number = forms.CharField(
+        max_length=20, 
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "+880 1711-000000"})
+    )
+    organization = forms.CharField(
+        max_length=150, 
+        required=False, 
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g., Acme Corp / Startup"})
+    )
+    address = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2, "class": "form-control", "placeholder": "Office address or city"}), 
+        required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "username" in self.fields:
+            self.fields["username"].widget.attrs.update({"class": "form-control", "placeholder": "Choose a username"})
+        if "password1" in self.fields:
+            self.fields["password1"].widget.attrs.update({"class": "form-control", "placeholder": "Create a strong password"})
+        if "password2" in self.fields:
+            self.fields["password2"].widget.attrs.update({"class": "form-control", "placeholder": "Confirm your password"})
 
     class Meta:
         model = User
