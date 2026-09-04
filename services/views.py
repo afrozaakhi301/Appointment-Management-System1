@@ -1,10 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Avg, Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from accounts.decorators import engineer_required
 from accounts.models import EngineerProfile, User
 from dashboard.utils import log_activity
+from feedback.models import Feedback
 from scheduling.models import EngineerAvailability
 from .forms import EngineerExpertiseForm
 from .models import EngineerExpertise, Expertise, Service
@@ -12,8 +13,25 @@ from .models import EngineerExpertise, Expertise, Service
 
 def home_view(request):
     services = Service.objects.filter(is_active=True)[:6]
-    engineers = User.objects.filter(role=User.Role.ENGINEER, is_active=True).select_related("engineer_profile").prefetch_related("engineer_expertises__expertise")[:4]
+    engineers = User.objects.filter(
+        role=User.Role.ENGINEER, 
+        is_active=True
+    ).select_related("engineer_profile").prefetch_related("engineer_expertises__expertise").annotate(
+        avg_rating=Avg("engineer_appointments__feedback__rating"),
+        review_count=Count("engineer_appointments__feedback", distinct=True)
+    )[:4]
     expertises = Expertise.objects.all()[:10]
+
+    # Recent reviews for public homepage testimonials
+    recent_reviews = Feedback.objects.select_related(
+        "appointment__client__client_profile",
+        "appointment__engineer__engineer_profile",
+        "appointment__service"
+    ).order_by("-created_at")[:6]
+
+    total_reviews = Feedback.objects.count()
+    overall_avg_rating = Feedback.objects.aggregate(Avg("rating"))["rating__avg"] or 0
+
     return render(
         request,
         "services/home.html",
@@ -21,6 +39,9 @@ def home_view(request):
             "services": services,
             "engineers": engineers,
             "expertises": expertises,
+            "recent_reviews": recent_reviews,
+            "total_reviews": total_reviews,
+            "overall_avg_rating": round(overall_avg_rating, 1),
         }
     )
 
@@ -180,6 +201,17 @@ def engineer_detail_view(request, engineer_id):
     expertises = engineer.engineer_expertises.select_related("expertise")
     availabilities = EngineerAvailability.objects.filter(engineer=engineer).order_by("day_of_week", "start_time")
 
+    # Reviews and feedback received by this engineer from clients
+    feedbacks = Feedback.objects.filter(
+        appointment__engineer=engineer
+    ).select_related(
+        "appointment__client__client_profile",
+        "appointment__service"
+    ).order_by("-created_at")
+
+    avg_rating = feedbacks.aggregate(Avg("rating"))["rating__avg"] or 0
+    review_count = feedbacks.count()
+
     return render(
         request,
         "services/engineer_detail.html",
@@ -188,6 +220,9 @@ def engineer_detail_view(request, engineer_id):
             "profile": profile,
             "expertises": expertises,
             "availabilities": availabilities,
+            "feedbacks": feedbacks,
+            "avg_rating": round(avg_rating, 1),
+            "review_count": review_count,
         }
     )
 
