@@ -18,7 +18,59 @@
     
     <!-- Custom CSS -->
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
+    <style>
+        /* Force Header-matching Footer Background & Remove All Underlines */
+        footer.footer-odoo {
+            background-color: #0f172a !important;
+            color: #94a3b8 !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        }
+        footer.footer-odoo * {
+            text-decoration: none !important;
+        }
+        footer.footer-odoo a {
+            color: #94a3b8 !important;
+            text-decoration: none !important;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+        footer.footer-odoo a:hover {
+            color: #ffffff !important;
+            text-decoration: none !important;
+        }
+        footer.footer-odoo ul {
+            list-style: none !important;
+            padding-left: 0 !important;
+            margin-bottom: 0 !important;
+        }
+        footer.footer-odoo li {
+            list-style: none !important;
+            margin-bottom: 0.35rem !important;
+        }
+        .footer-odoo-logo {
+            color: #ffffff !important;
+            font-size: 2.25rem !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.04em !important;
+            text-decoration: none !important;
+        }
+        .footer-odoo-logo:hover {
+            color: #ffffff !important;
+            text-decoration: none !important;
+        }
+        .footer-odoo-bottom {
+            background-color: #0b1120 !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+        }
+        .footer-odoo-bottom a {
+            color: #94a3b8 !important;
+            text-decoration: none !important;
+        }
+        .footer-odoo-bottom a:hover {
+            color: #ffffff !important;
+            text-decoration: none !important;
+        }
+    </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
@@ -45,11 +97,11 @@
     </main>
 
     <!-- Footer (Odoo Style Multi-Column) -->
-    <footer class="footer-odoo mt-5">
+    <footer class="footer-odoo mt-5 text-white" style="background-color: #0f172a !important;">
         <div class="container">
             <!-- Top Centered Minimal Brand Logo -->
             <div class="text-center pt-5 pb-5">
-                <a href="{% url 'home' %}" class="footer-odoo-logo text-decoration-none">
+                <a href="{% url 'home' %}" class="footer-odoo-logo text-decoration-none text-white" style="text-decoration: none !important; color: #ffffff !important;">
                     touch<span class="text-primary">&bull;</span>solve
                 </a>
             </div>
@@ -58,52 +110,52 @@
             <div class="row gy-4 pb-5">
                 <!-- Column 1: Community & Open Source -->
                 <div class="col-lg-2 col-md-4 col-6">
-                    <h6 class="fw-bold mb-3">Community</h6>
-                    <ul class="footer-nav-list">
-                        <li><a href="{% url 'services:service_list' %}">Tutorials</a></li>
-                        <li><a href="{% url 'services:service_list' %}">Documentation</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Forum</a></li>
-                        <li><a href="{% url 'home' %}#client-reviews">Client Reviews</a></li>
+                    <h6 class="fw-bold mb-3 text-white">Community</h6>
+                    <ul class="list-unstyled footer-nav-list mb-0">
+                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Tutorials</a></li>
+                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Documentation</a></li>
+                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Forum</a></li>
+                        <li><a href="{% url 'home' %}#client-reviews" class="text-decoration-none">Client Reviews</a></li>
                     </ul>
 
-                    <h6 class="fw-bold mb-3 mt-4">Open Source</h6>
-                    <ul class="footer-nav-list">
-                        <li><a href="{% url 'services:engineer_list' %}">Download</a></li>
-                        <li><a href="https://github.com/afrozaakhi301/Appointment-Management-System1" target="_blank">GitHub</a></li>
-                        <li><a href="{% url 'services:engineer_list' %}">Runbot</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Translations</a></li>
+                    <h6 class="fw-bold mb-3 mt-4 text-white">Open Source</h6>
+                    <ul class="list-unstyled footer-nav-list mb-0">
+                        <li><a href="{% url 'services:engineer_list' %}" class="text-decoration-none">Download</a></li>
+                        <li><a href="https://github.com/afrozaakhi301/Appointment-Management-System1" target="_blank" class="text-decoration-none">GitHub</a></li>
+                        <li><a href="{% url 'services:engineer_list' %}" class="text-decoration-none">Runbot</a></li>
+                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Translations</a></li>
                     </ul>
                 </div>
 
                 <!-- Column 2: Services -->
                 <div class="col-lg-2 col-md-4 col-6">
-                    <h6 class="fw-bold mb-3">Services</h6>
-                    <ul class="footer-nav-list">
-                        <li><a href="{% url 'services:service_list' %}">Cloud Architecture</a></li>
-                        <li><a href="{% url 'services:service_list' %}">Database Optimization</a></li>
-                        <li><a href="{% url 'services:service_list' %}">DevOps CI/CD</a></li>
-                        <li><a href="{% url 'services:service_list' %}">Upgrade &amp; Migration</a></li>
-                        <li><a href="{% url 'services:service_list' %}">Custom Developments</a></li>
-                        <li><a href="{% url 'services:service_list' %}">Education &amp; Training</a></li>
-                        <li><a href="{% url 'services:engineer_list' %}">Find an Engineer</a></li>
-                        <li><a href="{% url 'appointments:book_appointment' %}">Book Consultation</a></li>
+                    <h6 class="fw-bold mb-3 text-white">Services</h6>
+                    <ul class="list-unstyled footer-nav-list mb-0">
+                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Cloud Architecture</a></li>
+                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Database Optimization</a></li>
+                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">DevOps CI/CD</a></li>
+                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Upgrade &amp; Migration</a></li>
+                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Custom Developments</a></li>
+                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Education &amp; Training</a></li>
+                        <li><a href="{% url 'services:engineer_list' %}" class="text-decoration-none">Find an Engineer</a></li>
+                        <li><a href="{% url 'appointments:book_appointment' %}" class="text-decoration-none">Book Consultation</a></li>
                     </ul>
                 </div>
 
                 <!-- Column 3: About us -->
                 <div class="col-lg-2 col-md-4 col-6">
-                    <h6 class="fw-bold mb-3">About us</h6>
-                    <ul class="footer-nav-list">
-                        <li><a href="{% url 'services:about_contact' %}">Our company</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Brand Assets</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Contact us</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Jobs</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Events</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Podcast</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Blog</a></li>
-                        <li><a href="{% url 'home' %}#client-reviews">Customers</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Legal &bull; Privacy</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Security</a></li>
+                    <h6 class="fw-bold mb-3 text-white">About us</h6>
+                    <ul class="list-unstyled footer-nav-list mb-0">
+                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Our company</a></li>
+                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Brand Assets</a></li>
+                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Contact us</a></li>
+                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Jobs</a></li>
+                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Events</a></li>
+                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Podcast</a></li>
+                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Blog</a></li>
+                        <li><a href="{% url 'home' %}#client-reviews" class="text-decoration-none">Customers</a></li>
+                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Legal &bull; Privacy</a></li>
+                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Security</a></li>
                     </ul>
                 </div>
 
@@ -112,48 +164,49 @@
                     <!-- Language Selector Dropdown -->
                     <div class="d-flex align-items-center justify-content-start mb-2">
                         <div class="dropdown">
-                            <button class="btn btn-sm text-light border-0 dropdown-toggle p-0 d-inline-flex align-items-center gap-2 fw-medium" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.88rem;">
+                            <button class="btn btn-sm text-light border-0 dropdown-toggle p-0 d-inline-flex align-items-center gap-2 fw-medium text-decoration-none" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.88rem; text-decoration: none !important;">
                                 <span>🇺🇸</span> English
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark shadow border-secondary">
-                                <li><a class="dropdown-item active" href="#">🇺🇸 English</a></li>
-                                <li><a class="dropdown-item" href="#">🇧🇩 Bengali</a></li>
-                                <li><a class="dropdown-item" href="#">🇩🇪 German</a></li>
-                                <li><a class="dropdown-item" href="#">🇫🇷 French</a></li>
+                                <li><a class="dropdown-item active text-decoration-none" href="#">🇺🇸 English</a></li>
+                                <li><a class="dropdown-item text-decoration-none" href="#">🇧🇩 Bengali</a></li>
+                                <li><a class="dropdown-item text-decoration-none" href="#">🇩🇪 German</a></li>
+                                <li><a class="dropdown-item text-decoration-none" href="#">🇫🇷 French</a></li>
                             </ul>
                         </div>
                     </div>
 
                     <!-- Divider Line -->
-                    <hr class="border-secondary border-opacity-25 my-3">
+                    <hr class="border-secondary border-opacity-25 my-3" style="border-color: rgba(255,255,255,0.15) !important;">
 
                     <!-- Platform Description Narrative -->
-                    <p class="footer-narrative mb-2">
+                    <p class="footer-narrative mb-2" style="color: #94a3b8; font-size: 0.84rem; line-height: 1.65;">
                         Touch &amp; Solve is a suite of professional software engineering consultation apps and services that cover all your company needs: Cloud Architecture, Database Optimization, CI/CD Automation, Code Review, and 1-on-1 Lead Engineer sessions.
                     </p>
-                    <p class="footer-narrative mb-4">
+                    <p class="footer-narrative mb-4" style="color: #94a3b8; font-size: 0.84rem; line-height: 1.65;">
                         Touch &amp; Solve&rsquo;s unique value proposition is to be at the same time very easy to use and fully integrated.
                     </p>
 
                     <!-- Social Media & Contact Links -->
                     <div class="d-flex flex-wrap align-items-center gap-3 footer-odoo-social">
-                        <a href="https://facebook.com" target="_blank" title="Facebook"><i class="bi bi-facebook"></i></a>
-                        <a href="https://x.com" target="_blank" title="X"><i class="bi bi-twitter-x"></i></a>
-                        <a href="https://linkedin.com" target="_blank" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
-                        <a href="https://github.com/afrozaakhi301/Appointment-Management-System1" target="_blank" title="GitHub"><i class="bi bi-github"></i></a>
-                        <a href="https://instagram.com" target="_blank" title="Instagram"><i class="bi bi-instagram"></i></a>
-                        <a href="https://discord.com" target="_blank" title="Discord"><i class="bi bi-discord"></i></a>
-                        <a href="tel:+8801958227203" title="Call Us"><i class="bi bi-telephone-fill"></i></a>
-                        <a href="mailto:info@touchandsolve.com" title="Email Us"><i class="bi bi-envelope-fill"></i></a>
+                        <a href="https://facebook.com" target="_blank" title="Facebook" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="https://x.com" target="_blank" title="X" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-twitter-x fs-5"></i></a>
+                        <a href="https://linkedin.com" target="_blank" title="LinkedIn" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-linkedin fs-5"></i></a>
+                        <a href="https://github.com/afrozaakhi301/Appointment-Management-System1" target="_blank" title="GitHub" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-github fs-5"></i></a>
+                        <a href="https://instagram.com" target="_blank" title="Instagram" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="https://discord.com" target="_blank" title="Discord" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-discord fs-5"></i></a>
+                        <a href="tel:+8801958227203" title="Call Us" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-telephone-fill fs-5"></i></a>
+                        <a href="mailto:info@touchandsolve.com" title="Email Us" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-envelope-fill fs-5"></i></a>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Bottom Sub-Footer Bar -->
-        <div class="footer-odoo-bottom py-3 text-center">
+        <div class="footer-odoo-bottom py-3 text-center" style="background-color: #0b1120 !important; border-top: 1px solid rgba(255,255,255,0.06) !important;">
             <div class="container">
-                <span>Website made with <a href="{% url 'home' %}">touch&bull;solve</a></span>
+                <span class="text-secondary opacity-75">Website made with</span>
+                <a href="{% url 'home' %}" class="text-white text-decoration-none ms-1 fw-semibold" style="color: #ffffff !important; text-decoration: none !important;">touch&bull;solve</a>
             </div>
         </div>
     </footer>
