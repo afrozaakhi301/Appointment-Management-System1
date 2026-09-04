@@ -204,24 +204,34 @@ h1, h2, h3, h4, .font-heading {
    ODOO-STYLE HIGH-FIDELITY FOOTER
    ======================================================= */
 .footer-odoo {
-    background-color: #1e222d;
-    color: #a0aec0;
+    background-color: #0f172a !important;
+    color: #94a3b8;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.footer-odoo a,
+.footer-odoo a:hover,
+.footer-odoo a:focus,
+.footer-odoo a:active,
+.footer-odoo a:visited {
+    text-decoration: none !important;
+}
+
 .footer-odoo-logo {
-    color: #ffffff;
+    color: #ffffff !important;
     font-size: 2.25rem;
     font-weight: 800;
     letter-spacing: -0.04em;
     display: inline-block;
+    text-decoration: none !important;
     transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .footer-odoo-logo:hover {
-    color: #ffffff;
+    color: #ffffff !important;
     opacity: 0.95;
     transform: scale(1.02);
+    text-decoration: none !important;
 }
 
 .footer-odoo h6 {
@@ -244,14 +254,15 @@ h1, h2, h3, h4, .font-heading {
 
 .footer-odoo .footer-nav-list a {
     color: #94a3b8;
-    text-decoration: none;
+    text-decoration: none !important;
     font-size: 0.84rem;
     transition: color 0.15s ease, transform 0.15s ease;
     display: inline-block;
 }
 
 .footer-odoo .footer-nav-list a:hover {
-    color: #ffffff;
+    color: #ffffff !important;
+    text-decoration: none !important;
     transform: translateX(2px);
 }
 
@@ -268,30 +279,33 @@ h1, h2, h3, h4, .font-heading {
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    text-decoration: none;
+    text-decoration: none !important;
 }
 
 .footer-odoo-social a:hover {
-    color: #ffffff;
+    color: #ffffff !important;
+    text-decoration: none !important;
     transform: translateY(-2px);
 }
 
 .footer-odoo-bottom {
-    background-color: #151821;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: #0b1120 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     font-size: 0.815rem;
     color: #64748b;
 }
 
 .footer-odoo-bottom a {
     color: #94a3b8;
-    text-decoration: none;
+    text-decoration: none !important;
     font-weight: 600;
 }
 
 .footer-odoo-bottom a:hover {
-    color: #ffffff;
+    color: #ffffff !important;
+    text-decoration: none !important;
 }
+
 
 /* Floating Quick Consultation / Chat Bubble */
 .floating-chat-bubble {
