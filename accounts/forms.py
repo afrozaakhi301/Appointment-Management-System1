@@ -16,31 +16,24 @@ class ClientRegistrationForm(UserCreationForm):
     )
     email = forms.EmailField(
         required=True,
-        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "john.doe@company.com"})
+        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "name@example.com"})
     )
     phone_number = forms.CharField(
         max_length=20, 
         required=False,
-        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "+880 1711-000000"})
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "+880 1700-000000"})
     )
     organization = forms.CharField(
         max_length=150, 
         required=False, 
-        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g., Acme Corp / Startup"})
+        help_text="Company, Startup, or Organization (Optional)",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g., Acme Tech Ltd."})
     )
     address = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 2, "class": "form-control", "placeholder": "Office address or city"}), 
-        required=False
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "City, Country (e.g., Dhaka, Bangladesh)"}), 
+        required=False,
+        help_text="Primary location or business address (Optional)"
     )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if "username" in self.fields:
-            self.fields["username"].widget.attrs.update({"class": "form-control", "placeholder": "Choose a username"})
-        if "password1" in self.fields:
-            self.fields["password1"].widget.attrs.update({"class": "form-control", "placeholder": "Create a strong password"})
-        if "password2" in self.fields:
-            self.fields["password2"].widget.attrs.update({"class": "form-control", "placeholder": "Confirm your password"})
 
     class Meta:
         model = User
@@ -55,6 +48,14 @@ class ClientRegistrationForm(UserCreationForm):
             "password1",
             "password2",
         )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["username"].widget.attrs.update({"class": "form-control", "placeholder": "Choose a username"})
+        self.fields["password1"].widget.attrs.update({"class": "form-control", "placeholder": "Create password"})
+        self.fields["password2"].widget.attrs.update({"class": "form-control", "placeholder": "Confirm password"})
+        self.fields["password1"].help_text = "Use 8+ characters with a mix of letters and numbers."
+        self.fields["password2"].help_text = "Re-enter the same password for confirmation."
 
     def save(self, commit=True):
         user = super().save(commit=False)
