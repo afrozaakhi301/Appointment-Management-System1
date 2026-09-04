@@ -44,22 +44,118 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="footer bg-dark text-white py-4 mt-5">
+    <!-- Footer (Odoo Style Multi-Column) -->
+    <footer class="footer-main mt-5">
         <div class="container">
-            <div class="row gy-4 align-items-center">
-                <div class="col-md-5 text-center text-md-start">
-                    <h5 class="fw-bold mb-1 text-primary"><i class="bi bi-cpu-fill me-2"></i>Touch & Solve (TNS) AMS</h5>
-                    <p class="text-muted small mb-0">Professional Software Engineering Consultation &amp; Architecture Platform</p>
-                </div>
-                <div class="col-md-4 text-center text-md-start small text-muted">
-                    <div><i class="bi bi-geo-alt me-1 text-primary"></i>Sector 17, Uttara, Dhaka 1230, Bangladesh</div>
-                    <div><i class="bi bi-telephone me-1 text-success"></i>+880 1958227203 | <i class="bi bi-envelope me-1 text-warning"></i>info@touchandsolve.com</div>
-                </div>
-                <div class="col-md-3 text-center text-md-end">
-                    <p class="text-muted small mb-0">&copy; 2026 TNS AMS. All rights reserved.</p>
+            <!-- Top Centered Brand Logo -->
+            <div class="text-center pt-5 pb-4">
+                <a href="{% url 'home' %}" class="footer-brand-logo text-decoration-none d-inline-flex align-items-center gap-2">
+                    <span class="badge bg-primary px-2 py-1 rounded-2 shadow-sm">
+                        <i class="bi bi-code-slash text-white"></i>
+                    </span>
+                    <span class="text-white">Touch &amp; Solve</span>
+                    <span class="text-primary">AMS</span>
+                </a>
+            </div>
+
+            <!-- Footer Columns Grid -->
+            <div class="row gy-4 pb-5">
+                <!-- Column 1: Community & Domains -->
+                <div class="col-lg-2 col-md-4 col-6">
+                    <h6 class="fw-bold mb-3">Community</h6>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'services:service_list' %}">Documentation</a></li>
+                        <li><a href="{% url 'services:engineer_list' %}">Tech Stacks</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Engineering Forum</a></li>
+                        <li><a href="{% url 'home' %}#client-reviews">Client Reviews</a></li>
+                    </ul>
+
+                    <h6 class="fw-bold mb-3 mt-4">Domains</h6>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'services:engineer_list' %}?tag=cloud">Cloud &amp; AWS</a></li>
+                        <li><a href="{% url 'services:engineer_list' %}?tag=python">Python &amp; Django</a></li>
+                        <li><a href="{% url 'services:engineer_list' %}?tag=database">Database Tuning</a></li>
+                        <li><a href="{% url 'services:engineer_list' %}?tag=devops">DevOps &amp; CI/CD</a></li>
+                    </ul>
                 </div>
 
+                <!-- Column 2: Services -->
+                <div class="col-lg-2 col-md-4 col-6">
+                    <h6 class="fw-bold mb-3">Services</h6>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'services:service_list' %}">Cloud Migration</a></li>
+                        <li><a href="{% url 'services:service_list' %}">Database Optimization</a></li>
+                        <li><a href="{% url 'services:service_list' %}">DevOps CI/CD</a></li>
+                        <li><a href="{% url 'services:service_list' %}">Microservices &amp; API</a></li>
+                        <li><a href="{% url 'services:service_list' %}">Django Code Review</a></li>
+                        <li><a href="{% url 'services:engineer_list' %}">Find a Consultant</a></li>
+                        <li><a href="{% url 'appointments:book_appointment' %}">Book Consultation</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: About us -->
+                <div class="col-lg-2 col-md-4 col-6">
+                    <h6 class="fw-bold mb-3">About us</h6>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'services:about_contact' %}">Our Company</a></li>
+                        <li><a href="{% url 'services:engineer_list' %}">Lead Consultants</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Contact &amp; Support</a></li>
+                        <li><a href="{% url 'home' %}#client-reviews">Verified Feedback</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Appointments FAQ</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Legal &bull; Privacy</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Security Policy</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 4: Language Selector, Platform Description & Social Links -->
+                <div class="col-lg-6 col-md-12 ps-lg-4 mt-4 mt-lg-0">
+                    <!-- Language Selector Dropdown -->
+                    <div class="d-flex align-items-center justify-content-start mb-2">
+                        <div class="dropdown">
+                            <button class="btn btn-sm text-light border-0 dropdown-toggle p-0 d-inline-flex align-items-center gap-2 fw-medium" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
+                                <span>🇺🇸</span> English
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark shadow border-secondary">
+                                <li><a class="dropdown-item active" href="#">🇺🇸 English</a></li>
+                                <li><a class="dropdown-item" href="#">🇧🇩 Bengali</a></li>
+                                <li><a class="dropdown-item" href="#">🇩🇪 German</a></li>
+                                <li><a class="dropdown-item" href="#">🇫🇷 French</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Divider Line -->
+                    <hr class="border-secondary border-opacity-25 my-3">
+
+                    <!-- Platform Narrative Description -->
+                    <p class="footer-desc mb-2">
+                        Touch &amp; Solve (TNS) AMS is a comprehensive software engineering consultation platform that covers all your technical advisory needs: cloud migrations, database query tuning, microservices architecture, CI/CD pipeline automation, and dedicated 1-on-1 code reviews.
+                    </p>
+                    <p class="footer-desc mb-4">
+                        TNS&rsquo;s unique value proposition is to connect engineering teams directly with proven senior software consultants for fast, actionable, and production-ready solutions.
+                    </p>
+
+                    <!-- Social Media & Contact Links -->
+                    <div class="d-flex flex-wrap align-items-center gap-3 footer-social-links">
+                        <a href="https://facebook.com" target="_blank" title="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="https://x.com" target="_blank" title="X (formerly Twitter)"><i class="bi bi-twitter-x"></i></a>
+                        <a href="https://linkedin.com" target="_blank" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                        <a href="https://github.com/afrozaakhi301/Appointment-Management-System1" target="_blank" title="GitHub"><i class="bi bi-github"></i></a>
+                        <a href="https://instagram.com" target="_blank" title="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="https://discord.com" target="_blank" title="Discord"><i class="bi bi-discord"></i></a>
+                        <a href="tel:+8801958227203" title="Call Us"><i class="bi bi-telephone-fill"></i></a>
+                        <a href="mailto:info@touchandsolve.com" title="Email Us"><i class="bi bi-envelope-fill"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Sub-Footer Bar -->
+        <div class="footer-bottom py-3 text-center">
+            <div class="container">
+                <span class="text-secondary opacity-75">Platform engineered with</span>
+                <strong class="text-white mx-1">Touch &amp; Solve (TNS) AMS</strong>
+                <span class="text-secondary opacity-75">&bull; &copy; 2026 TNS AMS. All rights reserved.</span>
             </div>
         </div>
     </footer>
