@@ -220,17 +220,34 @@
 
 
                 {% else %}
-                    <!-- GUEST BUTTONS -->
-                    <li class="nav-item me-2">
-                        <a class="nav-link fw-medium" href="{% url 'accounts:login' %}">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-outline-primary btn-sm px-3 fw-medium" href="{% url 'accounts:register' %}">
-                            <i class="bi bi-person-plus me-1"></i>Register as Client
-                        </a>
-                    </li>
+                    <!-- GUEST BUTTONS WITH HIGH-CONTRAST & CONTEXTUAL ROUTE DETECTION -->
+                    {% if request.resolver_match.url_name == 'login' %}
+                        <!-- On Login Page: Show only Register as Client button -->
+                        <li class="nav-item">
+                            <a class="btn btn-light btn-sm px-3 text-primary fw-bold shadow-sm" href="{% url 'accounts:register' %}">
+                                <i class="bi bi-person-plus-fill me-1"></i>Register as Client
+                            </a>
+                        </li>
+                    {% elif request.resolver_match.url_name == 'register' %}
+                        <!-- On Register Page: Show only Login button -->
+                        <li class="nav-item">
+                            <a class="btn btn-outline-light btn-sm px-3 fw-semibold" href="{% url 'accounts:login' %}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                            </a>
+                        </li>
+                    {% else %}
+                        <!-- On Other Pages: Show both Login and Register buttons -->
+                        <li class="nav-item me-2 my-1 my-lg-0">
+                            <a class="btn btn-outline-light btn-sm px-3 fw-semibold" href="{% url 'accounts:login' %}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item my-1 my-lg-0">
+                            <a class="btn btn-light btn-sm px-3 text-primary fw-bold shadow-sm" href="{% url 'accounts:register' %}">
+                                <i class="bi bi-person-plus-fill me-1"></i>Register as Client
+                            </a>
+                        </li>
+                    {% endif %}
                 {% endif %}
             </ul>
         </div>
