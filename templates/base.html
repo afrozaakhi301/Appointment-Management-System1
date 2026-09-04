@@ -45,50 +45,47 @@
     </main>
 
     <!-- Footer (Odoo Style Multi-Column) -->
-    <footer class="footer-main mt-5">
+    <footer class="footer-odoo mt-5">
         <div class="container">
-            <!-- Top Centered Brand Logo -->
-            <div class="text-center pt-5 pb-4">
-                <a href="{% url 'home' %}" class="footer-brand-logo text-decoration-none d-inline-flex align-items-center gap-2">
-                    <span class="badge bg-primary px-2 py-1 rounded-2 shadow-sm">
-                        <i class="bi bi-code-slash text-white"></i>
-                    </span>
-                    <span class="text-white">Touch &amp; Solve</span>
-                    <span class="text-primary">AMS</span>
+            <!-- Top Centered Minimal Brand Logo -->
+            <div class="text-center pt-5 pb-5">
+                <a href="{% url 'home' %}" class="footer-odoo-logo text-decoration-none">
+                    touch<span class="text-primary">&bull;</span>solve
                 </a>
             </div>
 
             <!-- Footer Columns Grid -->
             <div class="row gy-4 pb-5">
-                <!-- Column 1: Community & Domains -->
+                <!-- Column 1: Community & Open Source -->
                 <div class="col-lg-2 col-md-4 col-6">
                     <h6 class="fw-bold mb-3">Community</h6>
-                    <ul class="footer-links">
+                    <ul class="footer-nav-list">
+                        <li><a href="{% url 'services:service_list' %}">Tutorials</a></li>
                         <li><a href="{% url 'services:service_list' %}">Documentation</a></li>
-                        <li><a href="{% url 'services:engineer_list' %}">Tech Stacks</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Engineering Forum</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Forum</a></li>
                         <li><a href="{% url 'home' %}#client-reviews">Client Reviews</a></li>
                     </ul>
 
-                    <h6 class="fw-bold mb-3 mt-4">Domains</h6>
-                    <ul class="footer-links">
-                        <li><a href="{% url 'services:engineer_list' %}?tag=cloud">Cloud &amp; AWS</a></li>
-                        <li><a href="{% url 'services:engineer_list' %}?tag=python">Python &amp; Django</a></li>
-                        <li><a href="{% url 'services:engineer_list' %}?tag=database">Database Tuning</a></li>
-                        <li><a href="{% url 'services:engineer_list' %}?tag=devops">DevOps &amp; CI/CD</a></li>
+                    <h6 class="fw-bold mb-3 mt-4">Open Source</h6>
+                    <ul class="footer-nav-list">
+                        <li><a href="{% url 'services:engineer_list' %}">Download</a></li>
+                        <li><a href="https://github.com/afrozaakhi301/Appointment-Management-System1" target="_blank">GitHub</a></li>
+                        <li><a href="{% url 'services:engineer_list' %}">Runbot</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Translations</a></li>
                     </ul>
                 </div>
 
                 <!-- Column 2: Services -->
                 <div class="col-lg-2 col-md-4 col-6">
                     <h6 class="fw-bold mb-3">Services</h6>
-                    <ul class="footer-links">
-                        <li><a href="{% url 'services:service_list' %}">Cloud Migration</a></li>
+                    <ul class="footer-nav-list">
+                        <li><a href="{% url 'services:service_list' %}">Cloud Architecture</a></li>
                         <li><a href="{% url 'services:service_list' %}">Database Optimization</a></li>
                         <li><a href="{% url 'services:service_list' %}">DevOps CI/CD</a></li>
-                        <li><a href="{% url 'services:service_list' %}">Microservices &amp; API</a></li>
-                        <li><a href="{% url 'services:service_list' %}">Django Code Review</a></li>
-                        <li><a href="{% url 'services:engineer_list' %}">Find a Consultant</a></li>
+                        <li><a href="{% url 'services:service_list' %}">Upgrade &amp; Migration</a></li>
+                        <li><a href="{% url 'services:service_list' %}">Custom Developments</a></li>
+                        <li><a href="{% url 'services:service_list' %}">Education &amp; Training</a></li>
+                        <li><a href="{% url 'services:engineer_list' %}">Find an Engineer</a></li>
                         <li><a href="{% url 'appointments:book_appointment' %}">Book Consultation</a></li>
                     </ul>
                 </div>
@@ -96,23 +93,26 @@
                 <!-- Column 3: About us -->
                 <div class="col-lg-2 col-md-4 col-6">
                     <h6 class="fw-bold mb-3">About us</h6>
-                    <ul class="footer-links">
-                        <li><a href="{% url 'services:about_contact' %}">Our Company</a></li>
-                        <li><a href="{% url 'services:engineer_list' %}">Lead Consultants</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Contact &amp; Support</a></li>
-                        <li><a href="{% url 'home' %}#client-reviews">Verified Feedback</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Appointments FAQ</a></li>
+                    <ul class="footer-nav-list">
+                        <li><a href="{% url 'services:about_contact' %}">Our company</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Brand Assets</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Contact us</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Jobs</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Events</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Podcast</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Blog</a></li>
+                        <li><a href="{% url 'home' %}#client-reviews">Customers</a></li>
                         <li><a href="{% url 'services:about_contact' %}">Legal &bull; Privacy</a></li>
-                        <li><a href="{% url 'services:about_contact' %}">Security Policy</a></li>
+                        <li><a href="{% url 'services:about_contact' %}">Security</a></li>
                     </ul>
                 </div>
 
-                <!-- Column 4: Language Selector, Platform Description & Social Links -->
-                <div class="col-lg-6 col-md-12 ps-lg-4 mt-4 mt-lg-0">
+                <!-- Column 4: Language Selector, Platform Narrative & Social Links -->
+                <div class="col-lg-6 col-md-12 ps-lg-5 mt-4 mt-lg-0">
                     <!-- Language Selector Dropdown -->
                     <div class="d-flex align-items-center justify-content-start mb-2">
                         <div class="dropdown">
-                            <button class="btn btn-sm text-light border-0 dropdown-toggle p-0 d-inline-flex align-items-center gap-2 fw-medium" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
+                            <button class="btn btn-sm text-light border-0 dropdown-toggle p-0 d-inline-flex align-items-center gap-2 fw-medium" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.88rem;">
                                 <span>🇺🇸</span> English
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark shadow border-secondary">
@@ -127,18 +127,18 @@
                     <!-- Divider Line -->
                     <hr class="border-secondary border-opacity-25 my-3">
 
-                    <!-- Platform Narrative Description -->
-                    <p class="footer-desc mb-2">
-                        Touch &amp; Solve (TNS) AMS is a comprehensive software engineering consultation platform that covers all your technical advisory needs: cloud migrations, database query tuning, microservices architecture, CI/CD pipeline automation, and dedicated 1-on-1 code reviews.
+                    <!-- Platform Description Narrative -->
+                    <p class="footer-narrative mb-2">
+                        Touch &amp; Solve is a suite of professional software engineering consultation apps and services that cover all your company needs: Cloud Architecture, Database Optimization, CI/CD Automation, Code Review, and 1-on-1 Lead Engineer sessions.
                     </p>
-                    <p class="footer-desc mb-4">
-                        TNS&rsquo;s unique value proposition is to connect engineering teams directly with proven senior software consultants for fast, actionable, and production-ready solutions.
+                    <p class="footer-narrative mb-4">
+                        Touch &amp; Solve&rsquo;s unique value proposition is to be at the same time very easy to use and fully integrated.
                     </p>
 
                     <!-- Social Media & Contact Links -->
-                    <div class="d-flex flex-wrap align-items-center gap-3 footer-social-links">
+                    <div class="d-flex flex-wrap align-items-center gap-3 footer-odoo-social">
                         <a href="https://facebook.com" target="_blank" title="Facebook"><i class="bi bi-facebook"></i></a>
-                        <a href="https://x.com" target="_blank" title="X (formerly Twitter)"><i class="bi bi-twitter-x"></i></a>
+                        <a href="https://x.com" target="_blank" title="X"><i class="bi bi-twitter-x"></i></a>
                         <a href="https://linkedin.com" target="_blank" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
                         <a href="https://github.com/afrozaakhi301/Appointment-Management-System1" target="_blank" title="GitHub"><i class="bi bi-github"></i></a>
                         <a href="https://instagram.com" target="_blank" title="Instagram"><i class="bi bi-instagram"></i></a>
@@ -151,14 +151,18 @@
         </div>
 
         <!-- Bottom Sub-Footer Bar -->
-        <div class="footer-bottom py-3 text-center">
+        <div class="footer-odoo-bottom py-3 text-center">
             <div class="container">
-                <span class="text-secondary opacity-75">Platform engineered with</span>
-                <strong class="text-white mx-1">Touch &amp; Solve (TNS) AMS</strong>
-                <span class="text-secondary opacity-75">&bull; &copy; 2026 TNS AMS. All rights reserved.</span>
+                <span>Website made with <a href="{% url 'home' %}">touch&bull;solve</a></span>
             </div>
         </div>
     </footer>
+
+    <!-- Floating Consultation Bubble -->
+    <a href="{% url 'appointments:book_appointment' %}" class="floating-chat-bubble" title="Book Consultation">
+        <i class="bi bi-chat-dots-fill"></i>
+    </a>
+
 
 
     <!-- Bootstrap 5 JS Bundle -->
