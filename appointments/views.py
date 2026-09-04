@@ -1,7 +1,8 @@
+import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import Prefetch, Q
+from django.db.models import Avg, Count, Prefetch, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from accounts.decorators import client_required, engineer_required, role_required
 from accounts.models import User
@@ -74,8 +75,75 @@ def book_appointment_view(request):
                 status=EngineerExpertise.VerificationStatus.APPROVED
             ).select_related("expertise")
         )
+    ).annotate(
+        avg_rating=Avg("engineer_appointments__feedback__rating"),
+        review_count=Count("engineer_appointments__feedback", distinct=True)
     )
     services = Service.objects.filter(is_active=True)
+
+    # Prepare serialized data for dynamic frontend filtering
+    all_engineers_data = []
+    for eng in engineers:
+        rating_val = round(eng.avg_rating, 1) if eng.avg_rating else None
+        rating_str = f"★ {rating_val}" if rating_val else ""
+        exp_names = [ee.expertise.name for ee in eng.engineer_expertises.all()]
+        exp_ids = [ee.expertise.id for ee in eng.engineer_expertises.all()]
+        desig = eng.engineer_profile.designation if hasattr(eng, "engineer_profile") and eng.engineer_profile.designation else "Lead Software Engineer"
+
+        eng_data = {
+            "id": eng.id,
+            "name": eng.get_full_name() or eng.username,
+            "designation": desig,
+            "rating": rating_val,
+            "rating_str": rating_str,
+            "expertises": exp_names,
+            "expertise_ids": exp_ids,
+            "years_of_experience": eng.engineer_profile.years_of_experience if hasattr(eng, "engineer_profile") else 0,
+        }
+        all_engineers_data.append(eng_data)
+
+    # Domain match mapping per service
+    engineer_service_map = {}
+    for svc in services:
+        matching = []
+        svc_name_lower = svc.name.lower()
+
+        for eng in all_engineers_data:
+            exp_lower = [e.lower() for e in eng["expertises"]]
+            desig_lower = eng["designation"].lower()
+
+            is_match = False
+            if "general architecture" in svc_name_lower or "scoping" in svc_name_lower:
+                # General Architecture & Scoping can be taken by all qualified engineers/architects
+                is_match = True
+            elif "cloud" in svc_name_lower or "aws" in svc_name_lower or "gcp" in svc_name_lower:
+                if any("cloud" in e or "aws" in e or "devops" in e or "kubernetes" in e or "terraform" in e for e in exp_lower) or "cloud" in desig_lower or "architect" in desig_lower:
+                    is_match = True
+            elif "database" in svc_name_lower or "performance" in svc_name_lower:
+                if any("database" in e or "sql" in e or "redis" in e or "postgres" in e or "query" in e or "python" in e for e in exp_lower) or "database" in desig_lower or "backend" in desig_lower:
+                    is_match = True
+            elif "devops" in svc_name_lower or "ci/cd" in svc_name_lower or "infrastructure" in svc_name_lower:
+                if any("devops" in e or "docker" in e or "kubernetes" in e or "terraform" in e or "ci/cd" in e for e in exp_lower) or "devops" in desig_lower or "infrastructure" in desig_lower:
+                    is_match = True
+            elif "microservice" in svc_name_lower or "api" in svc_name_lower:
+                if any("microservice" in e or "grpc" in e or "api" in e or "django" in e or "python" in e for e in exp_lower) or "microservice" in desig_lower or "architect" in desig_lower:
+                    is_match = True
+            elif "code review" in svc_name_lower or "python" in svc_name_lower or "django" in svc_name_lower:
+                if any("python" in e or "django" in e or "security" in e or "qa" in e or "owasp" in e for e in exp_lower) or "python" in desig_lower or "django" in desig_lower:
+                    is_match = True
+            else:
+                for exp in exp_lower:
+                    if any(word in exp for word in svc_name_lower.split() if len(word) > 3):
+                        is_match = True
+                        break
+
+            if is_match:
+                matching.append(eng)
+
+        if not matching:
+            matching = all_engineers_data
+
+        engineer_service_map[str(svc.id)] = matching
 
     return render(
         request,
@@ -84,8 +152,11 @@ def book_appointment_view(request):
             "form": form,
             "engineers": engineers,
             "services": services,
+            "engineer_service_map_json": json.dumps(engineer_service_map),
+            "all_engineers_json": json.dumps(all_engineers_data),
         }
     )
+
 
 
 @client_required

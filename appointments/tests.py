@@ -272,6 +272,44 @@ class AppointmentBusinessLogicTests(TestCase):
         self.assertTrue(doc.filename().endswith(".pdf"))
         self.assertEqual(appt.documents.count(), 1)
 
+    def test_book_appointment_dynamic_engineer_service_map(self):
+        import json
+        from accounts.models import EngineerProfile
+        from services.models import EngineerExpertise, Expertise
+
+        # Setup engineer with verified expertise
+        exp_cloud = Expertise.objects.create(name="AWS Solutions Architecture")
+        EngineerExpertise.objects.create(
+            engineer=self.engineer_user,
+            expertise=exp_cloud,
+            status=EngineerExpertise.VerificationStatus.APPROVED
+        )
+        eng_prof, _ = EngineerProfile.objects.get_or_create(user=self.engineer_user)
+        eng_prof.designation = "Lead Cloud Architect"
+        eng_prof.save()
+
+        cloud_service = Service.objects.create(
+            name="Cloud Migration & AWS Architecture",
+            description="Cloud consultation"
+        )
+
+        self.client.login(username="client1", password="Password123!")
+        response = self.client.get(reverse("appointments:book_appointment") + f"?service={cloud_service.id}")
+        self.assertEqual(response.status_code, 200)
+
+        # Verify JSON script blocks are present in response
+        self.assertIn("engineer_service_map_json", response.context)
+        self.assertIn("all_engineers_json", response.context)
+
+        map_data = json.loads(response.context["engineer_service_map_json"])
+        self.assertIn(str(cloud_service.id), map_data)
+        matching_eng_ids = [eng["id"] for eng in map_data[str(cloud_service.id)]]
+        self.assertIn(self.engineer_user.id, matching_eng_ids)
+
+        # Verify HTML rendered with json-script tags
+        self.assertContains(response, 'id="engineer-service-map-data"')
+        self.assertContains(response, 'id="all-engineers-data"')
+
 
 class FullVivaScenarioEndToEndTest(TestCase):
     def test_complete_twenty_two_step_scenario(self):
@@ -427,4 +465,6 @@ class FullVivaScenarioEndToEndTest(TestCase):
         from dashboard.utils import log_activity
         log_activity(client_user, "Client submitted feedback for K8s Consultation")
         self.assertTrue(ActivityLog.objects.filter(user=client_user).exists())
+
+
 

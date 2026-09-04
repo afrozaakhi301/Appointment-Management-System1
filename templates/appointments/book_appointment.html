@@ -34,72 +34,91 @@
                     <form method="post" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}
 
-                        <!-- Service & Engineer Selection -->
+                        <!-- Step 1a: Service Domain Selection -->
                         <div class="mb-4">
-                            <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
-                                <i class="bi bi-person-badge-fill me-2 text-primary"></i>1. Consultation Domain & Engineer
-                            </h5>
-
-                            <!-- Interactive Service Icon Grid (Click to Mark) -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold text-dark small mb-2">
-                                    <i class="bi bi-grid-fill text-primary me-1"></i>Select Service Domain <span class="text-danger">*</span>
-                                </label>
-                                <div class="row g-3 mb-2" id="serviceCardGrid">
-                                    {% for svc in services %}
-                                        <div class="col-md-6 col-lg-4">
-                                            <div class="service-select-card h-100 d-flex flex-column justify-content-between" 
-                                                 data-service-id="{{ svc.id }}" 
-                                                 data-service-name="{{ svc.name }}"
-                                                 onclick="selectServiceCard('{{ svc.id }}')">
-                                                
-                                                <!-- Top Checkmark Mark Badge -->
-                                                <div class="service-mark-badge" id="mark-badge-{{ svc.id }}" title="Service Selected">
-                                                    <i class="bi bi-check-lg"></i>
-                                                </div>
-
-                                                <div>
-                                                    <div class="d-flex align-items-center mb-2">
-                                                        <div class="service-icon-box me-3">
-                                                            {% if "Cloud" in svc.name or "AWS" in svc.name %}
-                                                                <i class="bi bi-cloud-arrow-up-fill"></i>
-                                                            {% elif "Database" in svc.name or "Backend" in svc.name %}
-                                                                <i class="bi bi-database-fill-gear"></i>
-                                                            {% elif "DevOps" in svc.name or "CI/CD" in svc.name or "Infrastructure" in svc.name %}
-                                                                <i class="bi bi-hdd-network-fill"></i>
-                                                            {% elif "Microservice" in svc.name or "API" in svc.name %}
-                                                                <i class="bi bi-diagram-3-fill"></i>
-                                                            {% elif "Python" in svc.name or "Django" in svc.name or "Code Review" in svc.name %}
-                                                                <i class="bi bi-code-slash"></i>
-                                                            {% else %}
-                                                                <i class="bi bi-cpu-fill"></i>
-                                                            {% endif %}
-                                                        </div>
-                                                        <div class="pe-3">
-                                                            <h6 class="fw-bold text-dark mb-0 fs-6">{{ svc.name }}</h6>
-                                                        </div>
-                                                    </div>
-                                                    <p class="text-muted small mb-2 line-clamp-2" style="font-size: 0.8rem;">
-                                                        {{ svc.description|truncatewords:14 }}
-                                                    </p>
-                                                </div>
-
-                                                <div class="pt-2 border-top d-flex align-items-center justify-content-between">
-                                                    <span class="service-mark-text" id="mark-text-{{ svc.id }}">Click to Select</span>
-                                                    <span class="badge bg-light text-muted border small">Service #{{ svc.id }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
+                            <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="bi bi-grid-fill me-2 text-primary"></i>Step 1a: Select Service Domain <span class="text-danger">*</span>
+                                </h5>
+                                <span class="badge bg-light text-muted border small">Click any domain card to select</span>
                             </div>
 
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    {{ form.service|as_crispy_field }}
+                            <!-- Interactive Service Icon Grid (Click to Mark) -->
+                            <div class="row g-3 mb-2" id="serviceCardGrid">
+                                {% for svc in services %}
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="service-select-card h-100 d-flex flex-column justify-content-between" 
+                                             data-service-id="{{ svc.id }}" 
+                                             data-service-name="{{ svc.name }}"
+                                             onclick="selectServiceCard('{{ svc.id }}')">
+                                            
+                                            <!-- Top Checkmark Mark Badge -->
+                                            <div class="service-mark-badge" id="mark-badge-{{ svc.id }}" title="Service Selected">
+                                                <i class="bi bi-check-lg"></i>
+                                            </div>
+
+                                            <div>
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <div class="service-icon-box me-3">
+                                                        {% if "Cloud" in svc.name or "AWS" in svc.name %}
+                                                            <i class="bi bi-cloud-arrow-up-fill"></i>
+                                                        {% elif "Database" in svc.name or "Backend" in svc.name %}
+                                                            <i class="bi bi-database-fill-gear"></i>
+                                                        {% elif "DevOps" in svc.name or "CI/CD" in svc.name or "Infrastructure" in svc.name %}
+                                                            <i class="bi bi-hdd-network-fill"></i>
+                                                        {% elif "Microservice" in svc.name or "API" in svc.name %}
+                                                            <i class="bi bi-diagram-3-fill"></i>
+                                                        {% elif "Python" in svc.name or "Django" in svc.name or "Code Review" in svc.name %}
+                                                            <i class="bi bi-code-slash"></i>
+                                                        {% else %}
+                                                            <i class="bi bi-cpu-fill"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="pe-3">
+                                                        <h6 class="fw-bold text-dark mb-0 fs-6">{{ svc.name }}</h6>
+                                                    </div>
+                                                </div>
+                                                <p class="text-muted small mb-2 line-clamp-2" style="font-size: 0.8rem;">
+                                                    {{ svc.description|truncatewords:14 }}
+                                                </p>
+                                            </div>
+
+                                            <div class="pt-2 border-top d-flex align-items-center justify-content-between">
+                                                <span class="service-mark-text" id="mark-text-{{ svc.id }}">Click to Select</span>
+                                                <span class="badge bg-light text-muted border small">Service #{{ svc.id }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            {% if form.service.errors %}
+                                <div class="alert alert-danger py-2 mt-2">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Please select a service domain from the cards above.
                                 </div>
-                                <div class="col-md-6">
+                            {% endif %}
+
+                            <!-- Hidden Service Input for Django Form Submission & Validation -->
+                            <div class="d-none">
+                                {{ form.service|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Step 1b: Engineer Selection -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="bi bi-person-badge-fill me-2 text-primary"></i>Step 1b: Select Your Lead Engineer <span class="text-danger">*</span>
+                                </h5>
+                            </div>
+
+                            <div class="card bg-light border-0 shadow-none p-3">
+                                <div class="mb-1">
                                     {{ form.engineer|as_crispy_field }}
+                                </div>
+                                <div class="text-muted small d-flex align-items-center">
+                                    <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                                    <span>Showing certified engineers specializing in your selected service domain.</span>
                                 </div>
                             </div>
                         </div>
@@ -107,7 +126,7 @@
                         <!-- Schedule & Dynamic Slot Checker -->
                         <div class="mb-4">
                             <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
-                                <i class="bi bi-calendar2-week-fill me-2 text-primary"></i>2. Schedule & Slot Selection
+                                <i class="bi bi-calendar2-week-fill me-2 text-primary"></i>Step 2: Schedule & Slot Selection
                             </h5>
 
                             <!-- Dynamic Live Availability Feedback Box -->
@@ -129,7 +148,7 @@
                         <!-- Project Scope & Requirements -->
                         <div class="mb-4">
                             <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
-                                <i class="bi bi-code-square me-2 text-primary"></i>3. Project Details & Optional Documents
+                                <i class="bi bi-code-square me-2 text-primary"></i>Step 3: Project Details & Optional Documents
                             </h5>
                             <div class="mb-3">
                                 {{ form.project_title|as_crispy_field }}
@@ -163,12 +182,16 @@
                 </div>
             </div>
         </div>
-    </div>
+    {{ engineer_service_map_json|json_script:"engineer-service-map-data" }}
+    {{ all_engineers_json|json_script:"all-engineers-data" }}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    const engineerServiceMap = JSON.parse(document.getElementById("engineer-service-map-data").textContent || "{}");
+    const allEngineers = JSON.parse(document.getElementById("all-engineers-data").textContent || "[]");
+
     function updateMarkedServiceUI(selectedId) {
         document.querySelectorAll(".service-select-card").forEach(function(card) {
             const cardId = card.getAttribute("data-service-id");
@@ -178,7 +201,7 @@
             if (cardId === String(selectedId) && selectedId !== "") {
                 card.classList.add("is-marked");
                 if (badge) badge.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
-                if (text) text.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Marked & Selected</span>';
+                if (text) text.innerHTML = '<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Selected Domain</span>';
             } else {
                 card.classList.remove("is-marked");
                 if (badge) badge.innerHTML = '<i class="bi bi-check-lg"></i>';
@@ -187,24 +210,108 @@
         });
     }
 
+    function filterEngineersByService(serviceId, preselectedEngineerId) {
+        const engineerSelect = document.getElementById("id_engineer");
+        if (!engineerSelect) return;
+
+        const currentSelected = preselectedEngineerId !== undefined ? String(preselectedEngineerId) : String(engineerSelect.value);
+
+        let targetList = [];
+        let isFallback = false;
+
+        if (serviceId && engineerServiceMap[String(serviceId)]) {
+            targetList = engineerServiceMap[String(serviceId)];
+        } else {
+            targetList = allEngineers;
+            isFallback = true;
+        }
+
+        if (!targetList || targetList.length === 0) {
+            targetList = allEngineers;
+            isFallback = true;
+        }
+
+        // Clear and rebuild options
+        engineerSelect.innerHTML = "";
+
+        // Default placeholder option
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        if (!serviceId || isFallback) {
+            defaultOption.textContent = "-- Select an Engineer (All Available) --";
+        } else {
+            defaultOption.textContent = `-- Select a Matching Lead Engineer (${targetList.length} Available) --`;
+        }
+        engineerSelect.appendChild(defaultOption);
+
+        let matchingSelectionFound = false;
+
+        targetList.forEach(function(eng) {
+            const option = document.createElement("option");
+            option.value = eng.id;
+
+            // Formatted user-friendly label: "Jane Doe — Lead Cloud Architect (★ 4.9)"
+            let label = eng.name;
+            if (eng.designation) {
+                label += " — " + eng.designation;
+            }
+            if (eng.rating_str) {
+                label += " (" + eng.rating_str + ")";
+            }
+            option.textContent = label;
+
+            if (String(eng.id) === String(currentSelected) && currentSelected !== "") {
+                option.selected = true;
+                matchingSelectionFound = true;
+            }
+
+            engineerSelect.appendChild(option);
+        });
+
+        if (matchingSelectionFound) {
+            engineerSelect.value = currentSelected;
+        } else if (currentSelected && !matchingSelectionFound) {
+            engineerSelect.value = "";
+        }
+
+        // Trigger change event to refresh schedule availability checker
+        engineerSelect.dispatchEvent(new Event("change"));
+    }
+
     function selectServiceCard(serviceId) {
         const serviceSelect = document.getElementById("id_service");
         if (serviceSelect) {
             serviceSelect.value = serviceId;
-            serviceSelect.dispatchEvent(new Event("change"));
+            updateMarkedServiceUI(serviceId);
+            filterEngineersByService(serviceId);
         }
-        updateMarkedServiceUI(serviceId);
     }
 
     document.addEventListener("DOMContentLoaded", function() {
         const serviceSelect = document.getElementById("id_service");
+        const engineerSelect = document.getElementById("id_engineer");
+
+        // Read initial pre-selected values from URL query parameters or form defaults
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlService = urlParams.get("service");
+        const urlEngineer = urlParams.get("engineer");
+
+        const initialServiceVal = urlService || (serviceSelect ? serviceSelect.value : "");
+        const initialEngineerVal = urlEngineer || (engineerSelect ? engineerSelect.value : "");
+
         if (serviceSelect) {
-            // Sync on load (e.g., initial or GET ?service= param)
+            if (urlService && serviceSelect.value !== urlService) {
+                serviceSelect.value = urlService;
+            }
+
+            // Sync Card UI and filter engineer dropdown on load
             updateMarkedServiceUI(serviceSelect.value);
+            filterEngineersByService(serviceSelect.value, initialEngineerVal);
 
             // Sync on dropdown change
             serviceSelect.addEventListener("change", function() {
                 updateMarkedServiceUI(this.value);
+                filterEngineersByService(this.value);
             });
         }
     });
