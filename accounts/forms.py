@@ -4,36 +4,12 @@ from .models import User, ClientProfile, EngineerProfile
 
 
 class ClientRegistrationForm(UserCreationForm):
-    first_name = forms.CharField(
-        max_length=150, 
-        required=True,
-        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g., John"})
-    )
-    last_name = forms.CharField(
-        max_length=150, 
-        required=True,
-        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g., Doe"})
-    )
-    email = forms.EmailField(
-        required=True,
-        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "name@example.com"})
-    )
-    phone_number = forms.CharField(
-        max_length=20, 
-        required=False,
-        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "+880 1700-000000"})
-    )
-    organization = forms.CharField(
-        max_length=150, 
-        required=False, 
-        help_text="Company, Startup, or Organization (Optional)",
-        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g., Acme Tech Ltd."})
-    )
-    address = forms.CharField(
-        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "City, Country (e.g., Dhaka, Bangladesh)"}), 
-        required=False,
-        help_text="Primary location or business address (Optional)"
-    )
+    first_name = forms.CharField(max_length=150, required=True)
+    last_name = forms.CharField(max_length=150, required=True)
+    email = forms.EmailField(required=True)
+    phone_number = forms.CharField(max_length=20, required=False)
+    organization = forms.CharField(max_length=150, required=False, help_text="Company or project organization")
+    address = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), required=False)
 
     class Meta:
         model = User
@@ -48,14 +24,6 @@ class ClientRegistrationForm(UserCreationForm):
             "password1",
             "password2",
         )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["username"].widget.attrs.update({"class": "form-control", "placeholder": "Choose a username"})
-        self.fields["password1"].widget.attrs.update({"class": "form-control", "placeholder": "Create password"})
-        self.fields["password2"].widget.attrs.update({"class": "form-control", "placeholder": "Confirm password"})
-        self.fields["password1"].help_text = "Use 8+ characters with a mix of letters and numbers."
-        self.fields["password2"].help_text = "Re-enter the same password for confirmation."
 
     def save(self, commit=True):
         user = super().save(commit=False)
