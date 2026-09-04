@@ -4,205 +4,53 @@
 {% block title %}Client Registration | Touch & Solve (TNS) AMS{% endblock %}
 
 {% block content %}
-<div class="container py-4 py-lg-5">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-xl-11 col-xxl-10">
+        <div class="col-lg-10 col-xl-9">
             <div class="card border-0 shadow-lg overflow-hidden rounded-4">
                 <div class="row g-0">
-                    
-                    <!-- Left: Brand & Value Proposition Showcase -->
-                    <div class="col-lg-4 d-none d-lg-flex flex-column justify-content-between p-4 p-xl-5 text-white position-relative" 
-                         style="background: linear-gradient(145deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);">
-                        
-                        <!-- Top Branding -->
-                        <div>
-                            <div class="d-flex align-items-center mb-4">
-                                <span class="bg-primary text-white rounded-3 p-2 px-3 me-2 shadow-sm fs-5">
-                                    <i class="bi bi-code-slash"></i>
-                                </span>
-                                <span class="fs-4 fw-bold tracking-tight">TNS <span class="text-primary">AMS</span></span>
-                            </div>
-
-                            <span class="badge bg-primary bg-opacity-25 text-primary-emphasis border border-primary border-opacity-25 px-3 py-1 rounded-pill mb-3 fw-semibold">
-                                <i class="bi bi-stars me-1 text-warning"></i> Client Portal Access
-                            </span>
-
-                            <h3 class="fw-bold text-white mb-3">Engineering Leadership On-Demand</h3>
-                            <p class="text-secondary small mb-4">
-                                Register to schedule technical architecture sessions, cloud scoping reviews, and database optimizations directly with verified lead engineers.
-                            </p>
-
-                            <!-- Key Feature Badges -->
-                            <div class="d-flex flex-column gap-3 mb-4">
-                                <div class="d-flex align-items-start">
-                                    <div class="bg-primary bg-opacity-20 text-primary rounded-circle p-2 me-3 flex-shrink-0" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="bi bi-person-check-fill"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="fw-bold text-white mb-0 fs-6">Principal Architect Scoping</h6>
-                                        <small class="text-secondary">Work directly with certified multi-cloud and distributed systems architects.</small>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex align-items-start">
-                                    <div class="bg-success bg-opacity-20 text-success rounded-circle p-2 me-3 flex-shrink-0" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="bi bi-calendar2-check-fill"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="fw-bold text-white mb-0 fs-6">Live Conflict-Free Booking</h6>
-                                        <small class="text-secondary">Instant slot reservation synced with verified engineer weekly availability.</small>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex align-items-start">
-                                    <div class="bg-info bg-opacity-20 text-info rounded-circle p-2 me-3 flex-shrink-0" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="bi bi-shield-lock-fill"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="fw-bold text-white mb-0 fs-6">Confidential & NDA Ready</h6>
-                                        <small class="text-secondary">Enterprise-grade document upload with strict role-based access control.</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Bottom Testimonial / Social Proof -->
-                        <div class="p-3 bg-white bg-opacity-10 rounded-3 border border-white border-opacity-10 backdrop-blur">
-                            <div class="d-flex align-items-center mb-2">
-                                <div class="text-warning small me-2">
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                </div>
-                                <span class="badge bg-success bg-opacity-75 text-white small px-2 py-0">5.0 Client Rating</span>
-                            </div>
-                            <p class="small text-light mb-1 fst-italic">"Seamless onboarding and instant architecture clarity for our AWS migration roadmap."</p>
-                            <small class="text-secondary d-block fw-semibold">&mdash; CTO, FinTech Innovations</small>
+                    <!-- Left: Picture Side-Banner -->
+                    <div class="col-md-5 d-none d-md-block position-relative bg-dark">
+                        <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80" 
+                             alt="Software Consultation & Engineering Team" 
+                             class="w-100 h-100 object-fit-cover" 
+                             style="opacity: 0.88;">
+                        <div class="position-absolute bottom-0 start-0 w-100 p-4 text-white" style="background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);">
+                            <span class="badge bg-primary mb-2">Touch & Solve</span>
+                            <h5 class="fw-bold mb-1">Accelerate Your Delivery</h5>
+                            <p class="small text-light opacity-90 mb-0">Join leaders and tech teams booking high-impact engineering reviews.</p>
                         </div>
                     </div>
 
-                    <!-- Right: Modern Registration Form -->
-                    <div class="col-lg-8 bg-white">
-                        <div class="card-body p-4 p-md-5">
-                            
-                            <!-- Header -->
-                            <div class="d-flex flex-wrap align-items-center justify-content-between border-bottom pb-3 mb-4">
-                                <div>
-                                    <span class="badge bg-primary-subtle text-primary fw-semibold mb-2 px-3 py-1 rounded-pill">
-                                        <i class="bi bi-person-plus-fill me-1"></i>New Client Registration
-                                    </span>
-                                    <h2 class="fw-bold text-dark mb-1">Create Your Account</h2>
-                                    <p class="text-muted small mb-0">Fill in your information to start booking software consultations</p>
-                                </div>
-                                <div class="mt-2 mt-md-0">
-                                    <span class="text-muted small">Already a client?</span>
-                                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-sm ms-2 fw-semibold">
-                                        <i class="bi bi-box-arrow-in-right me-1"></i>Sign In
-                                    </a>
-                                </div>
+                    <!-- Right: Registration Form -->
+                    <div class="col-md-7">
+                        <div class="card-body p-4 p-lg-5">
+                            <div class="mb-4">
+                                <span class="badge bg-primary-subtle text-primary fw-semibold mb-2 px-2 py-1">
+                                    <i class="bi bi-person-plus me-1"></i>New Client
+                                </span>
+                                <h2 class="fw-bold mb-1 text-dark">Create Account</h2>
+                                <p class="text-muted small">Register to start booking software consultations</p>
                             </div>
 
-                            <!-- Form -->
-                            <form method="post" novalidate id="clientRegisterForm">
+                            <form method="post" novalidate>
                                 {% csrf_token %}
+                                {{ form|crispy }}
 
-                                <!-- Non-field errors if any -->
-                                {% if form.non_field_errors %}
-                                    <div class="alert alert-danger shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
-                                        <i class="bi bi-exclamation-triangle-fill fs-5 text-danger me-2"></i>
-                                        <div>
-                                            {% for error in form.non_field_errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                <!-- Section 1: Personal & Account Identity -->
-                                <div class="mb-4">
-                                    <h6 class="text-uppercase fw-bold text-muted small mb-3" style="letter-spacing: 0.05em;">
-                                        <i class="bi bi-person-badge text-primary me-2"></i>1. Account & Identity Information
-                                    </h6>
-                                    
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            {{ form.username|as_crispy_field }}
-                                        </div>
-                                        <div class="col-md-6">
-                                            {{ form.email|as_crispy_field }}
-                                        </div>
-                                        <div class="col-md-6">
-                                            {{ form.first_name|as_crispy_field }}
-                                        </div>
-                                        <div class="col-md-6">
-                                            {{ form.last_name|as_crispy_field }}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Section 2: Contact & Company Details -->
-                                <div class="mb-4">
-                                    <h6 class="text-uppercase fw-bold text-muted small mb-3" style="letter-spacing: 0.05em;">
-                                        <i class="bi bi-building text-primary me-2"></i>2. Company & Contact Details
-                                    </h6>
-                                    
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            {{ form.organization|as_crispy_field }}
-                                        </div>
-                                        <div class="col-md-6">
-                                            {{ form.phone_number|as_crispy_field }}
-                                        </div>
-                                        <div class="col-12">
-                                            {{ form.address|as_crispy_field }}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Section 3: Security & Credentials -->
-                                <div class="mb-4">
-                                    <h6 class="text-uppercase fw-bold text-muted small mb-3" style="letter-spacing: 0.05em;">
-                                        <i class="bi bi-shield-lock text-primary me-2"></i>3. Security & Credentials
-                                    </h6>
-                                    
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            {{ form.password1|as_crispy_field }}
-                                        </div>
-                                        <div class="col-md-6">
-                                            {{ form.password2|as_crispy_field }}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Terms & Privacy Statement -->
-                                <div class="p-3 bg-light rounded-3 mb-4 border d-flex align-items-center">
-                                    <i class="bi bi-shield-check fs-4 text-primary me-3 flex-shrink-0"></i>
-                                    <small class="text-muted">
-                                        By registering, you agree to Touch & Solve's terms of service, strict data privacy standards, and confidential consultation agreement.
-                                    </small>
-                                </div>
-
-                                <!-- Submit Action -->
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm py-3" id="submitRegisterBtn">
-                                        <i class="bi bi-person-check-fill me-2"></i>Create Client Account &amp; Continue
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg fw-semibold shadow-sm">
+                                        <i class="bi bi-check-circle-fill me-2"></i>Complete Registration
                                     </button>
                                 </div>
                             </form>
 
-                            <!-- Bottom Link -->
-                            <div class="text-center mt-4 pt-2 border-top">
-                                <p class="text-muted small mb-0">
-                                    Already have an account? 
-                                    <a href="{% url 'accounts:login' %}" class="fw-bold text-primary text-decoration-none ms-1">
-                                        <i class="bi bi-box-arrow-in-right me-1"></i>Sign in to your portal
-                                    </a>
+                            <hr class="my-4">
+
+                            <div class="text-center">
+                                <p class="text-muted small mb-0">Already registered? 
+                                    <a href="{% url 'accounts:login' %}" class="fw-bold text-primary text-decoration-none">Sign in here</a>
                                 </p>
                             </div>
-
                         </div>
                     </div>
                 </div>
