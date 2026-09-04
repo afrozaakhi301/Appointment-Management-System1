@@ -55,12 +55,16 @@
                             <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
                         {% elif "Database" in service.name or "Backend" in service.name %}
                             <img src="https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
-                        {% elif "DevOps" in service.name or "Infrastructure" in service.name %}
-                            <img src="https://images.unsplash.com/photo-1618401471353-b98aedd04e11?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                        {% elif "DevOps" in service.name or "Infrastructure" in service.name or "CI/CD" in service.name %}
+                            <img src="https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
                         {% elif "Code Review" in service.name or "Python" in service.name or "Django" in service.name %}
                             <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
                         {% elif "Microservice" in service.name or "API" in service.name %}
                             <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                        {% elif "Mobile" in service.name or "Cross-Platform" in service.name %}
+                            <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                        {% elif "Cybersecurity" in service.name or "Hardening" in service.name or "Security" in service.name %}
+                            <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
                         {% else %}
                             <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
                         {% endif %}
@@ -92,6 +96,10 @@
                                     <i class="bi bi-diagram-3-fill"></i>
                                 {% elif "Python" in service.name or "Django" in service.name or "Code Review" in service.name %}
                                     <i class="bi bi-code-slash"></i>
+                                {% elif "Mobile" in service.name or "Cross-Platform" in service.name %}
+                                    <i class="bi bi-phone-fill text-primary"></i>
+                                {% elif "Cybersecurity" in service.name or "Hardening" in service.name or "Security" in service.name %}
+                                    <i class="bi bi-shield-lock-fill text-danger"></i>
                                 {% else %}
                                     <i class="bi bi-cpu-fill"></i>
                                 {% endif %}
@@ -136,6 +144,16 @@
                                     <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-check-all text-success me-1"></i>Pre-Launch Readiness</span>
                                     <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-tools text-primary me-1"></i>Code Refactoring</span>
                                     <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-bug text-warning me-1"></i>Technical Debt Cleanup</span>
+                                {% elif "Mobile" in service.name or "Cross-Platform" in service.name %}
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-phone text-primary me-1"></i>iOS & Android Apps</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-layers text-info me-1"></i>Flutter vs React Native</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-cloud-arrow-down text-success me-1"></i>Offline Data Sync</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-shop text-warning me-1"></i>App Store / Play Store</span>
+                                {% elif "Cybersecurity" in service.name or "Hardening" in service.name or "Security" in service.name %}
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-shield-shaded text-danger me-1"></i>OWASP Top 10 Audit</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-key-fill text-warning me-1"></i>Auth & Session Protection</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-bug-fill text-primary me-1"></i>Penetration Testing</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-file-earmark-lock text-success me-1"></i>Data Privacy & Hardening</span>
                                 {% else %}
                                     <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-rocket-takeoff text-primary me-1"></i>MVP Development</span>
                                     <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-cart3 text-success me-1"></i>E-Commerce / Online Store</span>

@@ -46,10 +46,16 @@ class Command(BaseCommand):
             ("DevOps CI/CD & Infrastructure as Code", "Modernization of delivery pipelines using GitHub Actions, GitLab CI, Terraform, Kubernetes Helm charts, and automated testing."),
             ("Microservices & API Strategy", "Domain-Driven Design (DDD), RESTful API standards, gRPC integration, message queues (Kafka, RabbitMQ), and distributed tracing."),
             ("Full-Stack Django & Python Code Review", "Comprehensive architectural and security inspection of Django codebases, clean architecture patterns, and asynchronous processing."),
+            ("Mobile App Architecture & Cross-Platform Strategy", "End-to-end architecture guidance for iOS and Android apps, cross-platform selection (Flutter vs React Native), offline sync, and store publishing."),
+            ("Cybersecurity Audit & Application Hardening", "Comprehensive security inspection of web platforms, OWASP Top 10 vulnerability mitigation, auth & session protection, and data privacy hardening."),
         ]
         service_objs = []
         for name, desc in services_data:
             svc, _ = Service.objects.get_or_create(name=name, defaults={"description": desc, "is_active": True})
+            # Ensure description is updated if already created
+            svc.description = desc
+            svc.is_active = True
+            svc.save()
             service_objs.append(svc)
 
         # 3. Expertise tags
@@ -62,6 +68,8 @@ class Command(BaseCommand):
             "DevOps & Terraform",
             "Redis & Distributed Caching",
             "System Security & OWASP",
+            "Mobile App Development (Flutter & React Native)",
+            "Cybersecurity & Penetration Testing",
         ]
         exp_objs = {}
         for name in expertises_data:
@@ -91,11 +99,12 @@ class Command(BaseCommand):
                 "last_name": "Debnath",
                 "email": "angkon.debnath@tns-software.com",
                 "phone": "+880 1812-000202",
-                "designation": "Senior Full-Stack & Python / Django Engineer",
+                "designation": "Senior Full-Stack & Mobile Systems Engineer",
                 "experience": 6,
-                "bio": "Experienced full-stack engineer specialized in high-performance Django architectures, asynchronous task queues (Celery/Redis), and scalable REST/GraphQL API design.",
+                "bio": "Experienced full-stack & mobile engineer specialized in Flutter/React Native cross-platform apps, Django architectures, asynchronous task queues (Celery/Redis), and scalable REST/GraphQL API design.",
                 "skills": [
                     ("Python / Django", EngineerExpertise.ProficiencyLevel.LEAD),
+                    ("Mobile App Development (Flutter & React Native)", EngineerExpertise.ProficiencyLevel.LEAD),
                     ("Redis & Distributed Caching", EngineerExpertise.ProficiencyLevel.EXPERT),
                     ("System Security & OWASP", EngineerExpertise.ProficiencyLevel.INTERMEDIATE),
                 ]
@@ -121,11 +130,12 @@ class Command(BaseCommand):
                 "last_name": "Ayat",
                 "email": "aizah.ayat@tns-software.com",
                 "phone": "+880 1614-000404",
-                "designation": "Staff DevOps & Platform Security Engineer",
+                "designation": "Staff DevOps & Cybersecurity Engineer",
                 "experience": 7,
-                "bio": "Focuses on automated GitOps pipelines, Terraform infrastructure-as-code, zero-trust security postures, and enterprise CI/CD modernization.",
+                "bio": "Focuses on automated GitOps pipelines, Terraform infrastructure-as-code, zero-trust security postures, application vulnerability hardening, and enterprise CI/CD modernization.",
                 "skills": [
                     ("DevOps & Terraform", EngineerExpertise.ProficiencyLevel.LEAD),
+                    ("Cybersecurity & Penetration Testing", EngineerExpertise.ProficiencyLevel.LEAD),
                     ("Kubernetes & Docker", EngineerExpertise.ProficiencyLevel.EXPERT),
                     ("System Security & OWASP", EngineerExpertise.ProficiencyLevel.LEAD),
                 ]
@@ -151,10 +161,11 @@ class Command(BaseCommand):
                 "last_name": "Lata",
                 "email": "shamsun.lata@tns-software.com",
                 "phone": "+880 1816-000606",
-                "designation": "Lead Software QA & Application Security Specialist",
+                "designation": "Lead Cybersecurity Auditor & Application Security Specialist",
                 "experience": 6,
                 "bio": "Specializes in automated testing suites, application security audits (OWASP Top 10), penetration testing, code review governance, and vulnerability management.",
                 "skills": [
+                    ("Cybersecurity & Penetration Testing", EngineerExpertise.ProficiencyLevel.LEAD),
                     ("System Security & OWASP", EngineerExpertise.ProficiencyLevel.LEAD),
                     ("Python / Django", EngineerExpertise.ProficiencyLevel.EXPERT),
                     ("DevOps & Terraform", EngineerExpertise.ProficiencyLevel.INTERMEDIATE),
@@ -166,10 +177,11 @@ class Command(BaseCommand):
                 "last_name": "Khan",
                 "email": "mahin.khan@tns-software.com",
                 "phone": "+880 1917-000707",
-                "designation": "Senior Backend & Cloud Native Systems Engineer",
+                "designation": "Senior Backend & Mobile Cloud Systems Engineer",
                 "experience": 5,
-                "bio": "Passionate backend architect specializing in cloud-native microservice development, database scaling, API gateway optimization, and serverless compute.",
+                "bio": "Passionate backend & mobile architect specializing in Flutter cross-platform integration, cloud-native microservice development, database scaling, API gateway optimization, and serverless compute.",
                 "skills": [
+                    ("Mobile App Development (Flutter & React Native)", EngineerExpertise.ProficiencyLevel.EXPERT),
                     ("AWS Solutions Architecture", EngineerExpertise.ProficiencyLevel.EXPERT),
                     ("Python / Django", EngineerExpertise.ProficiencyLevel.EXPERT),
                     ("PostgreSQL & Query Optimization", EngineerExpertise.ProficiencyLevel.INTERMEDIATE),
@@ -211,11 +223,12 @@ class Command(BaseCommand):
                 "last_name": "Vance",
                 "email": "marcus.vance@tns-software.com",
                 "phone": "+1-555-0203",
-                "designation": "Lead DevOps & Infrastructure Engineer",
+                "designation": "Lead DevOps & Platform Security Engineer",
                 "experience": 6,
                 "bio": "Passionate about GitOps, automated infrastructure provisioning with Terraform, zero-downtime blue/green deployments, and security compliance.",
                 "skills": [
                     ("DevOps & Terraform", EngineerExpertise.ProficiencyLevel.LEAD),
+                    ("Cybersecurity & Penetration Testing", EngineerExpertise.ProficiencyLevel.EXPERT),
                     ("Kubernetes & Docker", EngineerExpertise.ProficiencyLevel.EXPERT),
                     ("System Security & OWASP", EngineerExpertise.ProficiencyLevel.INTERMEDIATE),
                 ]
@@ -248,11 +261,17 @@ class Command(BaseCommand):
             for skill_name, prof_level in eng_data["skills"]:
                 exp_obj = exp_objs.get(skill_name)
                 if exp_obj:
-                    EngineerExpertise.objects.get_or_create(
+                    ee, _ = EngineerExpertise.objects.get_or_create(
                         engineer=eng_user,
                         expertise=exp_obj,
-                        defaults={"proficiency_level": prof_level}
+                        defaults={
+                            "proficiency_level": prof_level,
+                            "status": EngineerExpertise.VerificationStatus.APPROVED
+                        }
                     )
+                    if ee.status != EngineerExpertise.VerificationStatus.APPROVED:
+                        ee.status = EngineerExpertise.VerificationStatus.APPROVED
+                        ee.save()
 
             # Assign weekly working hours (Monday through Friday 09:00 - 17:00)
             for day in range(0, 5):  # Mon-Fri

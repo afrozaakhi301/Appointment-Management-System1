@@ -84,16 +84,22 @@
                          onclick="markHomeService('{{ service.id }}')">
                         <!-- Related Category Picture from Web -->
                         <div class="position-relative" style="height: 160px; overflow: hidden;">
-                            {% if "Cloud" in service.name %}
+                            {% if "General Architecture" in service.name or "Scoping" in service.name %}
+                                <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                            {% elif "Cloud" in service.name %}
                                 <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
                             {% elif "Database" in service.name or "Backend" in service.name %}
                                 <img src="https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
-                            {% elif "DevOps" in service.name or "Infrastructure" in service.name %}
-                                <img src="https://images.unsplash.com/photo-1618401471353-b98aedd04e11?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                            {% elif "DevOps" in service.name or "Infrastructure" in service.name or "CI/CD" in service.name %}
+                                <img src="https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
                             {% elif "Code Review" in service.name or "Python" in service.name or "Django" in service.name %}
                                 <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
                             {% elif "Microservice" in service.name or "API" in service.name %}
                                 <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                            {% elif "Mobile" in service.name or "Cross-Platform" in service.name %}
+                                <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                            {% elif "Cybersecurity" in service.name or "Hardening" in service.name or "Security" in service.name %}
+                                <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
                             {% else %}
                                 <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
                             {% endif %}
@@ -110,7 +116,9 @@
                         <div class="card-body p-4 d-flex flex-column">
                             <div class="d-flex align-items-center mb-2">
                                 <div class="service-icon-box me-2" style="width: 36px; height: 36px; font-size: 1.1rem;">
-                                    {% if "Cloud" in service.name or "AWS" in service.name %}
+                                    {% if "General Architecture" in service.name or "Scoping" in service.name %}
+                                        <i class="bi bi-compass-fill text-warning"></i>
+                                    {% elif "Cloud" in service.name or "AWS" in service.name %}
                                         <i class="bi bi-cloud-arrow-up-fill"></i>
                                     {% elif "Database" in service.name or "Backend" in service.name %}
                                         <i class="bi bi-database-fill-gear"></i>
@@ -120,6 +128,10 @@
                                         <i class="bi bi-diagram-3-fill"></i>
                                     {% elif "Python" in service.name or "Django" in service.name or "Code Review" in service.name %}
                                         <i class="bi bi-code-slash"></i>
+                                    {% elif "Mobile" in service.name or "Cross-Platform" in service.name %}
+                                        <i class="bi bi-phone-fill text-primary"></i>
+                                    {% elif "Cybersecurity" in service.name or "Hardening" in service.name or "Security" in service.name %}
+                                        <i class="bi bi-shield-lock-fill text-danger"></i>
                                     {% else %}
                                         <i class="bi bi-cpu-fill"></i>
                                     {% endif %}

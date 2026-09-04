@@ -60,7 +60,9 @@
                                             <div>
                                                 <div class="d-flex align-items-center mb-2">
                                                     <div class="service-icon-box me-3">
-                                                        {% if "Cloud" in svc.name or "AWS" in svc.name %}
+                                                        {% if "General Architecture" in svc.name or "Scoping" in svc.name %}
+                                                            <i class="bi bi-compass-fill text-warning"></i>
+                                                        {% elif "Cloud" in svc.name or "AWS" in svc.name %}
                                                             <i class="bi bi-cloud-arrow-up-fill"></i>
                                                         {% elif "Database" in svc.name or "Backend" in svc.name %}
                                                             <i class="bi bi-database-fill-gear"></i>
@@ -68,8 +70,12 @@
                                                             <i class="bi bi-hdd-network-fill"></i>
                                                         {% elif "Microservice" in svc.name or "API" in svc.name %}
                                                             <i class="bi bi-diagram-3-fill"></i>
-                                                        {% elif "Python" in svc.name or "Django" in svc.name or "Code Review" in svc.name %}
+                                                        {% elif "Code Review" in svc.name or "Python" in svc.name or "Django" in svc.name %}
                                                             <i class="bi bi-code-slash"></i>
+                                                        {% elif "Mobile" in svc.name or "iOS" in svc.name or "Android" in svc.name or "Flutter" in svc.name %}
+                                                            <i class="bi bi-phone-fill text-primary"></i>
+                                                        {% elif "Cybersecurity" in svc.name or "Security" in svc.name or "Hardening" in svc.name %}
+                                                            <i class="bi bi-shield-lock-fill text-danger"></i>
                                                         {% else %}
                                                             <i class="bi bi-cpu-fill"></i>
                                                         {% endif %}

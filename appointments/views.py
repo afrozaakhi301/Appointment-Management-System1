@@ -83,8 +83,14 @@ def book_appointment_view(request):
             elif "microservice" in svc_name_lower or "api" in svc_name_lower:
                 if any("microservice" in e or "grpc" in e or "api" in e or "django" in e or "python" in e for e in exp_lower) or "microservice" in desig_lower or "architect" in desig_lower:
                     is_match = True
-            elif "code review" in svc_name_lower or "python" in svc_name_lower or "django" in svc_name_lower:
+            elif "code review" in svc_name_lower or "django code" in svc_name_lower:
                 if any("python" in e or "django" in e or "security" in e or "qa" in e or "owasp" in e for e in exp_lower) or "python" in desig_lower or "django" in desig_lower:
+                    is_match = True
+            elif "mobile" in svc_name_lower or "cross-platform" in svc_name_lower or "ios" in svc_name_lower or "android" in svc_name_lower or "flutter" in svc_name_lower:
+                if any("mobile" in e or "flutter" in e or "react native" in e or "ios" in e or "android" in e for e in exp_lower) or "mobile" in desig_lower:
+                    is_match = True
+            elif "cybersecurity" in svc_name_lower or "security" in svc_name_lower or "hardening" in svc_name_lower or "audit" in svc_name_lower:
+                if any("security" in e or "owasp" in e or "penetration" in e or "hardening" in e or "audit" in e for e in exp_lower) or "security" in desig_lower or "cybersecurity" in desig_lower:
                     is_match = True
             else:
                 for exp in exp_lower:
