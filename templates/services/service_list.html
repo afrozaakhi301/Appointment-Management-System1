@@ -4,22 +4,54 @@
 
 {% block content %}
 <div class="container py-5">
-    <div class="text-center mb-5">
+    <div class="text-center mb-4">
         <span class="badge bg-primary text-white mb-2 px-3 py-2 fw-semibold">Consultation Domains</span>
         <h1 class="fw-bold mb-2">Our Consultation Services</h1>
-        <p class="text-muted">Specialized software engineering domains available for booking with Touch & Solve engineers</p>
+        <p class="text-muted">Specialized software engineering domains available for booking with Touch & Solve lead engineers</p>
     </div>
 
+    <!-- Prominent Non-Technical Guidance Banner -->
+    <div class="card border-0 shadow-sm mb-5 text-white overflow-hidden" 
+         style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%); border-radius: 1rem;">
+        <div class="card-body p-4 p-lg-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <span class="badge bg-warning text-dark px-3 py-2 fw-bold mb-3 rounded-pill shadow-sm">
+                        <i class="bi bi-lightbulb-fill me-1"></i>Need Help Choosing?
+                    </span>
+                    <h3 class="fw-bold mb-2 text-white">Not sure what technical service fits your project?</h3>
+                    <p class="text-light opacity-90 mb-0" style="font-size: 1.05rem; line-height: 1.6;">
+                        Book a <strong>General Architecture & Technical Scoping Session</strong>. Work 1-on-1 with a lead architect to clarify requirements, evaluate tech trade-offs, estimate timelines, and select the optimal stack for your business.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    {% if general_service %}
+                        <a href="{% url 'appointments:book_appointment' %}?service={{ general_service.id }}" class="btn btn-warning btn-lg fw-bold px-4 py-3 shadow-sm text-dark text-nowrap">
+                            <i class="bi bi-compass-fill me-2"></i>Book Scoping Session
+                        </a>
+                    {% else %}
+                        <a href="{% url 'appointments:book_appointment' %}" class="btn btn-warning btn-lg fw-bold px-4 py-3 shadow-sm text-dark text-nowrap">
+                            <i class="bi bi-compass-fill me-2"></i>Book Scoping Session
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Grid -->
     <div class="row g-4">
         {% for service in services %}
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100 service-catalog-card border-0 shadow-sm overflow-hidden rounded-3" 
+                <div class="card h-100 service-catalog-card border-0 shadow-sm overflow-hidden rounded-3 d-flex flex-column" 
                      id="catalog-service-{{ service.id }}" 
                      onclick="markCatalogService('{{ service.id }}')">
                     
-                    <!-- Related Service Image from Web -->
+                    <!-- Related Service Image -->
                     <div class="position-relative" style="height: 170px; overflow: hidden;">
-                        {% if "Cloud" in service.name %}
+                        {% if "General Architecture" in service.name or "Scoping" in service.name %}
+                            <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
+                        {% elif "Cloud" in service.name %}
                             <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
                         {% elif "Database" in service.name or "Backend" in service.name %}
                             <img src="https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
@@ -45,10 +77,12 @@
                         </div>
                     </div>
 
-                    <div class="card-body p-4 d-flex flex-column">
+                    <div class="card-body p-4 d-flex flex-column flex-grow-1">
                         <div class="d-flex align-items-center mb-2">
                             <div class="service-icon-box me-2" style="width: 36px; height: 36px; font-size: 1.1rem;">
-                                {% if "Cloud" in service.name or "AWS" in service.name %}
+                                {% if "General Architecture" in service.name or "Scoping" in service.name %}
+                                    <i class="bi bi-compass-fill text-warning"></i>
+                                {% elif "Cloud" in service.name or "AWS" in service.name %}
                                     <i class="bi bi-cloud-arrow-up-fill"></i>
                                 {% elif "Database" in service.name or "Backend" in service.name %}
                                     <i class="bi bi-database-fill-gear"></i>
@@ -64,7 +98,52 @@
                             </div>
                             <h5 class="fw-bold mb-0 text-dark">{{ service.name }}</h5>
                         </div>
-                        <p class="text-muted small flex-grow-1 mb-4">{{ service.description }}</p>
+                        <p class="text-muted small mb-3">{{ service.description }}</p>
+
+                        <!-- Typical Use Cases for Non-Technical Clients -->
+                        <div class="mb-4 text-start">
+                            <small class="text-muted fw-bold text-uppercase d-block mb-2" style="font-size: 0.72rem; letter-spacing: 0.04em;">
+                                <i class="bi bi-tags-fill text-primary me-1"></i>Typical Use Cases
+                            </small>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% if "General Architecture" in service.name or "Scoping" in service.name %}
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-rocket-takeoff text-primary me-1"></i>MVP Development</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-layers text-info me-1"></i>Tech Stack Selection</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-graph-up text-success me-1"></i>Timeline & Budgeting</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-cart-check text-warning me-1"></i>E-Commerce / Online Store</span>
+                                {% elif "Cloud" in service.name or "AWS" in service.name or "GCP" in service.name %}
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-cloud-arrow-up text-info me-1"></i>AWS / GCP Migration</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-speedometer2 text-success me-1"></i>High Traffic Scaling</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-shield-check text-primary me-1"></i>Server Cost Reduction</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-activity text-danger me-1"></i>Zero-Downtime Setup</span>
+                                {% elif "Database" in service.name or "Performance" in service.name or "Backend" in service.name %}
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Fixing Site Slowness</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-cart3 text-success me-1"></i>E-Commerce / Online Store</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-database-exclamation text-danger me-1"></i>Database Bottlenecks</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-repeat text-primary me-1"></i>Query Optimization</span>
+                                {% elif "DevOps" in service.name or "CI/CD" in service.name or "Infrastructure" in service.name %}
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-repeat text-primary me-1"></i>Automated Deployments</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-box-seam text-info me-1"></i>Docker & Kubernetes</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-shield-x text-danger me-1"></i>Release Failure Prevention</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-gear-wide-connected text-success me-1"></i>CI/CD Pipelines</span>
+                                {% elif "Microservice" in service.name or "API" in service.name %}
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-diagram-3 text-primary me-1"></i>Monolith to Microservices</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-credit-card text-success me-1"></i>Payment Gateways</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-link-45deg text-info me-1"></i>3rd-Party API Integrations</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-send-check text-warning me-1"></i>Real-Time Messaging</span>
+                                {% elif "Code Review" in service.name or "Django" in service.name or "Python" in service.name %}
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-shield-lock text-danger me-1"></i>Security Audit</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-check-all text-success me-1"></i>Pre-Launch Readiness</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-tools text-primary me-1"></i>Code Refactoring</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-bug text-warning me-1"></i>Technical Debt Cleanup</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-rocket-takeoff text-primary me-1"></i>MVP Development</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-cart3 text-success me-1"></i>E-Commerce / Online Store</span>
+                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-lightning-charge text-warning me-1"></i>Fixing Site Slowness</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
                         <div class="pt-3 border-top mt-auto">
                             <a href="{% url 'appointments:book_appointment' %}?service={{ service.id }}" class="btn btn-primary w-100 fw-semibold">
                                 <i class="bi bi-calendar-plus me-1"></i>Book This Consultation
@@ -107,3 +186,4 @@
     }
 </script>
 {% endblock %}
+

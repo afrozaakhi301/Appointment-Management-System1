@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from accounts.decorators import admin_required, client_required, engineer_required
 from accounts.forms import (
     AdminCreationForm,
@@ -17,6 +18,7 @@ from accounts.forms import (
 from accounts.models import ClientProfile, EngineerProfile, User
 from appointments.models import Appointment
 from feedback.models import Feedback
+from notifications.utils import create_notification
 from scheduling.models import EngineerAvailability, EngineerLeave
 from services.forms import AdminEngineerExpertiseForm, ExpertiseForm, ServiceForm
 from services.models import EngineerExpertise, Expertise, Service
@@ -94,6 +96,10 @@ def engineer_dashboard(request):
     # Personal completion tracking KPIs (daily, weekly, monthly)
     completion_kpis = get_completion_kpis(engineer=engineer)
 
+    # Engineer skills summary
+    verified_skills_count = EngineerExpertise.objects.filter(engineer=engineer, status=EngineerExpertise.VerificationStatus.APPROVED).count()
+    pending_skills_count = EngineerExpertise.objects.filter(engineer=engineer, status=EngineerExpertise.VerificationStatus.PENDING).count()
+
     return render(
         request,
         "dashboard/engineer_dashboard.html",
@@ -106,6 +112,8 @@ def engineer_dashboard(request):
             "avg_rating": round(avg_rating, 1),
             "feedback_count": feedback_count,
             "completion_kpis": completion_kpis,
+            "verified_skills_count": verified_skills_count,
+            "pending_skills_count": pending_skills_count,
         }
     )
 
@@ -126,6 +134,9 @@ def admin_dashboard(request):
     completed_appointments = Appointment.objects.filter(status=Appointment.Status.COMPLETED).count()
     cancelled_appointments = Appointment.objects.filter(status__in=[Appointment.Status.CANCELLED, Appointment.Status.REJECTED]).count()
 
+    # Pending skill verification requests
+    pending_skill_requests_count = EngineerExpertise.objects.filter(status=EngineerExpertise.VerificationStatus.PENDING).count()
+
     recent_activities = ActivityLog.objects.select_related("user")[:10]
     recent_appointments = Appointment.objects.select_related("client", "engineer", "service").order_by("-created_at")[:6]
 
@@ -143,6 +154,7 @@ def admin_dashboard(request):
             "approved_appointments": approved_appointments,
             "completed_appointments": completed_appointments,
             "cancelled_appointments": cancelled_appointments,
+            "pending_skill_requests_count": pending_skill_requests_count,
             "recent_activities": recent_activities,
             "recent_appointments": recent_appointments,
             "completion_kpis": completion_kpis,
@@ -277,7 +289,15 @@ def admin_add_admin(request):
 def admin_manage_services(request):
     services = Service.objects.all()
     expertises = Expertise.objects.all()
-    engineer_expertises = EngineerExpertise.objects.select_related("engineer", "expertise").order_by("engineer__username")
+
+    # Skill verifications & assignments
+    pending_skill_requests = EngineerExpertise.objects.filter(
+        status=EngineerExpertise.VerificationStatus.PENDING
+    ).select_related("engineer__engineer_profile", "expertise").order_by("-created_at")
+
+    engineer_expertises = EngineerExpertise.objects.select_related(
+        "engineer", "expertise", "reviewed_by"
+    ).order_by("-created_at", "engineer__username")
 
     service_form = ServiceForm()
     expertise_form = ExpertiseForm()
@@ -286,7 +306,43 @@ def admin_manage_services(request):
     if request.method == "POST":
         action = request.POST.get("action")
 
-        if action == "create_service":
+        if action == "approve_skill_request":
+            ee_id = request.POST.get("ee_id")
+            ee = get_object_or_404(EngineerExpertise, id=ee_id)
+            ee.status = EngineerExpertise.VerificationStatus.APPROVED
+            ee.reviewed_at = timezone.now()
+            ee.reviewed_by = request.user
+            ee.admin_notes = request.POST.get("admin_notes", "").strip()
+            ee.save()
+
+            create_notification(
+                user=ee.engineer,
+                message=f"Your skill verification request for '{ee.expertise.name}' ({ee.proficiency_level}) has been approved and verified by admin!"
+            )
+            log_activity(request.user, f"Approved skill verification: {ee.expertise.name} for {ee.engineer.username}")
+            messages.success(request, f"Skill '{ee.expertise.name}' for {ee.engineer.get_full_name() or ee.engineer.username} has been verified and approved.")
+            return redirect("dashboard:manage_services")
+
+        elif action == "reject_skill_request":
+            ee_id = request.POST.get("ee_id")
+            ee = get_object_or_404(EngineerExpertise, id=ee_id)
+            rejection_reason = request.POST.get("rejection_reason", "").strip()
+            ee.status = EngineerExpertise.VerificationStatus.REJECTED
+            ee.reviewed_at = timezone.now()
+            ee.reviewed_by = request.user
+            ee.admin_notes = rejection_reason
+            ee.save()
+
+            msg = f"Your skill verification request for '{ee.expertise.name}' was rejected by admin."
+            if rejection_reason:
+                msg += f" Note: {rejection_reason}"
+            create_notification(user=ee.engineer, message=msg)
+
+            log_activity(request.user, f"Rejected skill verification: {ee.expertise.name} for {ee.engineer.username}")
+            messages.warning(request, f"Skill verification request for '{ee.expertise.name}' from {ee.engineer.get_full_name() or ee.engineer.username} was rejected.")
+            return redirect("dashboard:manage_services")
+
+        elif action == "create_service":
             form = ServiceForm(request.POST)
             if form.is_valid():
                 svc = form.save()
@@ -345,11 +401,24 @@ def admin_manage_services(request):
                 ee, created = EngineerExpertise.objects.get_or_create(
                     engineer=eng,
                     expertise=exp,
-                    defaults={"proficiency_level": level}
+                    defaults={
+                        "proficiency_level": level,
+                        "status": EngineerExpertise.VerificationStatus.APPROVED,
+                        "reviewed_by": request.user,
+                        "reviewed_at": timezone.now()
+                    }
                 )
                 if not created:
                     ee.proficiency_level = level
+                    ee.status = EngineerExpertise.VerificationStatus.APPROVED
+                    ee.reviewed_by = request.user
+                    ee.reviewed_at = timezone.now()
                     ee.save()
+
+                create_notification(
+                    user=eng,
+                    message=f"Admin directly assigned and verified expertise '{exp.name}' ({level}) on your profile."
+                )
                 log_activity(request.user, f"Assigned expertise {exp.name} ({level}) to {eng.username}")
                 messages.success(request, f"Expertise '{exp.name}' ({level}) assigned to {eng.get_full_name() or eng.username}.")
                 return redirect("dashboard:manage_services")
@@ -357,7 +426,10 @@ def admin_manage_services(request):
         elif action == "remove_engineer_expertise":
             ee_id = request.POST.get("ee_id")
             ee = get_object_or_404(EngineerExpertise, id=ee_id)
+            ee_name = ee.expertise.name
+            ee_eng = ee.engineer.username
             ee.delete()
+            log_activity(request.user, f"Removed skill assignment {ee_name} from {ee_eng}")
             messages.success(request, "Expertise assignment removed.")
             return redirect("dashboard:manage_services")
 
@@ -367,12 +439,14 @@ def admin_manage_services(request):
         {
             "services": services,
             "expertises": expertises,
+            "pending_skill_requests": pending_skill_requests,
             "engineer_expertises": engineer_expertises,
             "service_form": service_form,
             "expertise_form": expertise_form,
             "assign_form": assign_form,
         }
     )
+
 
 
 @admin_required

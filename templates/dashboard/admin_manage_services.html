@@ -1,14 +1,139 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 
-{% block title %}Manage Services & Expertise | Admin | TNS AMS{% endblock %}
+{% block title %}Manage Services & Skill Verifications | Admin | TNS AMS{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-1">Services & Technical Expertise Management</h2>
-            <p class="text-muted small mb-0">Create consultation domains, define skill tags, and map proficiencies</p>
+            <p class="text-muted small mb-0">Review engineer skill verification requests, manage consultation domains, and map technical proficiencies</p>
+        </div>
+        <div>
+            <a href="{% url 'dashboard:admin_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Admin Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- PENDING SKILL VERIFICATION REQUESTS QUEUE -->
+    <div class="card border-0 shadow-sm mb-4 border-top border-4 border-warning">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-shield-exclamation me-2 text-warning"></i>Pending Skill Verification Requests
+                </h5>
+                <small class="text-muted">Skills requested by software engineers awaiting administrative verification</small>
+            </div>
+            <span class="badge {% if pending_skill_requests %}bg-warning text-dark{% else %}bg-secondary{% endif %} fs-6 px-3 py-1">
+                {{ pending_skill_requests.count }} Pending
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Engineer</th>
+                            <th>Requested Skill</th>
+                            <th>Proficiency Level</th>
+                            <th>Requested Date</th>
+                            <th class="text-end">Verification Decision</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in pending_skill_requests %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        {% if req.engineer.engineer_profile.profile_photo %}
+                                            <img src="{{ req.engineer.engineer_profile.profile_photo.url }}" class="rounded-circle" width="36" height="36" style="object-fit: cover;" alt="{{ req.engineer.username }}">
+                                        {% else %}
+                                            <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px; font-size: 0.85rem;">
+                                                {{ req.engineer.first_name|default:req.engineer.username|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <strong class="d-block text-dark">{{ req.engineer.get_full_name|default:req.engineer.username }}</strong>
+                                            <small class="text-muted">{{ req.engineer.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark fs-6">{{ req.expertise.name }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border px-2 py-1">
+                                        {{ req.proficiency_level }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ req.created_at|date:"M d, Y"|default:"Recently" }}
+                                        <div class="text-secondary" style="font-size: 0.72rem;">{{ req.created_at|time:"h:i A" }}</div>
+                                    </small>
+                                </td>
+                                <td class="text-end">
+                                    <!-- Approve Button Form -->
+                                    <form method="post" class="d-inline" onsubmit="return confirm('Approve and verify {{ req.expertise.name }} for {{ req.engineer.get_full_name|default:req.engineer.username }}?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="approve_skill_request">
+                                        <input type="hidden" name="ee_id" value="{{ req.id }}">
+                                        <button type="submit" class="btn btn-success btn-sm fw-semibold me-1">
+                                            <i class="bi bi-check-lg me-1"></i>Approve
+                                        </button>
+                                    </form>
+
+                                    <!-- Reject Button (Opens Reject Modal) -->
+                                    <button type="button" class="btn btn-outline-danger btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#rejectModal{{ req.id }}">
+                                        <i class="bi bi-x-lg me-1"></i>Reject
+                                    </button>
+
+                                    <!-- Reject Modal -->
+                                    <div class="modal fade text-start" id="rejectModal{{ req.id }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ req.id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content border-0 shadow">
+                                                <form method="post">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="reject_skill_request">
+                                                    <input type="hidden" name="ee_id" value="{{ req.id }}">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title fw-bold" id="rejectModalLabel{{ req.id }}">
+                                                            <i class="bi bi-shield-x me-2"></i>Reject Skill Request
+                                                        </h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body p-4">
+                                                        <p class="mb-3">
+                                                            Are you sure you want to reject <strong>{{ req.expertise.name }}</strong> ({{ req.proficiency_level }}) for <strong>{{ req.engineer.get_full_name|default:req.engineer.username }}</strong>?
+                                                        </p>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold text-dark">Reason / Feedback for Engineer (Optional):</label>
+                                                            <textarea name="rejection_reason" class="form-control" rows="3" placeholder="e.g., Needs additional certification or project demonstration..."></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer bg-light">
+                                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-danger fw-semibold">Confirm Rejection</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    <i class="bi bi-check-circle text-success fs-4 d-block mb-1"></i>
+                                    All clear! No pending skill verification requests at this time.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -54,10 +179,10 @@
                 </div>
             </div>
 
-            <!-- Assign Expertise to Engineer -->
+            <!-- Assign Expertise directly to Engineer -->
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3">
-                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-person-check-fill me-2 text-success"></i>Assign Skill to Engineer</h5>
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-person-check-fill me-2 text-success"></i>Direct Assign & Verify Skill</h5>
                 </div>
                 <div class="card-body p-4">
                     <form method="post" novalidate>
@@ -66,7 +191,7 @@
                         {{ assign_form|crispy }}
                         <div class="d-grid mt-3">
                             <button type="submit" class="btn btn-success fw-semibold">
-                                <i class="bi bi-link-45deg me-1"></i>Assign Skill
+                                <i class="bi bi-shield-check me-1"></i>Assign & Verify Skill
                             </button>
                         </div>
                     </form>
@@ -138,7 +263,7 @@
 
     <!-- Active Expertise Tags & Engineer Assignments -->
     <div class="row g-4">
-        <div class="col-lg-5">
+        <div class="col-lg-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3">
                     <h5 class="fw-bold mb-0 text-dark">Expertise Tags ({{ expertises.count }})</h5>
@@ -165,10 +290,10 @@
             </div>
         </div>
 
-        <div class="col-lg-7">
+        <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3">
-                    <h5 class="fw-bold mb-0 text-dark">Engineer Skill Assignments ({{ engineer_expertises.count }})</h5>
+                    <h5 class="fw-bold mb-0 text-dark">All Engineer Skill Profiles ({{ engineer_expertises.count }})</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -178,6 +303,7 @@
                                     <th>Engineer</th>
                                     <th>Expertise</th>
                                     <th>Proficiency</th>
+                                    <th>Status</th>
                                     <th class="text-end">Action</th>
                                 </tr>
                             </thead>
@@ -186,9 +312,26 @@
                                     <tr>
                                         <td><strong>{{ ee.engineer.get_full_name|default:ee.engineer.username }}</strong></td>
                                         <td>{{ ee.expertise.name }}</td>
-                                        <td><span class="badge bg-primary-subtle text-primary">{{ ee.proficiency_level }}</span></td>
+                                        <td><span class="badge bg-light text-dark border">{{ ee.proficiency_level }}</span></td>
+                                        <td>
+                                            {% if ee.status == "Approved" %}
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                                    <i class="bi bi-patch-check-fill me-1"></i>Verified
+                                                </span>
+                                            {% elif ee.status == "Pending" %}
+                                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                                    <i class="bi bi-hourglass-split me-1"></i>Pending
+                                                </span>
+                                            {% elif ee.status == "Rejected" %}
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                                    <i class="bi bi-x-circle-fill me-1"></i>Rejected
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ ee.status }}</span>
+                                            {% endif %}
+                                        </td>
                                         <td class="text-end">
-                                            <form method="post" class="d-inline" onsubmit="return confirm('Remove skill?');">
+                                            <form method="post" class="d-inline" onsubmit="return confirm('Remove skill assignment?');">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="action" value="remove_engineer_expertise">
                                                 <input type="hidden" name="ee_id" value="{{ ee.id }}">
@@ -198,7 +341,7 @@
                                     </tr>
                                 {% empty %}
                                     <tr>
-                                        <td colspan="4" class="text-center py-3 text-muted">No engineer skill assignments.</td>
+                                        <td colspan="5" class="text-center py-3 text-muted">No engineer skill assignments.</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -210,3 +353,4 @@
     </div>
 </div>
 {% endblock %}
+

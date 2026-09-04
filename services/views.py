@@ -1,11 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Count, Prefetch, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from accounts.decorators import engineer_required
 from accounts.models import EngineerProfile, User
 from dashboard.utils import log_activity
 from feedback.models import Feedback
+from notifications.utils import create_notification
 from scheduling.models import EngineerAvailability
 from .forms import EngineerExpertiseForm
 from .models import EngineerExpertise, Expertise, Service
@@ -16,7 +17,14 @@ def home_view(request):
     engineers = User.objects.filter(
         role=User.Role.ENGINEER, 
         is_active=True
-    ).select_related("engineer_profile").prefetch_related("engineer_expertises__expertise").annotate(
+    ).select_related("engineer_profile").prefetch_related(
+        Prefetch(
+            "engineer_expertises",
+            queryset=EngineerExpertise.objects.filter(
+                status=EngineerExpertise.VerificationStatus.APPROVED
+            ).select_related("expertise")
+        )
+    ).annotate(
         avg_rating=Avg("engineer_appointments__feedback__rating"),
         review_count=Count("engineer_appointments__feedback", distinct=True)
     )[:4]
@@ -52,10 +60,14 @@ def about_contact_view(request):
 
 def service_list_view(request):
     services = Service.objects.filter(is_active=True)
+    general_service = Service.objects.filter(name__icontains="General Architecture", is_active=True).first()
     return render(
         request,
         "services/service_list.html",
-        {"services": services}
+        {
+            "services": services,
+            "general_service": general_service,
+        }
     )
 
 
@@ -67,11 +79,17 @@ def engineer_list_view(request):
     proficiency = request.GET.get("proficiency", "").strip()
     sort_by = request.GET.get("sort", "exp_desc").strip()
 
-    from django.db.models import Avg, Count
     engineers = User.objects.filter(
         role=User.Role.ENGINEER, 
         is_active=True
-    ).select_related("engineer_profile").prefetch_related("engineer_expertises__expertise").annotate(
+    ).select_related("engineer_profile").prefetch_related(
+        Prefetch(
+            "engineer_expertises",
+            queryset=EngineerExpertise.objects.filter(
+                status=EngineerExpertise.VerificationStatus.APPROVED
+            ).select_related("expertise")
+        )
+    ).annotate(
         avg_rating=Avg("engineer_appointments__feedback__rating"),
         review_count=Count("engineer_appointments__feedback", distinct=True)
     )
@@ -84,53 +102,56 @@ def engineer_list_view(request):
             Q(username__icontains=query) |
             Q(engineer_profile__designation__icontains=query) |
             Q(engineer_profile__bio__icontains=query) |
-            Q(engineer_expertises__expertise__name__icontains=query)
+            (Q(engineer_expertises__expertise__name__icontains=query) & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED))
         )
 
     # 2. Specific Expertise Filter
     if expertise_id:
-        engineers = engineers.filter(engineer_expertises__expertise_id=expertise_id)
+        engineers = engineers.filter(
+            engineer_expertises__expertise_id=expertise_id,
+            engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED
+        )
 
     # 3. Quick Tag Filter
     if tag:
         if tag == "cloud":
             engineers = engineers.filter(
-                Q(engineer_expertises__expertise__name__icontains="AWS") |
-                Q(engineer_expertises__expertise__name__icontains="Cloud") |
+                (Q(engineer_expertises__expertise__name__icontains="AWS") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
+                (Q(engineer_expertises__expertise__name__icontains="Cloud") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
                 Q(engineer_profile__designation__icontains="Cloud")
             )
         elif tag == "python":
             engineers = engineers.filter(
-                Q(engineer_expertises__expertise__name__icontains="Python") |
-                Q(engineer_expertises__expertise__name__icontains="Django") |
+                (Q(engineer_expertises__expertise__name__icontains="Python") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
+                (Q(engineer_expertises__expertise__name__icontains="Django") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
                 Q(engineer_profile__designation__icontains="Python") |
                 Q(engineer_profile__designation__icontains="Full-Stack")
             )
         elif tag == "database":
             engineers = engineers.filter(
-                Q(engineer_expertises__expertise__name__icontains="Database") |
-                Q(engineer_expertises__expertise__name__icontains="PostgreSQL") |
-                Q(engineer_expertises__expertise__name__icontains="Redis") |
+                (Q(engineer_expertises__expertise__name__icontains="Database") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
+                (Q(engineer_expertises__expertise__name__icontains="PostgreSQL") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
+                (Q(engineer_expertises__expertise__name__icontains="Redis") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
                 Q(engineer_profile__designation__icontains="Database")
             )
         elif tag == "devops":
             engineers = engineers.filter(
-                Q(engineer_expertises__expertise__name__icontains="DevOps") |
-                Q(engineer_expertises__expertise__name__icontains="Docker") |
-                Q(engineer_expertises__expertise__name__icontains="Kubernetes") |
-                Q(engineer_expertises__expertise__name__icontains="Terraform") |
+                (Q(engineer_expertises__expertise__name__icontains="DevOps") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
+                (Q(engineer_expertises__expertise__name__icontains="Docker") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
+                (Q(engineer_expertises__expertise__name__icontains="Kubernetes") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
+                (Q(engineer_expertises__expertise__name__icontains="Terraform") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
                 Q(engineer_profile__designation__icontains="DevOps")
             )
         elif tag == "microservices":
             engineers = engineers.filter(
-                Q(engineer_expertises__expertise__name__icontains="Microservices") |
-                Q(engineer_expertises__expertise__name__icontains="gRPC") |
+                (Q(engineer_expertises__expertise__name__icontains="Microservices") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
+                (Q(engineer_expertises__expertise__name__icontains="gRPC") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
                 Q(engineer_profile__designation__icontains="Microservices")
             )
         elif tag == "security":
             engineers = engineers.filter(
-                Q(engineer_expertises__expertise__name__icontains="Security") |
-                Q(engineer_expertises__expertise__name__icontains="OWASP") |
+                (Q(engineer_expertises__expertise__name__icontains="Security") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
+                (Q(engineer_expertises__expertise__name__icontains="OWASP") & Q(engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED)) |
                 Q(engineer_profile__designation__icontains="Security") |
                 Q(engineer_profile__designation__icontains="QA")
             )
@@ -147,7 +168,10 @@ def engineer_list_view(request):
 
     # 5. Proficiency Level Filter
     if proficiency:
-        engineers = engineers.filter(engineer_expertises__proficiency_level=proficiency)
+        engineers = engineers.filter(
+            engineer_expertises__proficiency_level=proficiency,
+            engineer_expertises__status=EngineerExpertise.VerificationStatus.APPROVED
+        )
 
     engineers = engineers.distinct()
 
@@ -198,7 +222,9 @@ def engineer_list_view(request):
 def engineer_detail_view(request, engineer_id):
     engineer = get_object_or_404(User, id=engineer_id, role=User.Role.ENGINEER, is_active=True)
     profile, _ = EngineerProfile.objects.get_or_create(user=engineer)
-    expertises = engineer.engineer_expertises.select_related("expertise")
+    expertises = engineer.engineer_expertises.filter(
+        status=EngineerExpertise.VerificationStatus.APPROVED
+    ).select_related("expertise")
     availabilities = EngineerAvailability.objects.filter(engineer=engineer).order_by("day_of_week", "start_time")
 
     # Reviews and feedback received by this engineer from clients
@@ -230,7 +256,7 @@ def engineer_detail_view(request, engineer_id):
 @engineer_required
 def engineer_manage_expertise(request):
     engineer = request.user
-    my_expertises = EngineerExpertise.objects.filter(engineer=engineer).select_related("expertise")
+    my_expertises = EngineerExpertise.objects.filter(engineer=engineer).select_related("expertise").order_by("-created_at", "expertise__name")
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -239,22 +265,51 @@ def engineer_manage_expertise(request):
             item = get_object_or_404(EngineerExpertise, id=item_id, engineer=engineer)
             item_name = item.expertise.name
             item.delete()
-            log_activity(engineer, f"Removed expertise: {item_name}")
+            log_activity(engineer, f"Removed expertise entry: {item_name}")
             messages.success(request, f"Removed expertise '{item_name}'.")
             return redirect("services:manage_my_expertise")
         else:
             form = EngineerExpertiseForm(request.POST)
             if form.is_valid():
                 expertise_obj = form.cleaned_data["expertise"]
-                if EngineerExpertise.objects.filter(engineer=engineer, expertise=expertise_obj).exists():
-                    messages.warning(request, f"You have already added '{expertise_obj.name}'.")
+                proficiency_level = form.cleaned_data["proficiency_level"]
+
+                existing = EngineerExpertise.objects.filter(engineer=engineer, expertise=expertise_obj).first()
+                if existing:
+                    if existing.status == EngineerExpertise.VerificationStatus.APPROVED:
+                        messages.warning(request, f"You already have verified expertise for '{expertise_obj.name}'.")
+                        return redirect("services:manage_my_expertise")
+                    elif existing.status == EngineerExpertise.VerificationStatus.PENDING:
+                        messages.info(request, f"You already have a pending verification request for '{expertise_obj.name}'.")
+                        return redirect("services:manage_my_expertise")
+                    else:  # REJECTED - allow resubmitting
+                        existing.proficiency_level = proficiency_level
+                        existing.status = EngineerExpertise.VerificationStatus.PENDING
+                        existing.reviewed_at = None
+                        existing.reviewed_by = None
+                        existing.admin_notes = ""
+                        existing.save()
+                        item = existing
                 else:
                     item = form.save(commit=False)
                     item.engineer = engineer
+                    item.status = EngineerExpertise.VerificationStatus.PENDING
                     item.save()
-                    log_activity(engineer, f"Added expertise: {expertise_obj.name} ({item.proficiency_level})")
-                    messages.success(request, f"Added '{expertise_obj.name}' ({item.proficiency_level}) to your profile.")
-                    return redirect("services:manage_my_expertise")
+
+                # Notify admins
+                admins = User.objects.filter(role=User.Role.ADMIN, is_active=True)
+                for admin in admins:
+                    create_notification(
+                        user=admin,
+                        message=f"Engineer {engineer.get_full_name() or engineer.username} requested verification for skill '{expertise_obj.name}' ({proficiency_level})."
+                    )
+
+                log_activity(engineer, f"Submitted verification request for skill: {expertise_obj.name} ({proficiency_level})")
+                messages.success(
+                    request,
+                    f"Skill verification request for '{expertise_obj.name}' ({proficiency_level}) has been submitted to Admin for approval."
+                )
+                return redirect("services:manage_my_expertise")
     else:
         form = EngineerExpertiseForm()
 
@@ -266,3 +321,4 @@ def engineer_manage_expertise(request):
             "my_expertises": my_expertises,
         }
     )
+

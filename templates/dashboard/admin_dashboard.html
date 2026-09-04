@@ -65,11 +65,29 @@
                 </div>
                 <div>
                     <h3 class="fw-bold mb-0">{{ pending_appointments }}</h3>
-                    <small class="text-muted">Pending Reviews</small>
+                    <small class="text-muted">Pending Consultations</small>
                 </div>
             </div>
         </div>
     </div>
+
+    {% if pending_skill_requests_count > 0 %}
+        <!-- Pending Skill Verification Alert Banner -->
+        <div class="alert alert-warning border-0 shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 py-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="p-2 bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                    <i class="bi bi-shield-exclamation fs-4"></i>
+                </div>
+                <div>
+                    <strong class="d-block text-dark fs-6">{{ pending_skill_requests_count }} Engineer Skill Verification Request{{ pending_skill_requests_count|pluralize }} Awaiting Approval</strong>
+                    <span class="small text-muted">Software engineers have submitted skills for verification. Review and approve them to make them visible to clients.</span>
+                </div>
+            </div>
+            <a href="{% url 'dashboard:manage_services' %}" class="btn btn-warning btn-sm fw-bold px-3 py-2 text-nowrap">
+                Review Skills <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    {% endif %}
 
     <!-- Quick Management Hub Links -->
     <div class="row g-3 mb-4">
@@ -102,12 +120,23 @@
         <div class="col-md-3">
             <a href="{% url 'dashboard:manage_services' %}" class="card border-0 shadow-sm text-decoration-none p-3 h-100 card-hover">
                 <div class="d-flex align-items-center">
-                    <div class="p-3 bg-info-subtle text-info rounded-3 me-3">
+                    <div class="p-3 bg-info-subtle text-info rounded-3 me-3 position-relative">
                         <i class="bi bi-hdd-stack-fill fs-4"></i>
+                        {% if pending_skill_requests_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark border border-white">
+                                {{ pending_skill_requests_count }}
+                            </span>
+                        {% endif %}
                     </div>
                     <div>
                         <h6 class="fw-bold text-dark mb-0">Services & Skills</h6>
-                        <small class="text-muted">Domains & skill categories</small>
+                        <small class="text-muted">
+                            {% if pending_skill_requests_count > 0 %}
+                                <strong class="text-warning-emphasis">{{ pending_skill_requests_count }} pending review</strong>
+                            {% else %}
+                                Domains & skill categories
+                            {% endif %}
+                        </small>
                     </div>
                 </div>
             </a>
@@ -126,6 +155,7 @@
             </a>
         </div>
     </div>
+
 
     <!-- Appointment Completion Velocity Quick Widget -->
     <div class="card border-0 shadow-sm mb-4 bg-gradient text-white" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">

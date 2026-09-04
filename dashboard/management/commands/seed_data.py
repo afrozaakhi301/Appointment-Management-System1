@@ -40,6 +40,7 @@ class Command(BaseCommand):
 
         # 2. Services
         services_data = [
+            ("General Architecture & Technical Scoping", "Not sure which technical service fits your project? Work directly with a lead software architect to define MVP requirements, evaluate technology trade-offs, estimate timelines, and choose the optimal tech stack."),
             ("Cloud Migration & AWS/GCP Architecture", "End-to-end guidance on transitioning on-premises monoliths to scalable, resilient multi-cloud architectures with container orchestration."),
             ("Backend Performance & Database Optimization", "In-depth profiling, query plan optimization, indexing strategies, and database connection pooling for high-throughput applications."),
             ("DevOps CI/CD & Infrastructure as Code", "Modernization of delivery pipelines using GitHub Actions, GitLab CI, Terraform, Kubernetes Helm charts, and automated testing."),

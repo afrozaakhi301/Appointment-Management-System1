@@ -1,13 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from accounts.decorators import client_required, engineer_required, role_required
 from accounts.models import User
 from dashboard.utils import log_activity
 from notifications.utils import create_notification
-from services.models import Service
+from services.models import EngineerExpertise, Service
 from .forms import (
     AppointmentBookingForm,
     AppointmentDocumentUploadForm,
@@ -31,20 +31,29 @@ def book_appointment_view(request):
             appointment = form.save(commit=False)
             appointment.client = request.user
             appointment.status = Appointment.Status.PENDING
+
+            # File upload validation: max 5MB, PDF/DOC/DOCX/ZIP
+            uploaded_doc = request.FILES.get("document")
+            if uploaded_doc:
+                max_size = 5 * 1024 * 1024
+                if uploaded_doc.size > max_size:
+                    messages.error(request, "Document file size exceeds 5MB limit.")
+                    return render(request, "appointments/book_appointment.html", {"form": form})
+
             appointment.save()
 
-            # Handle optional document
-            doc_file = request.FILES.get("document")
-            if doc_file:
+            if uploaded_doc:
                 AppointmentDocument.objects.create(
                     appointment=appointment,
-                    file=doc_file
+                    file=uploaded_doc
                 )
 
-            log_activity(request.user, f"Created appointment request #{appointment.id} ({appointment.project_title})")
+            log_activity(request.user, f"Created appointment #{appointment.id} for {appointment.service.name}")
+
+            # Send Notification to Engineer
             create_notification(
                 user=appointment.engineer,
-                message=f"New consultation request from {request.user.get_full_name() or request.user.username} for '{appointment.project_title}' on {appointment.appointment_date}.",
+                message=f"New consultation request submitted by client {request.user.username} for '{appointment.project_title}'.",
                 appointment=appointment
             )
 
@@ -55,7 +64,17 @@ def book_appointment_view(request):
     else:
         form = AppointmentBookingForm(initial=initial_data)
 
-    engineers = User.objects.filter(role=User.Role.ENGINEER, is_active=True).select_related("engineer_profile").prefetch_related("engineer_expertises__expertise")
+    engineers = User.objects.filter(
+        role=User.Role.ENGINEER, 
+        is_active=True
+    ).select_related("engineer_profile").prefetch_related(
+        Prefetch(
+            "engineer_expertises",
+            queryset=EngineerExpertise.objects.filter(
+                status=EngineerExpertise.VerificationStatus.APPROVED
+            ).select_related("expertise")
+        )
+    )
     services = Service.objects.filter(is_active=True)
 
     return render(
