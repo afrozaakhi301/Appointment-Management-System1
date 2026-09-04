@@ -20,51 +20,6 @@ from .services import validate_status_transition
 
 @client_required
 def book_appointment_view(request):
-    initial_data = {}
-    if "engineer" in request.GET:
-        initial_data["engineer"] = request.GET.get("engineer")
-    if "service" in request.GET:
-        initial_data["service"] = request.GET.get("service")
-
-    if request.method == "POST":
-        form = AppointmentBookingForm(request.POST, request.FILES)
-        if form.is_valid():
-            appointment = form.save(commit=False)
-            appointment.client = request.user
-            appointment.status = Appointment.Status.PENDING
-
-            # File upload validation: max 5MB, PDF/DOC/DOCX/ZIP
-            uploaded_doc = request.FILES.get("document")
-            if uploaded_doc:
-                max_size = 5 * 1024 * 1024
-                if uploaded_doc.size > max_size:
-                    messages.error(request, "Document file size exceeds 5MB limit.")
-                    return render(request, "appointments/book_appointment.html", {"form": form})
-
-            appointment.save()
-
-            if uploaded_doc:
-                AppointmentDocument.objects.create(
-                    appointment=appointment,
-                    file=uploaded_doc
-                )
-
-            log_activity(request.user, f"Created appointment #{appointment.id} for {appointment.service.name}")
-
-            # Send Notification to Engineer
-            create_notification(
-                user=appointment.engineer,
-                message=f"New consultation request submitted by client {request.user.username} for '{appointment.project_title}'.",
-                appointment=appointment
-            )
-
-            messages.success(request, f"Your appointment request for '{appointment.project_title}' has been submitted successfully! The engineer will review your request.")
-            return redirect("appointments:appointment_detail", appointment_id=appointment.id)
-        else:
-            messages.error(request, "Unable to submit appointment request. Please check the errors below.")
-    else:
-        form = AppointmentBookingForm(initial=initial_data)
-
     engineers = User.objects.filter(
         role=User.Role.ENGINEER, 
         is_active=True
@@ -145,6 +100,67 @@ def book_appointment_view(request):
 
         engineer_service_map[str(svc.id)] = matching
 
+    initial_data = {}
+    if "engineer" in request.GET:
+        initial_data["engineer"] = request.GET.get("engineer")
+    if "service" in request.GET:
+        initial_data["service"] = request.GET.get("service")
+        if "engineer" not in initial_data:
+            svc_key = str(request.GET.get("service"))
+            if svc_key in engineer_service_map and len(engineer_service_map[svc_key]) == 1:
+                initial_data["engineer"] = engineer_service_map[svc_key][0]["id"]
+
+    if request.method == "POST":
+        form = AppointmentBookingForm(request.POST, request.FILES)
+        if form.is_valid():
+            appointment = form.save(commit=False)
+            appointment.client = request.user
+            appointment.status = Appointment.Status.PENDING
+
+            # File upload validation: max 5MB, PDF/DOC/DOCX/ZIP
+            uploaded_doc = request.FILES.get("document")
+            if uploaded_doc:
+                max_size = 5 * 1024 * 1024
+                if uploaded_doc.size > max_size:
+                    messages.error(request, "Document file size exceeds 5MB limit.")
+                    return render(
+                        request, 
+                        "appointments/book_appointment.html", 
+                        {
+                            "form": form,
+                            "engineers": engineers,
+                            "services": services,
+                            "engineer_service_map": engineer_service_map,
+                            "all_engineers_data": all_engineers_data,
+                            "engineer_service_map_json": json.dumps(engineer_service_map),
+                            "all_engineers_json": json.dumps(all_engineers_data),
+                        }
+                    )
+
+            appointment.save()
+
+            if uploaded_doc:
+                AppointmentDocument.objects.create(
+                    appointment=appointment,
+                    file=uploaded_doc
+                )
+
+            log_activity(request.user, f"Created appointment #{appointment.id} for {appointment.service.name}")
+
+            # Send Notification to Engineer
+            create_notification(
+                user=appointment.engineer,
+                message=f"New consultation request submitted by client {request.user.username} for '{appointment.project_title}'.",
+                appointment=appointment
+            )
+
+            messages.success(request, f"Your appointment request for '{appointment.project_title}' has been submitted successfully! The engineer will review your request.")
+            return redirect("appointments:appointment_detail", appointment_id=appointment.id)
+        else:
+            messages.error(request, "Unable to submit appointment request. Please check the errors below.")
+    else:
+        form = AppointmentBookingForm(initial=initial_data)
+
     return render(
         request,
         "appointments/book_appointment.html",
@@ -152,6 +168,8 @@ def book_appointment_view(request):
             "form": form,
             "engineers": engineers,
             "services": services,
+            "engineer_service_map": engineer_service_map,
+            "all_engineers_data": all_engineers_data,
             "engineer_service_map_json": json.dumps(engineer_service_map),
             "all_engineers_json": json.dumps(all_engineers_data),
         }

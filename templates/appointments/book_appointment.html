@@ -182,15 +182,30 @@
                 </div>
             </div>
         </div>
-    {{ engineer_service_map_json|json_script:"engineer-service-map-data" }}
-    {{ all_engineers_json|json_script:"all-engineers-data" }}
+    {{ engineer_service_map|json_script:"engineer-service-map-data" }}
+    {{ all_engineers_data|json_script:"all-engineers-data" }}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    const engineerServiceMap = JSON.parse(document.getElementById("engineer-service-map-data").textContent || "{}");
-    const allEngineers = JSON.parse(document.getElementById("all-engineers-data").textContent || "[]");
+    function parseJsonScript(id, defaultValue) {
+        try {
+            const el = document.getElementById(id);
+            if (!el) return defaultValue;
+            let data = JSON.parse(el.textContent || "null");
+            if (typeof data === "string") {
+                data = JSON.parse(data);
+            }
+            return data || defaultValue;
+        } catch (e) {
+            console.error("Error parsing JSON script:", id, e);
+            return defaultValue;
+        }
+    }
+
+    const engineerServiceMap = parseJsonScript("engineer-service-map-data", {});
+    const allEngineers = parseJsonScript("all-engineers-data", []);
 
     function updateMarkedServiceUI(selectedId) {
         document.querySelectorAll(".service-select-card").forEach(function(card) {
@@ -214,12 +229,14 @@
         const engineerSelect = document.getElementById("id_engineer");
         if (!engineerSelect) return;
 
-        const currentSelected = preselectedEngineerId !== undefined ? String(preselectedEngineerId) : String(engineerSelect.value);
+        const currentSelected = (preselectedEngineerId !== undefined && preselectedEngineerId !== null && String(preselectedEngineerId).trim() !== "")
+            ? String(preselectedEngineerId) 
+            : String(engineerSelect.value || "");
 
         let targetList = [];
         let isFallback = false;
 
-        if (serviceId && engineerServiceMap[String(serviceId)]) {
+        if (serviceId && engineerServiceMap && engineerServiceMap[String(serviceId)]) {
             targetList = engineerServiceMap[String(serviceId)];
         } else {
             targetList = allEngineers;
@@ -248,7 +265,7 @@
 
         targetList.forEach(function(eng) {
             const option = document.createElement("option");
-            option.value = eng.id;
+            option.value = String(eng.id);
 
             // Formatted user-friendly label: "Jane Doe — Lead Cloud Architect (★ 4.9)"
             let label = eng.name;
@@ -270,15 +287,30 @@
 
         if (matchingSelectionFound) {
             engineerSelect.value = currentSelected;
+            for (let i = 0; i < engineerSelect.options.length; i++) {
+                if (String(engineerSelect.options[i].value) === String(currentSelected)) {
+                    engineerSelect.selectedIndex = i;
+                    engineerSelect.options[i].selected = true;
+                } else {
+                    engineerSelect.options[i].selected = false;
+                }
+            }
         } else if (targetList.length === 1) {
             // Exactly 1 matching engineer found -> auto-select
-            engineerSelect.value = String(targetList[0].id);
-            const singleOption = engineerSelect.querySelector('option[value="' + targetList[0].id + '"]');
-            if (singleOption) {
-                singleOption.selected = true;
+            const singleId = String(targetList[0].id);
+            engineerSelect.value = singleId;
+            defaultOption.selected = false;
+            for (let i = 0; i < engineerSelect.options.length; i++) {
+                if (String(engineerSelect.options[i].value) === singleId) {
+                    engineerSelect.selectedIndex = i;
+                    engineerSelect.options[i].selected = true;
+                } else {
+                    engineerSelect.options[i].selected = false;
+                }
             }
         } else {
             engineerSelect.value = "";
+            engineerSelect.selectedIndex = 0;
             defaultOption.selected = true;
         }
 
