@@ -165,11 +165,13 @@
                             </div>
                         {% endif %}
 
-                        <div class="d-flex justify-content-end">
-                            <a href="{% url 'appointments:appointment_detail' appointment.id %}" class="btn btn-primary fw-semibold px-4 shadow-sm">
-                                <i class="bi bi-box-arrow-up-right me-2"></i>Open Full Consultation &amp; Documents
-                            </a>
-                        </div>
+                        {% if user.is_superuser or user.role == 'Admin' or user == appointment.client or user == appointment.engineer %}
+                            <div class="d-flex justify-content-end">
+                                <a href="{% url 'appointments:appointment_detail' appointment.id %}" class="btn btn-primary fw-semibold px-4 shadow-sm">
+                                    <i class="bi bi-box-arrow-up-right me-2"></i>Open Full Consultation &amp; Documents
+                                </a>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             {% endif %}

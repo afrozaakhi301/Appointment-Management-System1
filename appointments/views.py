@@ -2,13 +2,15 @@ import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import Avg, Count, Prefetch, Q
+from django.db.models import Avg, Case, Count, IntegerField, Prefetch, Q, Value, When
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from accounts.decorators import client_required, engineer_required, role_required
 from accounts.models import User
 from dashboard.utils import log_activity
 from notifications.utils import create_notification
 from services.models import EngineerExpertise, Service
+from .ai_matcher import calculate_match_scores
 from .forms import (
     AppointmentBookingForm,
     AppointmentDocumentUploadForm,
@@ -34,7 +36,17 @@ def book_appointment_view(request):
         avg_rating=Avg("engineer_appointments__feedback__rating"),
         review_count=Count("engineer_appointments__feedback", distinct=True)
     )
-    services = Service.objects.filter(is_active=True)
+    services = Service.objects.filter(is_active=True).annotate(
+        priority=Case(
+            When(name__icontains="General Architecture", then=Value(0)),
+            default=Value(1),
+            output_field=IntegerField(),
+        )
+    ).order_by("priority", "name")
+    general_service = services.filter(
+        Q(name__icontains="General Architecture") | 
+        Q(name__icontains="Scoping")
+    ).first()
 
     # Prepare serialized data for dynamic frontend filtering
     all_engineers_data = []
@@ -136,6 +148,7 @@ def book_appointment_view(request):
                             "form": form,
                             "engineers": engineers,
                             "services": services,
+                            "general_service": general_service,
                             "engineer_service_map": engineer_service_map,
                             "all_engineers_data": all_engineers_data,
                             "engineer_service_map_json": json.dumps(engineer_service_map),
@@ -174,6 +187,7 @@ def book_appointment_view(request):
             "form": form,
             "engineers": engineers,
             "services": services,
+            "general_service": general_service,
             "engineer_service_map": engineer_service_map,
             "all_engineers_data": all_engineers_data,
             "engineer_service_map_json": json.dumps(engineer_service_map),
@@ -471,3 +485,40 @@ def appointment_upload_doc_view(request, appointment_id):
             messages.error(request, "Failed to upload document.")
 
     return redirect("appointments:appointment_detail", appointment_id=appointment.id)
+
+
+def ai_match_view(request):
+    """
+    JSON API endpoint for AI-assisted problem analysis and engineer matching.
+    Accepts POST JSON {"text": "..."} and returns structured analysis including
+    the matched Service and ranked Engineers with compatibility scores.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed. Use POST."}, status=405)
+
+    text = ""
+    try:
+        if request.body:
+            content_type = request.META.get("CONTENT_TYPE", "")
+            if "application/json" in content_type:
+                payload = json.loads(request.body.decode("utf-8"))
+                text = payload.get("text", "")
+            else:
+                text = request.POST.get("text", "")
+        else:
+            text = request.POST.get("text", "")
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({"error": "Invalid JSON format in request body."}, status=400)
+
+    if not isinstance(text, str) or not text.strip():
+        return JsonResponse(
+            {"error": "Please provide project details or problem text in the 'text' field."},
+            status=400
+        )
+
+    try:
+        analysis = calculate_match_scores(text.strip())
+        return JsonResponse(analysis, status=200)
+    except Exception as e:
+        return JsonResponse({"error": f"AI Matcher error: {str(e)}"}, status=500)
+

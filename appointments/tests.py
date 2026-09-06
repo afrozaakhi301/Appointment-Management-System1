@@ -310,6 +310,29 @@ class AppointmentBusinessLogicTests(TestCase):
         self.assertContains(response, 'id="engineer-service-map-data"')
         self.assertContains(response, 'id="all-engineers-data"')
 
+    def test_book_appointment_displays_scoping_card_highlight_and_sequential_badges(self):
+        general_svc, _ = Service.objects.get_or_create(
+            name="General Architecture & Technical Scoping",
+            defaults={
+                "description": "Scoping session for non-technical clients.",
+                "is_active": True
+            }
+        )
+        self.client.login(username="client1", password="Password123!")
+        response = self.client.get(reverse("appointments:book_appointment"))
+        self.assertEqual(response.status_code, 200)
+
+        # Context has general_service as the first item in services list
+        self.assertIn("general_service", response.context)
+        self.assertEqual(response.context["general_service"], general_svc)
+        self.assertEqual(list(response.context["services"])[0], general_svc)
+
+        # Sequential badges and highlight on Service #1
+        self.assertContains(response, "Service #1")
+        self.assertContains(response, "💡 Not sure which service fits? Start Here")
+        self.assertContains(response, "Work directly with a lead software architect to define requirements")
+        self.assertContains(response, "scoping-highlight-card")
+
 
 class FullVivaScenarioEndToEndTest(TestCase):
     def test_complete_twenty_two_step_scenario(self):
@@ -465,6 +488,219 @@ class FullVivaScenarioEndToEndTest(TestCase):
         from dashboard.utils import log_activity
         log_activity(client_user, "Client submitted feedback for K8s Consultation")
         self.assertTrue(ActivityLog.objects.filter(user=client_user).exists())
+
+
+class AIMatcherUnitTests(TestCase):
+    def setUp(self):
+        from accounts.models import EngineerProfile
+        from services.models import EngineerExpertise, Expertise
+
+        # 1. Create Services
+        self.cloud_service = Service.objects.create(
+            name="Cloud Architecture & AWS Migration",
+            description="Enterprise AWS infrastructure, Docker containerization, Kubernetes clusters, and Terraform."
+        )
+        self.db_service = Service.objects.create(
+            name="Database Performance & Optimization",
+            description="PostgreSQL indexing, SQL query tuning, Redis caching, and replication."
+        )
+
+        # 2. Create Expertises
+        self.exp_aws = Expertise.objects.create(name="AWS Solutions Architecture")
+        self.exp_k8s = Expertise.objects.create(name="Kubernetes & Docker")
+        self.exp_postgres = Expertise.objects.create(name="PostgreSQL Optimization")
+
+        # 3. Create Cloud Engineer (Lead)
+        self.cloud_eng = User.objects.create_user(
+            username="cloud_lead",
+            password="Password123!",
+            first_name="Jane",
+            last_name="Doe",
+            role=User.Role.ENGINEER
+        )
+        eng_prof1, _ = EngineerProfile.objects.get_or_create(user=self.cloud_eng)
+        eng_prof1.designation = "Lead Cloud Architect"
+        eng_prof1.years_of_experience = 10
+        eng_prof1.save()
+
+        EngineerExpertise.objects.create(
+            engineer=self.cloud_eng,
+            expertise=self.exp_aws,
+            proficiency_level=EngineerExpertise.ProficiencyLevel.LEAD,
+            status=EngineerExpertise.VerificationStatus.APPROVED
+        )
+        EngineerExpertise.objects.create(
+            engineer=self.cloud_eng,
+            expertise=self.exp_k8s,
+            proficiency_level=EngineerExpertise.ProficiencyLevel.EXPERT,
+            status=EngineerExpertise.VerificationStatus.APPROVED
+        )
+
+        # 4. Create Database Engineer (Intermediate)
+        self.db_eng = User.objects.create_user(
+            username="db_specialist",
+            password="Password123!",
+            first_name="Alex",
+            last_name="Smith",
+            role=User.Role.ENGINEER
+        )
+        eng_prof2, _ = EngineerProfile.objects.get_or_create(user=self.db_eng)
+        eng_prof2.designation = "Database Administrator"
+        eng_prof2.years_of_experience = 4
+        eng_prof2.save()
+
+        EngineerExpertise.objects.create(
+            engineer=self.db_eng,
+            expertise=self.exp_postgres,
+            proficiency_level=EngineerExpertise.ProficiencyLevel.INTERMEDIATE,
+            status=EngineerExpertise.VerificationStatus.APPROVED
+        )
+
+    def test_tokenize_clean_and_stop_words(self):
+        from appointments.ai_matcher import tokenize
+
+        text = "We need a cloud architecture for AWS and Kubernetes with ci/cd pipelines!"
+        tokens = tokenize(text)
+
+        self.assertIn("cloud", tokens)
+        self.assertIn("aws", tokens)
+        self.assertIn("kubernetes", tokens)
+        self.assertIn("ci/cd", tokens)
+        self.assertNotIn("a", tokens)
+        self.assertNotIn("and", tokens)
+        self.assertNotIn("with", tokens)
+
+        # Empty/None handling
+        self.assertEqual(tokenize(""), [])
+        self.assertEqual(tokenize(None), [])
+
+    def test_cosine_similarity_edge_cases(self):
+        from appointments.ai_matcher import cosine_similarity
+
+        # Identical vectors
+        v1 = {"aws": 2, "cloud": 1}
+        v2 = {"aws": 2, "cloud": 1}
+        self.assertAlmostEqual(cosine_similarity(v1, v2), 1.0, places=3)
+
+        # Orthogonal vectors (no intersection)
+        v3 = {"database": 1, "sql": 2}
+        self.assertEqual(cosine_similarity(v1, v3), 0.0)
+
+        # Empty vectors
+        self.assertEqual(cosine_similarity({}, v1), 0.0)
+        self.assertEqual(cosine_similarity(v1, {}), 0.0)
+
+    def test_calculate_match_scores_domain_and_engineer_scoring(self):
+        from appointments.ai_matcher import calculate_match_scores
+
+        query = "We need assistance with AWS cloud architecture, Kubernetes containers, and infrastructure scaling."
+        result = calculate_match_scores(query)
+
+        self.assertEqual(result["status"], "success")
+        self.assertIsNotNone(result["matched_service"])
+        self.assertEqual(result["matched_service"]["id"], self.cloud_service.id)
+
+        # Cloud engineer must be top ranked and shortlisted >= 80%
+        engineers = result["engineers"]
+        self.assertTrue(len(engineers) >= 2)
+
+        top_eng = engineers[0]
+        self.assertEqual(top_eng["id"], self.cloud_eng.id)
+        self.assertGreaterEqual(top_eng["score"], 80)
+        self.assertTrue(top_eng["is_shortlisted"])
+        self.assertTrue(top_eng["is_recommended"])
+
+        # Database engineer should have lower score for cloud query
+        db_score_entry = next(e for e in engineers if e["id"] == self.db_eng.id)
+        self.assertLess(db_score_entry["score"], top_eng["score"])
+
+    def test_calculate_match_scores_database_domain(self):
+        from appointments.ai_matcher import calculate_match_scores
+
+        query = "PostgreSQL query tuning, indexing optimization, and high volume database performance."
+        result = calculate_match_scores(query)
+
+        self.assertEqual(result["matched_service"]["id"], self.db_service.id)
+        self.assertEqual(result["top_engineer"]["id"], self.db_eng.id)
+        self.assertGreaterEqual(result["top_engineer"]["score"], 80)
+        self.assertTrue(result["top_engineer"]["is_shortlisted"])
+
+    def test_proficiency_multiplier_influences_score(self):
+        from accounts.models import EngineerProfile
+        from appointments.ai_matcher import calculate_match_scores
+        from services.models import EngineerExpertise
+
+        # Create beginner engineer with same expertise
+        beginner_eng = User.objects.create_user(
+            username="beginner_cloud",
+            password="Password123!",
+            role=User.Role.ENGINEER
+        )
+        EngineerProfile.objects.get_or_create(user=beginner_eng)
+        EngineerExpertise.objects.create(
+            engineer=beginner_eng,
+            expertise=self.exp_aws,
+            proficiency_level=EngineerExpertise.ProficiencyLevel.BEGINNER,
+            status=EngineerExpertise.VerificationStatus.APPROVED
+        )
+
+        result = calculate_match_scores("AWS Solutions Architecture")
+        lead_entry = next(e for e in result["engineers"] if e["id"] == self.cloud_eng.id)
+        beg_entry = next(e for e in result["engineers"] if e["id"] == beginner_eng.id)
+
+        self.assertGreater(lead_entry["score"], beg_entry["score"])
+
+
+class AIMatchApiEndpointTests(TestCase):
+    def setUp(self):
+        from services.models import Expertise, EngineerExpertise
+
+        self.service = Service.objects.create(
+            name="Cloud DevOps Architecture",
+            description="AWS, GCP, Docker, Kubernetes, CI/CD."
+        )
+        self.eng = User.objects.create_user(
+            username="api_eng",
+            password="Password123!",
+            role=User.Role.ENGINEER
+        )
+        exp = Expertise.objects.create(name="AWS DevOps")
+        EngineerExpertise.objects.create(
+            engineer=self.eng,
+            expertise=exp,
+            proficiency_level=EngineerExpertise.ProficiencyLevel.LEAD,
+            status=EngineerExpertise.VerificationStatus.APPROVED
+        )
+
+    def test_ai_match_endpoint_post_json_success(self):
+        import json
+
+        url = reverse("appointments:ai_match")
+        payload = {"text": "We need AWS DevOps consultation with Kubernetes."}
+        response = self.client.post(url, data=json.dumps(payload), content_type="application/json")
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["status"], "success")
+        self.assertIn("matched_service", data)
+        self.assertIn("engineers", data)
+        self.assertIn("extracted_keywords", data)
+        self.assertEqual(data["matched_service"]["id"], self.service.id)
+        self.assertTrue(len(data["engineers"]) >= 1)
+
+    def test_ai_match_endpoint_empty_text_returns_400(self):
+        import json
+
+        url = reverse("appointments:ai_match")
+        response = self.client.post(url, data=json.dumps({"text": ""}), content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.json())
+
+    def test_ai_match_endpoint_invalid_method_returns_405(self):
+        url = reverse("appointments:ai_match")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 405)
+
 
 
 

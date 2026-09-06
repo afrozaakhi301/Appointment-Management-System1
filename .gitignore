@@ -20,6 +20,7 @@ db.sqlite3-journal
 # Backups & Snapshots
 project_snapshot.txt
 *.bak
+media/appointment_docs/specs*
 
 # IDE & OS
 .vscode/

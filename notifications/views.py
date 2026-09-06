@@ -114,8 +114,14 @@ def mark_as_read_view(request, notification_id):
     notification = get_object_or_404(Notification, id=notification_id, user=request.user)
     notification.is_read = True
     notification.save()
-    
-    if notification.appointment:
+
+    user = request.user
+    if notification.appointment and (
+        user.is_superuser or 
+        user.role == "Admin" or 
+        notification.appointment.client == user or 
+        notification.appointment.engineer == user
+    ):
         return redirect("appointments:appointment_detail", appointment_id=notification.appointment.id)
     return redirect("notifications:notification_list")
 

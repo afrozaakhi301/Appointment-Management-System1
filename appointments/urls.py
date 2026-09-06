@@ -5,6 +5,7 @@ app_name = "appointments"
 
 urlpatterns = [
     path("book/", views.book_appointment_view, name="book_appointment"),
+    path("api/ai-match/", views.ai_match_view, name="ai_match"),
     path("my/", views.client_appointments_view, name="client_appointments"),
     path("requests/", views.engineer_requests_view, name="engineer_requests"),
     path("schedule/", views.engineer_schedule_view, name="engineer_schedule"),

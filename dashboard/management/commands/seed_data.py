@@ -188,11 +188,11 @@ class Command(BaseCommand):
                 ]
             },
             {
-                "username": "alex_turner",
-                "first_name": "Alex",
-                "last_name": "Turner",
-                "email": "alex.turner@tns-software.com",
-                "phone": "+1-555-0201",
+                "username": "suyeb_ali",
+                "first_name": "Suyeb",
+                "last_name": "Ali",
+                "email": "suyeb.ali@tns-software.com",
+                "phone": "+880 1718-000808",
                 "designation": "Principal Cloud Architect",
                 "experience": 9,
                 "bio": "Specializes in large-scale distributed systems, multi-cloud migrations (AWS/GCP), and Kubernetes orchestration.",
@@ -203,11 +203,11 @@ class Command(BaseCommand):
                 ]
             },
             {
-                "username": "sophia_chen",
-                "first_name": "Sophia",
-                "last_name": "Chen",
-                "email": "sophia.chen@tns-software.com",
-                "phone": "+1-555-0202",
+                "username": "nadia_hossain",
+                "first_name": "Nadia",
+                "last_name": "Hossain",
+                "email": "nadia.hossain@tns-software.com",
+                "phone": "+880 1819-000909",
                 "designation": "Staff Database & Backend Engineer",
                 "experience": 7,
                 "bio": "Expert in high-concurrency database architectures, PostgreSQL tuning, indexing optimization, Redis caching layers, and Python asynchronous services.",
@@ -218,11 +218,11 @@ class Command(BaseCommand):
                 ]
             },
             {
-                "username": "marcus_vance",
-                "first_name": "Marcus",
-                "last_name": "Vance",
-                "email": "marcus.vance@tns-software.com",
-                "phone": "+1-555-0203",
+                "username": "wasim_kamal",
+                "first_name": "Wasim",
+                "last_name": "Kamal",
+                "email": "wasim.kamal@tns-software.com",
+                "phone": "+880 1920-001010",
                 "designation": "Lead DevOps & Platform Security Engineer",
                 "experience": 6,
                 "bio": "Passionate about GitOps, automated infrastructure provisioning with Terraform, zero-downtime blue/green deployments, and security compliance.",
@@ -346,31 +346,31 @@ class Command(BaseCommand):
             {
                 "title": "PostgreSQL Query Optimization & Index Audit",
                 "client": client_objs[0],
-                "engineer": eng_objs[1],  # Sophia
+                "engineer": eng_objs[1],  # Nadia
                 "service": service_objs[1],  # Database
                 "date": today,
                 "start": time(10, 0),
                 "end": time(11, 30),
                 "desc": "Our logistics order tracking system was encountering 2-second query latencies on the primary orders table. Required deep indexing analysis.",
                 "rating": 5,
-                "review": "Sophia was phenomenal! She pinpointed the missing partial index in 15 minutes, reducing our latency from 2,100ms down to 18ms. Exceptional expertise."
+                "review": "Nadia was phenomenal! She pinpointed the missing partial index in 15 minutes, reducing our latency from 2,100ms down to 18ms. Exceptional expertise."
             },
             {
                 "title": "Kubernetes Microservices Mesh Ingress Setup",
                 "client": client_objs[1],
-                "engineer": eng_objs[0],  # Alex
+                "engineer": eng_objs[0],  # Suyeb
                 "service": service_objs[0],  # Cloud
                 "date": today - timedelta(days=2),
                 "start": time(14, 0),
                 "end": time(15, 30),
                 "desc": "Configuring Istio service mesh and traffic routing across microservices clusters.",
                 "rating": 5,
-                "review": "Alex demonstrated master-level knowledge of AWS EKS and Istio routing. Highly recommended."
+                "review": "Suyeb demonstrated master-level knowledge of AWS EKS and Istio routing. Highly recommended."
             },
             {
                 "title": "CI/CD Pipeline Security & Static Analysis Audit",
                 "client": client_objs[0],
-                "engineer": eng_objs[2],  # Marcus
+                "engineer": eng_objs[2],  # Wasim
                 "service": service_objs[2],  # DevOps
                 "date": today - timedelta(days=8),
                 "start": time(11, 0),
@@ -382,19 +382,19 @@ class Command(BaseCommand):
             {
                 "title": "Django ORM Query N+1 Bottleneck Refactor",
                 "client": client_objs[1],
-                "engineer": eng_objs[1],  # Sophia
+                "engineer": eng_objs[1],  # Nadia
                 "service": service_objs[4],  # Python/Django
                 "date": today - timedelta(days=18),
                 "start": time(15, 0),
                 "end": time(16, 30),
                 "desc": "Resolving serious N+1 query explosion across multi-level nested foreign key serialization.",
                 "rating": 5,
-                "review": "Sophia utilized prefetch_related and selected subqueries to slice database hits from 450 queries down to 4 queries."
+                "review": "Nadia utilized prefetch_related and selected subqueries to slice database hits from 450 queries down to 4 queries."
             },
             {
                 "title": "Cloud Architecture High Availability Review",
                 "client": client_objs[0],
-                "engineer": eng_objs[0],  # Alex
+                "engineer": eng_objs[0],  # Suyeb
                 "service": service_objs[0],  # Cloud
                 "date": today - timedelta(days=40),
                 "start": time(10, 0),
@@ -434,7 +434,7 @@ class Command(BaseCommand):
             project_title="AWS Multi-Region Disaster Recovery Architecture",
             defaults={
                 "client": client_objs[1],
-                "engineer": eng_objs[0],  # Alex
+                "engineer": eng_objs[0],  # Suyeb
                 "service": service_objs[0],  # Cloud
                 "appointment_date": next_monday,
                 "start_time": time(14, 0),
@@ -450,7 +450,7 @@ class Command(BaseCommand):
             project_title="Kubernetes Helm Deployment Pipeline Migration",
             defaults={
                 "client": client_objs[0],
-                "engineer": eng_objs[2],  # Marcus
+                "engineer": eng_objs[2],  # Wasim
                 "service": service_objs[2],  # DevOps
                 "appointment_date": next_tuesday,
                 "start_time": time(11, 0),
@@ -477,9 +477,9 @@ Test Credentials created:
    - rashed_rana     (Password: Engineer123!) -> Senior Microservices Architect
    - shamsun_lata    (Password: Engineer123!) -> Lead QA & AppSec Specialist
    - mahin_khan      (Password: Engineer123!) -> Senior Cloud Native Engineer
-   - alex_turner     (Password: Engineer123!)
-   - sophia_chen     (Password: Engineer123!)
-   - marcus_vance    (Password: Engineer123!)
+   - suyeb_ali       (Password: Engineer123!) -> Principal Cloud Architect
+   - nadia_hossain   (Password: Engineer123!) -> Staff Database & Backend Engineer
+   - wasim_kamal     (Password: Engineer123!) -> Lead DevOps & Platform Security Engineer
 
 3. Client Accounts:
    - techcorp_client (Password: Client123!)

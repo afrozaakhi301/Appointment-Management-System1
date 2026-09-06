@@ -34,6 +34,93 @@
                     <form method="post" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}
 
+                        <!-- AI Problem Analyzer & Matcher (Decision-Support Engine) -->
+                        <div class="ai-matcher-box card border-0 shadow-sm mb-4 rounded-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff;">
+                            <div class="card-body p-4">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="ai-icon-pulse me-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: #ffffff; font-size: 1.35rem; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);">
+                                            <i class="bi bi-stars"></i>
+                                        </div>
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <h5 class="fw-bold mb-0 text-white">AI Problem Analyzer &amp; Matcher</h5>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1" style="font-size: 0.72rem; letter-spacing: 0.03em;">DECISION SUPPORT</span>
+                                            </div>
+                                            <p class="text-white-50 small mb-0 mt-1">Describe your technical problem or architectural needs to instantly match the optimal service and certified lead engineer.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Input & Textarea -->
+                                <div class="mb-3">
+                                    <textarea id="ai-project-input" class="form-control" rows="3" placeholder="e.g., We need to migrate our high-traffic Django application to AWS ECS with Kubernetes, optimize PostgreSQL database queries, and setup automated CI/CD pipelines." style="background-color: rgba(15, 23, 42, 0.7) !important; border-color: rgba(148, 163, 184, 0.3) !important; color: #f8fafc !important; font-size: 0.92rem;"></textarea>
+                                </div>
+
+                                <!-- Quick Suggestion Prompts -->
+                                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                                    <span class="text-white-50 small me-1"><i class="bi bi-lightbulb me-1"></i>Try:</span>
+                                    <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill small ai-sample-btn" style="font-size: 0.78rem;" onclick="fillAiSample('We need to architect an AWS cloud migration with Docker, Kubernetes, and Terraform infrastructure.')">Cloud &amp; K8s Migration</button>
+                                    <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill small ai-sample-btn" style="font-size: 0.78rem;" onclick="fillAiSample('Database optimization for slow PostgreSQL queries, indexing, and Redis caching under high load.')">Database &amp; Redis Tuning</button>
+                                    <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill small ai-sample-btn" style="font-size: 0.78rem;" onclick="fillAiSample('Django backend code review, OWASP security audit, and microservice REST API design.')">Security &amp; Code Review</button>
+                                    <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill small ai-sample-btn" style="font-size: 0.78rem;" onclick="fillAiSample('Cross-platform mobile app development with Flutter, iOS and Android offline sync.')">Mobile Flutter App</button>
+                                </div>
+
+                                <!-- Action Row -->
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                    <div id="ai-match-feedback" class="small text-white-50"></div>
+                                    <button type="button" id="btn-run-ai-match" class="btn btn-primary px-4 fw-bold shadow-sm d-flex align-items-center gap-2" onclick="executeAiMatcher()">
+                                        <span id="ai-btn-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                        <i id="ai-btn-icon" class="bi bi-magic"></i>
+                                        <span id="ai-btn-text">Analyze &amp; Match</span>
+                                    </button>
+                                </div>
+
+                                <!-- Live Analysis Results Panel -->
+                                <div id="ai-results-panel" class="mt-4 pt-3 border-top d-none" style="border-color: rgba(255, 255, 255, 0.15) !important;">
+                                    <div class="row g-3">
+                                        <!-- Matched Service Domain -->
+                                        <div class="col-md-6">
+                                            <div class="p-3 rounded-3 h-100" style="background-color: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12);">
+                                                <div class="text-white-50 small text-uppercase fw-semibold mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                                                    <i class="bi bi-bullseye text-warning me-1"></i>Matched Service Domain
+                                                </div>
+                                                <h6 class="fw-bold text-white mb-2 fs-6" id="ai-matched-service-name">-</h6>
+                                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                    <span class="badge bg-success text-white px-2 py-1" id="ai-service-confidence-badge">Match: 95%</span>
+                                                    <span class="text-success-emphasis small fw-medium" id="ai-service-autoselected-text" style="color: #86efac !important;"><i class="bi bi-check-circle-fill me-1"></i>Selected in Step 1a</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Top Matched Lead Engineer -->
+                                        <div class="col-md-6">
+                                            <div class="p-3 rounded-3 h-100" style="background-color: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12);">
+                                                <div class="text-white-50 small text-uppercase fw-semibold mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                                                    <i class="bi bi-star-fill text-warning me-1"></i>Top Recommended Engineer
+                                                </div>
+                                                <h6 class="fw-bold text-white mb-2 fs-6" id="ai-top-engineer-name">-</h6>
+                                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                    <span class="badge bg-warning text-dark fw-bold px-2 py-1" id="ai-engineer-score-badge">⭐ 94% Compatibility</span>
+                                                    <span class="text-success-emphasis small fw-medium" id="ai-engineer-autoselected-text" style="color: #86efac !important;"><i class="bi bi-check-circle-fill me-1"></i>Selected in Step 1b</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Extracted Keywords Tags & Sync Button -->
+                                    <div class="mt-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                        <div class="d-flex flex-wrap align-items-center gap-1" id="ai-keywords-container">
+                                            <span class="text-white-50 small me-1">Matched Keywords:</span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-light text-white" onclick="copyAiPromptToScope()" title="Copy project description into Step 3 below">
+                                            <i class="bi bi-clipboard-check me-1"></i>Copy Description to Step 3
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Step 1a: Service Domain Selection -->
                         <div class="mb-4">
                             <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
@@ -47,51 +134,66 @@
                             <div class="row g-3 mb-2" id="serviceCardGrid">
                                 {% for svc in services %}
                                     <div class="col-md-6 col-lg-4">
-                                        <div class="service-select-card h-100 d-flex flex-column justify-content-between" 
+                                        <div class="service-select-card h-100 d-flex flex-column justify-content-between {% if forloop.first or 'General Architecture' in svc.name or 'Scoping' in svc.name %}scoping-highlight-card border-primary shadow-sm{% endif %}" 
                                              data-service-id="{{ svc.id }}" 
                                              data-service-name="{{ svc.name }}"
+                                             id="service-card-{{ svc.id }}"
                                              onclick="selectServiceCard('{{ svc.id }}')">
                                             
-                                            <!-- Top Checkmark Mark Badge -->
-                                            <div class="service-mark-badge" id="mark-badge-{{ svc.id }}" title="Service Selected">
-                                                <i class="bi bi-check-lg"></i>
-                                            </div>
-
-                                            <div>
-                                                <div class="d-flex align-items-center mb-2">
-                                                    <div class="service-icon-box me-3">
-                                                        {% if "General Architecture" in svc.name or "Scoping" in svc.name %}
-                                                            <i class="bi bi-compass-fill text-warning"></i>
-                                                        {% elif "Cloud" in svc.name or "AWS" in svc.name %}
-                                                            <i class="bi bi-cloud-arrow-up-fill"></i>
-                                                        {% elif "Database" in svc.name or "Backend" in svc.name %}
-                                                            <i class="bi bi-database-fill-gear"></i>
-                                                        {% elif "DevOps" in svc.name or "CI/CD" in svc.name or "Infrastructure" in svc.name %}
-                                                            <i class="bi bi-hdd-network-fill"></i>
-                                                        {% elif "Microservice" in svc.name or "API" in svc.name %}
-                                                            <i class="bi bi-diagram-3-fill"></i>
-                                                        {% elif "Code Review" in svc.name or "Python" in svc.name or "Django" in svc.name %}
-                                                            <i class="bi bi-code-slash"></i>
-                                                        {% elif "Mobile" in svc.name or "iOS" in svc.name or "Android" in svc.name or "Flutter" in svc.name %}
-                                                            <i class="bi bi-phone-fill text-primary"></i>
-                                                        {% elif "Cybersecurity" in svc.name or "Security" in svc.name or "Hardening" in svc.name %}
-                                                            <i class="bi bi-shield-lock-fill text-danger"></i>
-                                                        {% else %}
-                                                            <i class="bi bi-cpu-fill"></i>
-                                                        {% endif %}
-                                                    </div>
-                                                    <div class="pe-3">
-                                                        <h6 class="fw-bold text-dark mb-0 fs-6">{{ svc.name }}</h6>
-                                                    </div>
+                                            <!-- Top Ribbon Bar for Card #1 -->
+                                            {% if forloop.first or "General Architecture" in svc.name or "Scoping" in svc.name %}
+                                                <div class="bg-warning text-dark text-center fw-bold py-1 small rounded-top border-bottom" style="font-size: 0.78rem; letter-spacing: 0.01em;">
+                                                    💡 Not sure which service fits? Start Here
                                                 </div>
-                                                <p class="text-muted small mb-2 line-clamp-2" style="font-size: 0.8rem;">
-                                                    {{ svc.description|truncatewords:14 }}
-                                                </p>
-                                            </div>
+                                            {% endif %}
 
-                                            <div class="pt-2 border-top d-flex align-items-center justify-content-between">
-                                                <span class="service-mark-text" id="mark-text-{{ svc.id }}">Click to Select</span>
-                                                <span class="badge bg-light text-muted border small">Service #{{ svc.id }}</span>
+                                            <!-- Inner Card Body Container -->
+                                            <div class="service-card-body d-flex flex-column justify-content-between flex-grow-1 position-relative p-3">
+                                                <!-- Top Checkmark Mark Badge -->
+                                                <div class="service-mark-badge" id="mark-badge-{{ svc.id }}" title="Service Selected">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </div>
+
+                                                <div>
+                                                    <div class="d-flex align-items-center mb-2 pe-4">
+                                                        <div class="service-icon-box me-3 flex-shrink-0">
+                                                            {% if "General Architecture" in svc.name or "Scoping" in svc.name %}
+                                                                <i class="bi bi-compass-fill text-warning"></i>
+                                                            {% elif "Cloud" in svc.name or "AWS" in svc.name %}
+                                                                <i class="bi bi-cloud-arrow-up-fill"></i>
+                                                            {% elif "Database" in svc.name or "Backend" in svc.name %}
+                                                                <i class="bi bi-database-fill-gear"></i>
+                                                            {% elif "DevOps" in svc.name or "CI/CD" in svc.name or "Infrastructure" in svc.name %}
+                                                                <i class="bi bi-hdd-network-fill"></i>
+                                                            {% elif "Microservice" in svc.name or "API" in svc.name %}
+                                                                <i class="bi bi-diagram-3-fill"></i>
+                                                            {% elif "Code Review" in svc.name or "Python" in svc.name or "Django" in svc.name %}
+                                                                <i class="bi bi-code-slash"></i>
+                                                            {% elif "Mobile" in svc.name or "iOS" in svc.name or "Android" in svc.name or "Flutter" in svc.name %}
+                                                                <i class="bi bi-phone-fill text-primary"></i>
+                                                            {% elif "Cybersecurity" in svc.name or "Security" in svc.name or "Hardening" in svc.name %}
+                                                                <i class="bi bi-shield-lock-fill text-danger"></i>
+                                                            {% else %}
+                                                                <i class="bi bi-cpu-fill"></i>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="pe-2">
+                                                            <h6 class="fw-bold text-dark mb-0 fs-6">{{ svc.name }}</h6>
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-muted small mb-2 line-clamp-2" style="font-size: 0.8rem; min-height: 2.4rem;">
+                                                        {% if forloop.first or "General Architecture" in svc.name or "Scoping" in svc.name %}
+                                                            Work directly with a lead software architect to define requirements, choose tech stacks, and plan timelines.
+                                                        {% else %}
+                                                            {{ svc.description|truncatewords:14 }}
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+
+                                                <div class="pt-2 border-top d-flex align-items-center justify-content-between mt-auto">
+                                                    <span class="service-mark-text" id="mark-text-{{ svc.id }}">Click to Select</span>
+                                                    <span class="badge bg-light text-secondary border">Service #{{ forloop.counter }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -330,6 +432,234 @@
             serviceSelect.value = serviceId;
             updateMarkedServiceUI(serviceId);
             filterEngineersByService(serviceId);
+        }
+    }
+
+    function selectScopingService(serviceId) {
+        let targetId = serviceId;
+        if (!targetId || targetId === "" || targetId === "None") {
+            const allCards = document.querySelectorAll(".service-select-card");
+            for (let card of allCards) {
+                const name = (card.getAttribute("data-service-name") || "").toLowerCase();
+                if (name.includes("general") || name.includes("scoping")) {
+                    targetId = card.getAttribute("data-service-id");
+                    break;
+                }
+            }
+        }
+        if (targetId) {
+            selectServiceCard(targetId);
+            const cardElem = document.getElementById("service-card-" + targetId);
+            if (cardElem) {
+                cardElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }
+
+    // AI Matcher Decision-Support Logic
+    function getCsrfToken() {
+        const tokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (tokenInput && tokenInput.value) return tokenInput.value;
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            const [k, v] = cookie.trim().split("=");
+            if (k === "csrftoken") return decodeURIComponent(v);
+        }
+        return "";
+    }
+
+    function fillAiSample(text) {
+        const input = document.getElementById("ai-project-input");
+        if (input) {
+            input.value = text;
+            input.focus();
+        }
+    }
+
+    function copyAiPromptToScope() {
+        const aiText = (document.getElementById("ai-project-input")?.value || "").trim();
+        const projDesc = document.getElementById("id_project_description");
+        const projTitle = document.getElementById("id_project_title");
+
+        if (aiText && projDesc) {
+            projDesc.value = aiText;
+            if (projTitle && !projTitle.value) {
+                const summary = aiText.split(".")[0].trim().substring(0, 80);
+                projTitle.value = summary || "Technical Architecture & Consulting";
+            }
+            projDesc.scrollIntoView({ behavior: "smooth", block: "center" });
+            projDesc.classList.add("is-valid");
+        }
+    }
+
+    function populateEngineersWithAiScores(aiEngineers) {
+        const engineerSelect = document.getElementById("id_engineer");
+        if (!engineerSelect || !aiEngineers || aiEngineers.length === 0) return;
+
+        engineerSelect.innerHTML = "";
+
+        // Default placeholder
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.textContent = `-- Select an AI-Ranked Lead Engineer (${aiEngineers.length} Scored) --`;
+        engineerSelect.appendChild(defaultOption);
+
+        let highestScoreEngId = null;
+
+        aiEngineers.forEach(function(eng, idx) {
+            const opt = document.createElement("option");
+            opt.value = String(eng.id);
+
+            // Build compatibility badge: e.g., Jane Doe (94% Compatibility - ⭐ Recommended)
+            let badgeText = "";
+            if (eng.is_recommended || idx === 0) {
+                badgeText = `(${eng.score}% Compatibility - ⭐ Recommended)`;
+                if (!highestScoreEngId) {
+                    highestScoreEngId = String(eng.id);
+                }
+            } else if (eng.is_shortlisted) {
+                badgeText = `(${eng.score}% Compatibility - Shortlisted)`;
+            } else {
+                badgeText = `(${eng.score}% Compatibility)`;
+            }
+
+            let label = eng.name;
+            if (eng.designation) {
+                label += ` — ${eng.designation}`;
+            }
+            label += ` ${badgeText}`;
+
+            opt.textContent = label;
+            engineerSelect.appendChild(opt);
+        });
+
+        // Automatically select the highest-scoring engineer
+        if (highestScoreEngId) {
+            engineerSelect.value = highestScoreEngId;
+            defaultOption.selected = false;
+            for (let i = 0; i < engineerSelect.options.length; i++) {
+                if (String(engineerSelect.options[i].value) === highestScoreEngId) {
+                    engineerSelect.selectedIndex = i;
+                    engineerSelect.options[i].selected = true;
+                } else {
+                    engineerSelect.options[i].selected = false;
+                }
+            }
+        }
+
+        // Trigger change event to refresh schedule availability
+        engineerSelect.dispatchEvent(new Event("change"));
+    }
+
+    async function executeAiMatcher() {
+        const inputElem = document.getElementById("ai-project-input");
+        const text = inputElem ? inputElem.value.trim() : "";
+        const feedbackElem = document.getElementById("ai-match-feedback");
+        const btnSpinner = document.getElementById("ai-btn-spinner");
+        const btnIcon = document.getElementById("ai-btn-icon");
+        const btnText = document.getElementById("ai-btn-text");
+        const matchBtn = document.getElementById("btn-run-ai-match");
+
+        if (!text) {
+            if (feedbackElem) {
+                feedbackElem.innerHTML = '<span class="text-warning"><i class="bi bi-exclamation-circle me-1"></i>Please describe your project requirements in the box above.</span>';
+            }
+            if (inputElem) inputElem.focus();
+            return;
+        }
+
+        // Set Loading State
+        if (matchBtn) matchBtn.disabled = true;
+        if (btnSpinner) btnSpinner.classList.remove("d-none");
+        if (btnIcon) btnIcon.classList.add("d-none");
+        if (btnText) btnText.textContent = "Analyzing Scope...";
+        if (feedbackElem) {
+            feedbackElem.innerHTML = '<span class="text-info"><i class="bi bi-gear-wide-connected spin me-1"></i>Running TF-IDF & Cosine Similarity vector matching...</span>';
+        }
+
+        try {
+            const response = await fetch("/appointments/api/ai-match/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCsrfToken(),
+                },
+                body: JSON.stringify({ text: text })
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error || `Server responded with status ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // 1. Highlight and click matched Service Card
+            if (data.matched_service && data.matched_service.id) {
+                const matchedId = String(data.matched_service.id);
+                const serviceSelect = document.getElementById("id_service");
+                if (serviceSelect) {
+                    serviceSelect.value = matchedId;
+                }
+                updateMarkedServiceUI(matchedId);
+
+                const cardElem = document.getElementById("service-card-" + matchedId);
+                if (cardElem) {
+                    cardElem.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+            }
+
+            // 2. Populate Engineer dropdown with compatibility badges and auto-select top match
+            if (data.engineers && data.engineers.length > 0) {
+                populateEngineersWithAiScores(data.engineers);
+            }
+
+            // 3. Update Results Panel
+            const resultsPanel = document.getElementById("ai-results-panel");
+            if (resultsPanel) {
+                resultsPanel.classList.remove("d-none");
+            }
+
+            if (data.matched_service) {
+                const svcNameElem = document.getElementById("ai-matched-service-name");
+                const svcConfBadge = document.getElementById("ai-service-confidence-badge");
+                if (svcNameElem) svcNameElem.textContent = data.matched_service.name;
+                if (svcConfBadge) svcConfBadge.textContent = `Match: ${data.matched_service.similarity_score}% Confidence`;
+            }
+
+            if (data.top_engineer) {
+                const engNameElem = document.getElementById("ai-top-engineer-name");
+                const engScoreBadge = document.getElementById("ai-engineer-score-badge");
+                if (engNameElem) engNameElem.textContent = `${data.top_engineer.name} (${data.top_engineer.designation})`;
+                if (engScoreBadge) engScoreBadge.textContent = `⭐ ${data.top_engineer.score}% Compatibility - Top Match`;
+            }
+
+            // Keywords Badges
+            const keywordsContainer = document.getElementById("ai-keywords-container");
+            if (keywordsContainer && data.extracted_keywords) {
+                keywordsContainer.innerHTML = '<span class="text-white-50 small me-1">Detected Keywords:</span>';
+                data.extracted_keywords.slice(0, 8).forEach(function(kw) {
+                    const badge = document.createElement("span");
+                    badge.className = "badge bg-secondary-subtle text-light border border-secondary px-2 py-1 small me-1";
+                    badge.style.fontSize = "0.74rem";
+                    badge.textContent = kw;
+                    keywordsContainer.appendChild(badge);
+                });
+            }
+
+            if (feedbackElem) {
+                feedbackElem.innerHTML = '<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Analysis complete! Optimal domain and lead engineer auto-selected below.</span>';
+            }
+        } catch (err) {
+            console.error("AI Matcher error:", err);
+            if (feedbackElem) {
+                feedbackElem.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i>${err.message}</span>`;
+            }
+        } finally {
+            if (matchBtn) matchBtn.disabled = false;
+            if (btnSpinner) btnSpinner.classList.add("d-none");
+            if (btnIcon) btnIcon.classList.remove("d-none");
+            if (btnText) btnText.textContent = "Analyze & Match";
         }
     }
 

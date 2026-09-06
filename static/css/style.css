@@ -355,11 +355,25 @@ h1, h2, h3, h4, .font-heading {
     cursor: pointer;
     border: 2px solid var(--border-color);
     border-radius: 0.85rem;
-    padding: 1rem;
+    padding: 0;
+    overflow: hidden;
     background: #ffffff;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     user-select: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.service-card-body {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    position: relative;
 }
 
 .service-select-card:hover {
@@ -428,6 +442,35 @@ h1, h2, h3, h4, .font-heading {
 .service-select-card.is-marked .service-mark-text {
     color: var(--primary);
     font-weight: 700;
+}
+
+/* Scoping Highlight Card for Non-Technical Clients */
+.service-select-card.scoping-highlight-card {
+    border-color: #f59e0b;
+    background: linear-gradient(145deg, #ffffff 0%, #fffdf5 100%);
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.12);
+}
+
+.service-select-card.scoping-highlight-card:hover {
+    border-color: #d97706;
+    box-shadow: 0 8px 22px rgba(245, 158, 11, 0.22);
+    transform: translateY(-3px);
+}
+
+.service-select-card.scoping-highlight-card .service-icon-box {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.service-select-card.scoping-highlight-card.is-marked {
+    border-color: #d97706;
+    background: linear-gradient(145deg, #fffdf5 0%, #fef3c7 100%);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25), 0 8px 24px rgba(245, 158, 11, 0.2);
+}
+
+.service-select-card.scoping-highlight-card.is-marked .service-icon-box {
+    background: #d97706;
+    color: #ffffff;
 }
 
 /* Service catalog cards (list & home) */
