@@ -68,11 +68,11 @@
                 <i class="bi bi-graph-up-arrow text-primary me-2"></i>Appointment Completion Tracker
             </h2>
             <p class="text-muted small mb-0">
-                Track how many consultations have been successfully completed <strong>monthly and across engineer distribution</strong>.
+                Track completed consultations with real-time key metrics and consultant completion rosters.
             </p>
         </div>
         <div class="d-flex gap-2 no-print">
-            <a href="{% url 'dashboard:export_tracking_csv' %}?timeframe={{ timeframe }}{% if selected_engineer_id %}&engineer={{ selected_engineer_id }}{% endif %}{% if selected_service_id %}&service={{ selected_service_id }}{% endif %}" class="btn btn-outline-success btn-sm fw-semibold">
+            <a href="{% url 'dashboard:export_tracking_csv' %}{% if selected_engineer_id %}?engineer={{ selected_engineer_id }}{% endif %}{% if selected_service_id %}&service={{ selected_service_id }}{% endif %}" class="btn btn-outline-success btn-sm fw-semibold">
                 <i class="bi bi-file-earmark-spreadsheet me-1"></i>Export CSV
             </a>
             <button onclick="window.print()" class="btn btn-outline-secondary btn-sm fw-semibold">
@@ -193,30 +193,12 @@
         </div>
     </div>
 
-    <!-- Filter & View Selector Bar -->
+    <!-- Filter Bar -->
     <div class="card border-0 shadow-sm mb-4 no-print">
         <div class="card-body p-3">
             <form method="GET" action="{% url 'dashboard:appointment_tracking' %}" id="trackingFilterForm" class="row g-3 align-items-end">
-                <!-- Timeframe Selection Tabs (hidden input populated on tab click) -->
-                <input type="hidden" name="timeframe" id="timeframeInput" value="{{ timeframe }}">
-
-                <div class="col-12 mb-2">
-                    <ul class="nav nav-pills bg-light p-1 rounded-3">
-                        <li class="nav-item">
-                            <a class="nav-link {% if timeframe == 'monthly' %}active{% endif %}" href="javascript:void(0)" onclick="setTimeframe('monthly')">
-                                <i class="bi bi-calendar-month me-1"></i>Monthly Tracking
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if timeframe == 'overview' %}active{% endif %}" href="javascript:void(0)" onclick="setTimeframe('overview')">
-                                <i class="bi bi-speedometer2 me-1"></i>Overview & Distribution
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
                 <!-- Engineer Filter -->
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label small fw-semibold text-muted mb-1">Filter by Engineer</label>
                     <select name="engineer" class="form-select form-select-sm" onchange="document.getElementById('trackingFilterForm').submit();">
                         <option value="">All Engineers (System-wide)</option>
@@ -229,7 +211,7 @@
                 </div>
 
                 <!-- Service Filter -->
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label class="form-label small fw-semibold text-muted mb-1">Filter by Service</label>
                     <select name="service" class="form-select form-select-sm" onchange="document.getElementById('trackingFilterForm').submit();">
                         <option value="">All Services</option>
@@ -242,7 +224,7 @@
                 </div>
 
                 <!-- Year Filter -->
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label small fw-semibold text-muted mb-1">Target Year</label>
                     <select name="year" class="form-select form-select-sm" onchange="document.getElementById('trackingFilterForm').submit();">
                         {% for y in available_years %}
@@ -252,11 +234,11 @@
                 </div>
 
                 <!-- Action buttons -->
-                <div class="col-md-3 d-flex gap-2">
+                <div class="col-md-2 d-flex gap-2">
                     <button type="submit" class="btn btn-primary btn-sm flex-grow-1 fw-semibold">
                         <i class="bi bi-funnel-fill me-1"></i>Filter
                     </button>
-                    <a href="{% url 'dashboard:appointment_tracking' %}?timeframe={{ timeframe }}" class="btn btn-outline-secondary btn-sm" title="Reset Filters">
+                    <a href="{% url 'dashboard:appointment_tracking' %}" class="btn btn-outline-secondary btn-sm" title="Reset Filters">
                         <i class="bi bi-arrow-counterclockwise"></i>
                     </a>
                 </div>
@@ -264,276 +246,55 @@
         </div>
     </div>
 
-    <!-- ============================================================= -->
-    <!-- TIMEFRAME CONTENT PANELS -->
-    <!-- ============================================================= -->
-
-    {% if timeframe == 'monthly' %}
-        <!-- MONTHLY TRACKING VIEW -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-calendar-range-fill text-info me-2"></i>Monthly Completed Consultations ({{ target_year }})
-                    </h5>
-                    <small class="text-muted">
-                        Yearly progression across all 12 calendar months &bull; Total for {{ target_year }}: {{ monthly_data.total_in_period }} completed
-                    </small>
-                </div>
-                <span class="badge bg-info text-dark px-3 py-2 fs-6">{{ monthly_data.total_in_period }} Completed in {{ target_year }}</span>
-            </div>
-            <div class="card-body p-4">
-                <div class="chart-container mb-4">
-                    <canvas id="monthlyChart"></canvas>
-                </div>
-
-                <h6 class="fw-bold text-dark mt-4 mb-3"><i class="bi bi-table me-2 text-info"></i>Month-by-Month Summary ({{ target_year }})</h6>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Month</th>
-                                <th>Completed Count</th>
-                                <th>Status / Highlight</th>
-                                <th>Completed Consultations</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for m in monthly_data.monthly_breakdown %}
-                                <tr {% if m.is_current %}class="table-primary-subtle border-start border-primary border-4"{% endif %}>
-                                    <td>
-                                        <strong>{{ m.month_name }} {{ m.year }}</strong>
-                                        {% if m.is_current %}
-                                            <span class="badge bg-primary ms-2">Current Month</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if m.count > 0 %}
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-3 py-1">
-                                                {{ m.count }} Completed
-                                            </span>
-                                        {% else %}
-                                            <span class="text-muted small">0 sessions</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if m.count > 0 %}
-                                            <span class="text-success small fw-semibold"><i class="bi bi-check-lg me-1"></i>Active Consultations</span>
-                                        {% else %}
-                                            <span class="text-muted small">No completions</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if m.appointments %}
-                                            <div class="d-flex flex-wrap gap-2">
-                                                {% for appt in m.appointments %}
-                                                    <a href="{% url 'appointments:appointment_detail' appt.id %}" class="badge bg-white text-dark border p-2 text-decoration-none shadow-sm">
-                                                        <span class="fw-semibold text-primary">#{{ appt.id }}</span> {{ appt.project_title|truncatewords:3 }} &bull; <small class="text-muted">{{ appt.appointment_date|date:"M d" }}</small>
-                                                    </a>
-                                                {% endfor %}
-                                            </div>
-                                        {% else %}
-                                            <span class="text-muted small">&mdash;</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">No monthly data available for {{ target_year }}.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <!-- Engineer Completion Leaderboard -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-trophy-fill me-2 text-warning"></i>Engineer Completion Roster</h5>
         </div>
-
-    {% else %}
-        <!-- OVERVIEW & DISTRIBUTION VIEW -->
-        <div class="row g-4 mb-4">
-            <!-- Monthly Trend Chart -->
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-graph-up me-2 text-primary"></i>Monthly Consultation Velocity ({{ target_year }})</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="chart-container">
-                            <canvas id="monthlyChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Service Distribution Chart -->
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-pie-chart-fill me-2 text-info"></i>By Service Domain</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="chart-container" style="height: 250px;">
-                            <canvas id="serviceChart"></canvas>
-                        </div>
-                        <ul class="list-group list-group-flush mt-3 small">
-                            {% for s in distribution_data.service_breakdown %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
-                                    <span>{{ s.service__name }}</span>
-                                    <span class="badge bg-primary rounded-pill">{{ s.count }}</span>
-                                </li>
-                            {% empty %}
-                                <li class="list-group-item text-center text-muted py-3">No completed consultations recorded.</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Engineer Completion Leaderboard -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white py-3">
-                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-trophy-fill me-2 text-warning"></i>Engineer Completion Roster</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Engineer</th>
+                            <th>Completed Consultations</th>
+                            <th>Quick Filter</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for eng in distribution_data.engineer_breakdown %}
                             <tr>
-                                <th>Engineer</th>
-                                <th>Completed Consultations</th>
-                                <th>Quick Filter</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for eng in distribution_data.engineer_breakdown %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sm bg-primary-subtle text-primary rounded-circle p-2 me-3 fw-bold">
-                                                {{ eng.engineer__username|make_list|first|upper }}
-                                            </div>
-                                            <div>
-                                                <strong>{{ eng.engineer__first_name }} {{ eng.engineer__last_name }}</strong>
-                                                <small class="text-muted d-block">@{{ eng.engineer__username }}</small>
-                                            </div>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary-subtle text-primary rounded-circle p-2 me-3 fw-bold">
+                                            {{ eng.engineer__username|make_list|first|upper }}
                                         </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-3 py-1">
-                                            <i class="bi bi-check-circle-fill me-1"></i>{{ eng.count }} Consultations Completed
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'dashboard:appointment_tracking' %}?timeframe=monthly&engineer={{ eng.engineer__username }}" class="btn btn-outline-primary btn-sm">
-                                            View Timeline <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="3" class="text-center py-4 text-muted">No completed consultations found.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                        <div>
+                                            <strong>{{ eng.engineer__first_name }} {{ eng.engineer__last_name }}</strong>
+                                            <small class="text-muted d-block">@{{ eng.engineer__username }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-3 py-1">
+                                        <i class="bi bi-check-circle-fill me-1"></i>{{ eng.count }} Consultations Completed
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'dashboard:appointment_tracking' %}?engineer={{ eng.engineer__id|default:eng.engineer__username }}" class="btn btn-outline-primary btn-sm">
+                                        Filter Engineer <i class="bi bi-funnel"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center py-4 text-muted">No completed consultations found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-    {% endif %}
+    </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    function setTimeframe(tf) {
-        document.getElementById('timeframeInput').value = tf;
-        document.getElementById('trackingFilterForm').submit();
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        const timeframe = "{{ timeframe }}";
-
-        // 1. Monthly Chart
-        const monthlyCanvas = document.getElementById("monthlyChart");
-        if (monthlyCanvas) {
-            const monthlyData = JSON.parse('{{ monthly_chart_json|escapejs }}');
-            new Chart(monthlyCanvas, {
-                type: 'line',
-                data: {
-                    labels: monthlyData.labels,
-                    datasets: [{
-                        label: 'Completed Consultations',
-                        data: monthlyData.data,
-                        backgroundColor: 'rgba(13, 202, 240, 0.15)',
-                        borderColor: '#0dcaf0',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#0d6efd',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        fill: true,
-                        tension: 0.3,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1, precision: 0 },
-                            grid: { color: 'rgba(0,0,0,0.05)' }
-                        },
-                        x: {
-                            grid: { display: false }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(ctx) {
-                                    return ctx.parsed.y + ' consultation(s) completed';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 4. Service Distribution Chart
-        const serviceCanvas = document.getElementById("serviceChart");
-        if (serviceCanvas) {
-            const serviceData = JSON.parse('{{ service_chart_json|escapejs }}');
-            if (serviceData.labels.length > 0) {
-                new Chart(serviceCanvas, {
-                    type: 'doughnut',
-                    data: {
-                        labels: serviceData.labels,
-                        datasets: [{
-                            data: serviceData.data,
-                            backgroundColor: [
-                                '#0d6efd', '#198754', '#0dcaf0', '#ffc107', '#6f42c1', '#fd7e14'
-                            ],
-                            borderWidth: 2,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                        },
-                        cutout: '65%'
-                    }
-                });
-            }
-        }
-    });
-</script>
 {% endblock %}
