@@ -119,7 +119,7 @@
                     <tbody>
                         {% for appt in recent_appointments %}
                             <tr>
-                                <td class="text-muted fw-bold">#{{ appt.id }}</td>
+                                <td class="text-muted fw-bold">#{{ forloop.counter }}</td>
                                 <td class="fw-bold">{{ appt.project_title }}</td>
                                 <td>{{ appt.engineer.get_full_name|default:appt.engineer.username }}</td>
                                 <td><span class="badge bg-light text-dark border">{{ appt.service.name }}</span></td>

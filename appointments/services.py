@@ -36,12 +36,13 @@ def validate_appointment_booking(engineer, appointment_date, start_time, end_tim
         )
 
     # 2. Advance Booking Lead Time Policy Check
+    current_tz = timezone.get_current_timezone()
+    booking_dt = timezone.make_aware(start_dt, current_tz) if timezone.is_naive(start_dt) else start_dt
     now = timezone.now()
-    booking_dt = timezone.make_aware(start_dt) if timezone.is_aware(now) else start_dt
     if booking_dt < now + timedelta(hours=MIN_BOOKING_LEAD_HOURS):
         raise ValidationError(
             f"[Policy Rule] Minimum advance booking lead time is {MIN_BOOKING_LEAD_HOURS} hours. "
-            f"Requested slot is on {appointment_date} at {start_time.strftime('%I:%M %p')}, which violates this policy."
+            f"Requested slot on {appointment_date} at {start_time.strftime('%I:%M %p')} violates this policy."
         )
 
     # 3. Maximum Daily Capacity Policy Check
