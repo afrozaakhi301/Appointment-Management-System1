@@ -702,5 +702,180 @@ class AIMatchApiEndpointTests(TestCase):
         self.assertEqual(response.status_code, 405)
 
 
+class BusinessPolicyAndTieredCancellationTests(TestCase):
+    def setUp(self):
+        from datetime import datetime, timedelta
+        from django.utils import timezone
+
+        self.client_user = User.objects.create_user(
+            username="policy_client",
+            password="Password123!",
+            role=User.Role.CLIENT
+        )
+        self.engineer_user = User.objects.create_user(
+            username="policy_eng",
+            password="Password123!",
+            role=User.Role.ENGINEER
+        )
+        self.service = Service.objects.create(
+            name="Policy Review Service",
+            description="Testing business rules"
+        )
+
+        # Set up broad engineer availability for every day of the week
+        for d in range(7):
+            EngineerAvailability.objects.create(
+                engineer=self.engineer_user,
+                day_of_week=d,
+                start_time=time(0, 0),
+                end_time=time(23, 59)
+            )
+
+        self.future_date = timezone.localdate() + timedelta(days=5)
+
+    def test_minimum_session_duration_policy(self):
+        """Policy: Sessions must be at least 30 minutes in duration."""
+        # 15 minutes session -> MUST FAIL
+        with self.assertRaises(ValidationError) as ctx:
+            validate_appointment_booking(
+                engineer=self.engineer_user,
+                appointment_date=self.future_date,
+                start_time=time(10, 0),
+                end_time=time(10, 15)
+            )
+        self.assertIn("[Policy Rule]", str(ctx.exception))
+        self.assertIn("30 minutes", str(ctx.exception))
+
+        # 30 minutes session -> MUST SUCCEED
+        try:
+            validate_appointment_booking(
+                engineer=self.engineer_user,
+                appointment_date=self.future_date,
+                start_time=time(10, 0),
+                end_time=time(10, 30)
+            )
+        except ValidationError:
+            self.fail("30-minute session was unexpectedly rejected.")
+
+    def test_minimum_booking_lead_time_policy(self):
+        """Policy: Booking must be placed at least 6 hours in advance."""
+        from django.utils import timezone
+        from datetime import timedelta
+
+        # Slot 2 hours from now -> MUST FAIL
+        now = timezone.now()
+        near_slot = now + timedelta(hours=2)
+        with self.assertRaises(ValidationError) as ctx:
+            validate_appointment_booking(
+                engineer=self.engineer_user,
+                appointment_date=near_slot.date(),
+                start_time=near_slot.time(),
+                end_time=(near_slot + timedelta(minutes=45)).time()
+            )
+        self.assertIn("[Policy Rule]", str(ctx.exception))
+        self.assertIn("6 hours", str(ctx.exception))
+
+    def test_max_daily_engineer_sessions_limit_policy(self):
+        """Policy: Engineer cannot have more than 4 active sessions per day."""
+        # Create 4 sessions on the same future date
+        for i in range(4):
+            Appointment.objects.create(
+                client=self.client_user,
+                engineer=self.engineer_user,
+                service=self.service,
+                appointment_date=self.future_date,
+                start_time=time(8 + i * 2, 0),
+                end_time=time(9 + i * 2, 0),
+                project_title=f"Session #{i+1}",
+                status=Appointment.Status.APPROVED
+            )
+
+        # 5th session on same date -> MUST FAIL
+        with self.assertRaises(ValidationError) as ctx:
+            validate_appointment_booking(
+                engineer=self.engineer_user,
+                appointment_date=self.future_date,
+                start_time=time(18, 0),
+                end_time=time(19, 0)
+            )
+        self.assertIn("[Policy Rule]", str(ctx.exception))
+        self.assertIn("maximum capacity limit", str(ctx.exception))
+
+    def test_tiered_cancellation_under_24_hours_requires_reason(self):
+        """Tiered Cancellation: Cancelling < 24 hours requires mandatory reason."""
+        from django.utils import timezone
+        from datetime import timedelta
+        from notifications.models import Notification
+
+        # Create appointment scheduled in 4 hours
+        now = timezone.now()
+        appt_time = now + timedelta(hours=4)
+        appt = Appointment.objects.create(
+            client=self.client_user,
+            engineer=self.engineer_user,
+            service=self.service,
+            appointment_date=appt_time.date(),
+            start_time=appt_time.time(),
+            end_time=(appt_time + timedelta(hours=1)).time(),
+            project_title="Short Notice Cancellation Test",
+            status=Appointment.Status.APPROVED
+        )
+
+        self.client.login(username="policy_client", password="Password123!")
+
+        # 1. GET cancel page shows late cancellation notice
+        res = self.client.get(reverse("appointments:appointment_cancel", args=[appt.id]))
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.context["is_late_cancellation"])
+
+        # 2. POST without reason is rejected
+        res_post_empty = self.client.post(reverse("appointments:appointment_cancel", args=[appt.id]), {"cancellation_reason": ""})
+        self.assertEqual(res_post_empty.status_code, 200)
+        appt.refresh_from_db()
+        self.assertEqual(appt.status, Appointment.Status.APPROVED)
+
+        # 3. POST with reason succeeds
+        res_post_valid = self.client.post(
+            reverse("appointments:appointment_cancel", args=[appt.id]),
+            {"cancellation_reason": "Emergency production deployment"}
+        )
+        self.assertEqual(res_post_valid.status_code, 302)
+        appt.refresh_from_db()
+        self.assertEqual(appt.status, Appointment.Status.CANCELLED)
+        self.assertEqual(appt.cancellation_reason, "Emergency production deployment")
+
+        # Verify engineer was notified
+        notif = Notification.objects.filter(user=self.engineer_user, appointment=appt).first()
+        self.assertIsNotNone(notif)
+        self.assertIn("Emergency production deployment", notif.message)
+
+    def test_standard_cancellation_over_24_hours(self):
+        """Tiered Cancellation: Cancelling >= 24 hours does not mandate reason."""
+        appt = Appointment.objects.create(
+            client=self.client_user,
+            engineer=self.engineer_user,
+            service=self.service,
+            appointment_date=self.future_date,
+            start_time=time(10, 0),
+            end_time=time(11, 0),
+            project_title="Advance Cancellation Test",
+            status=Appointment.Status.PENDING
+        )
+
+        self.client.login(username="policy_client", password="Password123!")
+
+        # GET cancel page
+        res = self.client.get(reverse("appointments:appointment_cancel", args=[appt.id]))
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(res.context["is_late_cancellation"])
+
+        # POST without reason succeeds
+        res_post = self.client.post(reverse("appointments:appointment_cancel", args=[appt.id]), {"cancellation_reason": ""})
+        self.assertEqual(res_post.status_code, 302)
+        appt.refresh_from_db()
+        self.assertEqual(appt.status, Appointment.Status.CANCELLED)
+
+
+
 
 

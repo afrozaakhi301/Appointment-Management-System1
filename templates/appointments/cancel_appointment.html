@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Cancel Consultation #{{ appointment.id }} | TNS AMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'appointments:appointment_detail' appointment.id %}" class="text-decoration-none">Appointment #{{ appointment.id }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Cancel</li>
+                </ol>
+            </nav>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                    <h5 class="fw-bold text-danger mb-0">
+                        <i class="bi bi-x-circle-fill me-2"></i>Cancel Consultation Appointment
+                    </h5>
+                    <span class="badge bg-light text-muted border">Appt #{{ appointment.id }}</span>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <!-- Policy Warning Banner -->
+                    {% if is_late_cancellation %}
+                        <div class="alert alert-warning border-0 shadow-sm d-flex align-items-start gap-3 p-3 mb-4">
+                            <i class="bi bi-exclamation-triangle-fill text-warning fs-3 flex-shrink-0"></i>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1">Short-Notice Cancellation</h6>
+                                <p class="small text-dark mb-0">
+                                    This consultation starts in less than 24 hours (<strong>{{ hours_remaining }} hours away</strong>). 
+                                    To help our engineering team manage schedules, please provide a brief reason for cancelling.
+                                </p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info border-0 shadow-sm d-flex align-items-start gap-3 p-3 mb-4">
+                            <i class="bi bi-info-circle-fill text-primary fs-3 flex-shrink-0"></i>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1">Cancel Consultation</h6>
+                                <p class="small text-muted mb-0">
+                                    You are cancelling with more than 24 hours advance notice. You may optionally leave a note for the consultant.
+                                </p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Appointment Summary Card -->
+                    <div class="p-3 bg-light rounded-3 border mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ appointment.service.name }}</span>
+                            <span class="badge bg-secondary">{{ appointment.status }}</span>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-2">{{ appointment.project_title }}</h5>
+                        <div class="row g-2 text-muted small">
+                            <div class="col-sm-6">
+                                <i class="bi bi-calendar-event me-1 text-primary"></i><strong>Date:</strong> {{ appointment.appointment_date|date:"F d, Y" }}
+                            </div>
+                            <div class="col-sm-6">
+                                <i class="bi bi-clock me-1 text-primary"></i><strong>Time:</strong> {{ appointment.start_time|time:"h:i A" }} - {{ appointment.end_time|time:"h:i A" }}
+                            </div>
+                            <div class="col-sm-6">
+                                <i class="bi bi-person me-1 text-primary"></i><strong>Client:</strong> {{ appointment.client.get_full_name|default:appointment.client.username }}
+                            </div>
+                            <div class="col-sm-6">
+                                <i class="bi bi-person-badge me-1 text-primary"></i><strong>Lead Engineer:</strong> {{ appointment.engineer.get_full_name|default:appointment.engineer.username }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cancellation Form -->
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label for="cancellation_reason" class="form-label fw-bold">
+                                Reason for Cancellation {% if is_late_cancellation %}<span class="text-danger">* (Required for short notice)</span>{% else %}<span class="text-muted fw-normal">(Optional)</span>{% endif %}
+                            </label>
+                            <textarea 
+                                name="cancellation_reason" 
+                                id="cancellation_reason" 
+                                class="form-control" 
+                                rows="3" 
+                                placeholder="{% if is_late_cancellation %}Please briefly explain why you need to cancel on short notice...{% else %}Tell us why you are cancelling or if you plan to reschedule (optional)...{% endif %}"
+                                {% if is_late_cancellation %}required{% endif %}
+                            ></textarea>
+                            <div class="form-text small">
+                                {% if is_late_cancellation %}
+                                    Your reason will be recorded and shared with your assigned engineer.
+                                {% else %}
+                                    Your feedback helps our engineers adjust their availability schedule.
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center gap-3">
+                            <a href="{% url 'appointments:appointment_detail' appointment.id %}" class="btn btn-outline-secondary px-4 fw-semibold">
+                                <i class="bi bi-arrow-left me-1"></i>Keep Appointment
+                            </a>
+                            <button type="submit" class="btn btn-danger px-4 fw-bold shadow-sm" onclick="return confirm('Are you sure you want to permanently cancel this consultation?');">
+                                <i class="bi bi-x-circle me-1"></i>Confirm Cancellation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

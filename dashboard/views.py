@@ -28,6 +28,7 @@ from .analytics import (
     get_weekly_completion_breakdown,
     get_monthly_completion_breakdown,
     get_service_and_engineer_breakdown,
+    get_engineer_workload_distribution,
 )
 from .models import ActivityLog
 from .utils import log_activity
@@ -507,6 +508,9 @@ def admin_reports(request):
     # 5. Completion tracking KPIs (daily, weekly, monthly)
     completion_kpis = get_completion_kpis()
 
+    # 6. Engineer workload & capacity balance
+    workload_distribution = get_engineer_workload_distribution()
+
     return render(
         request,
         "dashboard/admin_reports.html",
@@ -517,6 +521,7 @@ def admin_reports(request):
             "engineer_stats": engineer_stats,
             "recent_feedback": recent_feedback,
             "completion_kpis": completion_kpis,
+            "workload_distribution": workload_distribution,
         }
     )
 

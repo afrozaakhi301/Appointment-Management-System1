@@ -9,6 +9,7 @@ from dashboard.analytics import (
     get_weekly_completion_breakdown,
     get_monthly_completion_breakdown,
     get_service_and_engineer_breakdown,
+    get_engineer_workload_distribution,
 )
 from dashboard.models import ActivityLog
 from dashboard.utils import log_activity
@@ -204,4 +205,126 @@ class AppointmentTrackingViewsTests(TestCase):
         self.assertIn("Appointment ID", content)
         self.assertIn("Project Title", content)
         self.assertIn("Client Username", content)
+
+
+class EngineerWorkloadAnalyticsTests(TestCase):
+    def setUp(self):
+        self.client_http = Client()
+        self.admin_user = User.objects.create_user(
+            username="analytics_admin",
+            password="Password123!",
+            role=User.Role.ADMIN,
+            is_staff=True,
+            is_superuser=True
+        )
+        self.client_user = User.objects.create_user(
+            username="analytics_client",
+            password="Password123!",
+            role=User.Role.CLIENT
+        )
+        self.service = Service.objects.create(
+            name="Architecture Review",
+            description="System Architecture Consulting",
+            is_active=True
+        )
+
+        # Create 3 engineers: one overloaded (4 active), one optimal (2 active), one available (0 active)
+        self.eng_overloaded = User.objects.create_user(
+            username="eng_overloaded",
+            password="Password123!",
+            role=User.Role.ENGINEER
+        )
+        self.eng_optimal = User.objects.create_user(
+            username="eng_optimal",
+            password="Password123!",
+            role=User.Role.ENGINEER
+        )
+        self.eng_available = User.objects.create_user(
+            username="eng_available",
+            password="Password123!",
+            role=User.Role.ENGINEER
+        )
+
+        # 4 active sessions for eng_overloaded
+        for i in range(4):
+            Appointment.objects.create(
+                client=self.client_user,
+                engineer=self.eng_overloaded,
+                service=self.service,
+                appointment_date=date.today(),
+                start_time=time(8 + i * 2, 0),
+                end_time=time(9 + i * 2, 0),
+                project_title=f"Overloaded Task #{i+1}",
+                status=Appointment.Status.APPROVED
+            )
+
+        # 2 active sessions for eng_optimal
+        for i in range(2):
+            Appointment.objects.create(
+                client=self.client_user,
+                engineer=self.eng_optimal,
+                service=self.service,
+                appointment_date=date.today(),
+                start_time=time(9 + i * 3, 0),
+                end_time=time(10 + i * 3, 0),
+                project_title=f"Optimal Task #{i+1}",
+                status=Appointment.Status.PENDING
+            )
+
+        # 1 completed session for eng_available
+        Appointment.objects.create(
+            client=self.client_user,
+            engineer=self.eng_available,
+            service=self.service,
+            appointment_date=date.today() - timedelta(days=1),
+            start_time=time(10, 0),
+            end_time=time(11, 0),
+            project_title="Completed Task",
+            status=Appointment.Status.COMPLETED
+        )
+
+    def test_get_engineer_workload_distribution(self):
+        workload = get_engineer_workload_distribution()
+        self.assertEqual(len(workload), 3)
+
+        # Find entries
+        overloaded_entry = next(w for w in workload if w["engineer"].id == self.eng_overloaded.id)
+        optimal_entry = next(w for w in workload if w["engineer"].id == self.eng_optimal.id)
+        available_entry = next(w for w in workload if w["engineer"].id == self.eng_available.id)
+
+        # Assert Overloaded
+        self.assertEqual(overloaded_entry["active_load"], 4)
+        self.assertEqual(overloaded_entry["capacity_pct"], 100)
+        self.assertEqual(overloaded_entry["status_label"], "Overloaded")
+        self.assertEqual(overloaded_entry["status_badge"], "bg-danger")
+        self.assertEqual(overloaded_entry["progress_bar"], "bg-danger")
+
+        # Assert Optimal
+        self.assertEqual(optimal_entry["active_load"], 2)
+        self.assertEqual(optimal_entry["capacity_pct"], 50)
+        self.assertEqual(optimal_entry["status_label"], "Optimal")
+        self.assertEqual(optimal_entry["status_badge"], "bg-success")
+        self.assertEqual(optimal_entry["progress_bar"], "bg-success")
+
+        # Assert Available
+        self.assertEqual(available_entry["active_load"], 0)
+        self.assertEqual(available_entry["completed_count"], 1)
+        self.assertEqual(available_entry["capacity_pct"], 0)
+        self.assertEqual(available_entry["status_label"], "Available")
+        self.assertEqual(available_entry["status_badge"], "bg-info")
+        self.assertEqual(available_entry["progress_bar"], "bg-info")
+
+    def test_admin_reports_view_renders_workload_distribution(self):
+        self.client_http.login(username="analytics_admin", password="Password123!")
+        response = self.client_http.get(reverse("dashboard:admin_reports"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "dashboard/admin_reports.html")
+        self.assertIn("workload_distribution", response.context)
+        self.assertEqual(len(response.context["workload_distribution"]), 3)
+        content = response.content.decode("utf-8")
+        self.assertIn("Engineer Workload & Capacity Balance", content)
+        self.assertIn("Overloaded", content)
+        self.assertIn("Optimal", content)
+        self.assertIn("Available", content)
+
 

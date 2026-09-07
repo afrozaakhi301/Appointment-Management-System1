@@ -36,6 +36,7 @@ class Appointment(models.Model):
     project_title = models.CharField(max_length=200)
     project_description = models.TextField()
     requirements = models.TextField(blank=True)
+    cancellation_reason = models.TextField(blank=True)
     status = models.CharField(
         max_length=20,
         choices=Status.choices,

@@ -136,6 +136,86 @@
         </div>
     </div>
 
+    <!-- Engineer Workload & Capacity Balance (Decision Support Analytics) -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <div>
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-speedometer2 me-2 text-primary"></i>Engineer Workload & Capacity Balance
+                </h5>
+                <small class="text-muted">Real-time capacity tracking against maximum daily session threshold (4 sessions/engineer)</small>
+            </div>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+                <i class="bi bi-shield-check me-1"></i>Policy: Max 4 Active/Day
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Engineer</th>
+                            <th>Active Load</th>
+                            <th style="min-width: 180px;">Capacity Utilization</th>
+                            <th>Status</th>
+                            <th>Completed</th>
+                            <th>Client Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in workload_distribution %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ item.engineer.get_full_name|default:item.engineer.username }}</div>
+                                    <small class="text-muted">@{{ item.engineer.username }} &bull; {{ item.engineer.engineer_profile.designation|default:"Software Engineer" }}</small>
+                                </td>
+                                <td>
+                                    <span class="fs-6 fw-bold text-dark">{{ item.active_load }}</span>
+                                    <small class="text-muted">sessions</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 8px;">
+                                            <div class="progress-bar {{ item.progress_bar }}" role="progressbar" style="width: {{ item.capacity_pct }}%;" aria-valuenow="{{ item.capacity_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small class="fw-semibold text-muted" style="min-width: 45px;">{{ item.capacity_pct }}%</small>
+                                    </div>
+                                    <small class="text-muted">{{ item.active_load }} / 4 Max</small>
+                                </td>
+                                <td>
+                                    <span class="badge {{ item.status_badge }} px-2 py-1 fw-semibold">
+                                        {% if item.status_label == 'Overloaded' %}
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Overloaded
+                                        {% elif item.status_label == 'Optimal' %}
+                                            <i class="bi bi-check-circle-fill me-1"></i>Optimal
+                                        {% else %}
+                                            <i class="bi bi-person-check-fill me-1"></i>Available
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">{{ item.completed_count }} Done</span>
+                                </td>
+                                <td>
+                                    {% if item.avg_rating %}
+                                        <span class="text-warning fw-bold">★ {{ item.avg_rating }}</span>
+                                        <small class="text-muted">({{ item.review_count }})</small>
+                                    {% else %}
+                                        <span class="text-muted small">No ratings</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">No active software engineers found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Engineer Performance & Ratings -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white py-3">

@@ -1,7 +1,8 @@
 import calendar
 from datetime import date, datetime, timedelta
-from django.db.models import Count, Q
+from django.db.models import Avg, Count, Q
 from django.utils import timezone
+from accounts.models import User
 from appointments.models import Appointment
 
 
@@ -324,3 +325,67 @@ def get_service_and_engineer_breakdown(engineer=None, service=None, start_date=N
         "service_breakdown": list(service_breakdown),
         "engineer_breakdown": list(engineer_breakdown),
     }
+
+
+def get_engineer_workload_distribution():
+    """
+    Computes workload and capacity balance across active engineers:
+    - active_load: Total sessions in Pending, Approved, or Rescheduled status.
+    - completed_count: Total completed sessions.
+    - avg_rating & review_count: Feedback metrics.
+    - capacity_pct: Percentage of daily max threshold (4 sessions), capped at 100%.
+    - status_label / status_badge / progress_bar:
+        * 'Overloaded' (active_load >= 4): Red
+        * 'Optimal' (2 <= active_load <= 3): Green
+        * 'Available' (active_load <= 1): Blue / Info
+    """
+    engineers = User.objects.filter(role=User.Role.ENGINEER, is_active=True).annotate(
+        active_load=Count(
+            "engineer_appointments",
+            filter=Q(engineer_appointments__status__in=[
+                Appointment.Status.PENDING,
+                Appointment.Status.APPROVED,
+                Appointment.Status.RESCHEDULED,
+            ]),
+            distinct=True,
+        ),
+        completed_count=Count(
+            "engineer_appointments",
+            filter=Q(engineer_appointments__status=Appointment.Status.COMPLETED),
+            distinct=True,
+        ),
+        avg_rating=Avg("engineer_appointments__feedback__rating"),
+        review_count=Count("engineer_appointments__feedback", distinct=True),
+    ).order_by("-active_load", "first_name", "last_name")
+
+    workload_data = []
+    for eng in engineers:
+        active = eng.active_load
+        capacity_pct = min(100, int((active / 4.0) * 100))
+
+        if active >= 4:
+            status_label = "Overloaded"
+            status_badge = "bg-danger"
+            progress_bar = "bg-danger"
+        elif active >= 2:
+            status_label = "Optimal"
+            status_badge = "bg-success"
+            progress_bar = "bg-success"
+        else:
+            status_label = "Available"
+            status_badge = "bg-info"
+            progress_bar = "bg-info"
+
+        workload_data.append({
+            "engineer": eng,
+            "active_load": active,
+            "completed_count": eng.completed_count,
+            "avg_rating": round(eng.avg_rating, 1) if eng.avg_rating else 0.0,
+            "review_count": eng.review_count,
+            "capacity_pct": capacity_pct,
+            "status_label": status_label,
+            "status_badge": status_badge,
+            "progress_bar": progress_bar,
+        })
+
+    return workload_data

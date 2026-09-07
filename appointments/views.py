@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -5,6 +6,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Avg, Case, Count, IntegerField, Prefetch, Q, Value, When
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from accounts.decorators import client_required, engineer_required, role_required
 from accounts.models import User
 from dashboard.utils import log_activity
@@ -410,25 +412,58 @@ def appointment_cancel_view(request, appointment_id):
         messages.error(request, f"Cannot cancel an appointment with status '{appointment.status}'.")
         return redirect("appointments:appointment_detail", appointment_id=appointment.id)
 
-    try:
-        validate_status_transition(appointment, Appointment.Status.CANCELLED, user)
-        appointment.status = Appointment.Status.CANCELLED
-        appointment.save()
+    naive_dt = datetime.combine(appointment.appointment_date, appointment.start_time)
+    appt_datetime = timezone.make_aware(naive_dt) if timezone.is_naive(naive_dt) else naive_dt
+    time_diff = appt_datetime - timezone.now()
+    hours_remaining = max(0.0, round(time_diff.total_seconds() / 3600.0, 1))
+    is_late_cancellation = (time_diff.total_seconds() < 24 * 3600)
 
-        log_activity(user, f"Cancelled appointment #{appointment.id} ({appointment.project_title})")
+    if request.method == "POST":
+        reason = request.POST.get("cancellation_reason", "").strip()
 
-        notify_user = appointment.engineer if user == appointment.client else appointment.client
-        create_notification(
-            user=notify_user,
-            message=f"Consultation '{appointment.project_title}' scheduled on {appointment.appointment_date} was cancelled by {user.get_full_name() or user.username}.",
-            appointment=appointment
-        )
+        if is_late_cancellation and not reason:
+            messages.error(request, "[Policy Rule] Cancellations requested less than 24 hours prior to appointment require a mandatory justification reason.")
+            return render(
+                request,
+                "appointments/cancel_appointment.html",
+                {
+                    "appointment": appointment,
+                    "is_late_cancellation": is_late_cancellation,
+                    "hours_remaining": hours_remaining,
+                }
+            )
 
-        messages.success(request, f"Appointment #{appointment.id} has been cancelled.")
-    except ValidationError as e:
-        messages.error(request, str(e.message if hasattr(e, 'message') else e))
+        try:
+            validate_status_transition(appointment, Appointment.Status.CANCELLED, user)
+            appointment.status = Appointment.Status.CANCELLED
+            appointment.cancellation_reason = reason
+            appointment.save()
 
-    return redirect("appointments:appointment_detail", appointment_id=appointment.id)
+            log_activity(user, f"Cancelled appointment #{appointment.id} ({appointment.project_title})")
+
+            notify_user = appointment.engineer if user == appointment.client else appointment.client
+            reason_note = f" (Reason: {reason})" if reason else ""
+            create_notification(
+                user=notify_user,
+                message=f"Consultation '{appointment.project_title}' scheduled on {appointment.appointment_date} was cancelled by {user.get_full_name() or user.username}.{reason_note}",
+                appointment=appointment
+            )
+
+            messages.success(request, f"Appointment #{appointment.id} has been cancelled.")
+            return redirect("appointments:appointment_detail", appointment_id=appointment.id)
+        except ValidationError as e:
+            messages.error(request, str(e.message if hasattr(e, 'message') else e))
+            return redirect("appointments:appointment_detail", appointment_id=appointment.id)
+
+    return render(
+        request,
+        "appointments/cancel_appointment.html",
+        {
+            "appointment": appointment,
+            "is_late_cancellation": is_late_cancellation,
+            "hours_remaining": hours_remaining,
+        }
+    )
 
 
 @login_required

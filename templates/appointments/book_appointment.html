@@ -34,7 +34,7 @@
                     <form method="post" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}
 
-                        <!-- AI Problem Analyzer & Matcher (Decision-Support Engine) -->
+                        <!-- AI Consultation Matcher (Smart Recommendation Engine) -->
                         <div class="ai-matcher-box card border-0 shadow-sm mb-4 rounded-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff;">
                             <div class="card-body p-4">
                                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
@@ -44,26 +44,28 @@
                                         </div>
                                         <div>
                                             <div class="d-flex align-items-center gap-2">
-                                                <h5 class="fw-bold mb-0 text-white">AI Problem Analyzer &amp; Matcher</h5>
-                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1" style="font-size: 0.72rem; letter-spacing: 0.03em;">DECISION SUPPORT</span>
+                                                <h5 class="fw-bold mb-0 text-white">AI Consultation Matcher</h5>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1" style="font-size: 0.72rem; letter-spacing: 0.03em;">
+                                                    <i class="bi bi-robot me-1"></i>Smart Match
+                                                </span>
                                             </div>
-                                            <p class="text-white-50 small mb-0 mt-1">Describe your technical problem or architectural needs to instantly match the optimal service and certified lead engineer.</p>
+                                            <p class="text-white-50 small mb-0 mt-1">Describe what you need help with. We'll automatically suggest the best service and engineer for you.</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Input & Textarea -->
                                 <div class="mb-3">
-                                    <textarea id="ai-project-input" class="form-control" rows="3" placeholder="e.g., We need to migrate our high-traffic Django application to AWS ECS with Kubernetes, optimize PostgreSQL database queries, and setup automated CI/CD pipelines." style="background-color: rgba(15, 23, 42, 0.7) !important; border-color: rgba(148, 163, 184, 0.3) !important; color: #f8fafc !important; font-size: 0.92rem;"></textarea>
+                                    <textarea id="ai-project-input" class="form-control" rows="3" placeholder="Describe your project, technology stack, or problem (e.g. 'We need help reviewing our Django code for security, optimizing slow database queries, or planning an AWS migration')..." style="background-color: rgba(15, 23, 42, 0.7) !important; border-color: rgba(148, 163, 184, 0.3) !important; color: #f8fafc !important; font-size: 0.92rem;"></textarea>
                                 </div>
 
                                 <!-- Quick Suggestion Prompts -->
                                 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                                    <span class="text-white-50 small me-1"><i class="bi bi-lightbulb me-1"></i>Try:</span>
-                                    <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill small ai-sample-btn" style="font-size: 0.78rem;" onclick="fillAiSample('We need to architect an AWS cloud migration with Docker, Kubernetes, and Terraform infrastructure.')">Cloud &amp; K8s Migration</button>
+                                    <span class="text-white-50 small me-1"><i class="bi bi-lightbulb me-1"></i>Quick Examples:</span>
+                                    <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill small ai-sample-btn" style="font-size: 0.78rem;" onclick="fillAiSample('We need to architect an AWS cloud migration with Docker, Kubernetes, and Terraform infrastructure.')">Cloud &amp; AWS Setup</button>
                                     <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill small ai-sample-btn" style="font-size: 0.78rem;" onclick="fillAiSample('Database optimization for slow PostgreSQL queries, indexing, and Redis caching under high load.')">Database &amp; Redis Tuning</button>
                                     <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill small ai-sample-btn" style="font-size: 0.78rem;" onclick="fillAiSample('Django backend code review, OWASP security audit, and microservice REST API design.')">Security &amp; Code Review</button>
-                                    <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill small ai-sample-btn" style="font-size: 0.78rem;" onclick="fillAiSample('Cross-platform mobile app development with Flutter, iOS and Android offline sync.')">Mobile Flutter App</button>
+                                    <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill small ai-sample-btn" style="font-size: 0.78rem;" onclick="fillAiSample('Cross-platform mobile app development with Flutter, iOS and Android offline sync.')">Mobile App Development</button>
                                 </div>
 
                                 <!-- Action Row -->
@@ -71,8 +73,8 @@
                                     <div id="ai-match-feedback" class="small text-white-50"></div>
                                     <button type="button" id="btn-run-ai-match" class="btn btn-primary px-4 fw-bold shadow-sm d-flex align-items-center gap-2" onclick="executeAiMatcher()">
                                         <span id="ai-btn-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                        <i id="ai-btn-icon" class="bi bi-magic"></i>
-                                        <span id="ai-btn-text">Analyze &amp; Match</span>
+                                        <i id="ai-btn-icon" class="bi bi-sparkles"></i>
+                                        <span id="ai-btn-text">Find Best Match</span>
                                     </button>
                                 </div>
 
@@ -83,12 +85,12 @@
                                         <div class="col-md-6">
                                             <div class="p-3 rounded-3 h-100" style="background-color: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12);">
                                                 <div class="text-white-50 small text-uppercase fw-semibold mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">
-                                                    <i class="bi bi-bullseye text-warning me-1"></i>Matched Service Domain
+                                                    <i class="bi bi-diagram-3-fill text-warning me-1"></i>Recommended Service
                                                 </div>
                                                 <h6 class="fw-bold text-white mb-2 fs-6" id="ai-matched-service-name">-</h6>
                                                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                                                    <span class="badge bg-success text-white px-2 py-1" id="ai-service-confidence-badge">Match: 95%</span>
-                                                    <span class="text-success-emphasis small fw-medium" id="ai-service-autoselected-text" style="color: #86efac !important;"><i class="bi bi-check-circle-fill me-1"></i>Selected in Step 1a</span>
+                                                    <span class="badge bg-success text-white px-2 py-1" id="ai-service-confidence-badge">⭐ Best Service Match</span>
+                                                    <span class="text-success-emphasis small fw-medium" id="ai-service-autoselected-text" style="color: #86efac !important;"><i class="bi bi-check-circle-fill me-1"></i>Selected Below</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -97,12 +99,12 @@
                                         <div class="col-md-6">
                                             <div class="p-3 rounded-3 h-100" style="background-color: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12);">
                                                 <div class="text-white-50 small text-uppercase fw-semibold mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">
-                                                    <i class="bi bi-star-fill text-warning me-1"></i>Top Recommended Engineer
+                                                    <i class="bi bi-person-check-fill text-warning me-1"></i>Recommended Lead Engineer
                                                 </div>
                                                 <h6 class="fw-bold text-white mb-2 fs-6" id="ai-top-engineer-name">-</h6>
                                                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                                                    <span class="badge bg-warning text-dark fw-bold px-2 py-1" id="ai-engineer-score-badge">⭐ 94% Compatibility</span>
-                                                    <span class="text-success-emphasis small fw-medium" id="ai-engineer-autoselected-text" style="color: #86efac !important;"><i class="bi bi-check-circle-fill me-1"></i>Selected in Step 1b</span>
+                                                    <span class="badge bg-warning text-dark fw-bold px-2 py-1" id="ai-engineer-score-badge">⭐ Top Matched Specialist</span>
+                                                    <span class="text-success-emphasis small fw-medium" id="ai-engineer-autoselected-text" style="color: #86efac !important;"><i class="bi bi-check-circle-fill me-1"></i>Selected Below</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -111,10 +113,10 @@
                                     <!-- Extracted Keywords Tags & Sync Button -->
                                     <div class="mt-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
                                         <div class="d-flex flex-wrap align-items-center gap-1" id="ai-keywords-container">
-                                            <span class="text-white-50 small me-1">Matched Keywords:</span>
+                                            <span class="text-white-50 small fw-medium me-2"><i class="bi bi-tags me-1"></i>Key Topics Found:</span>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-outline-light text-white" onclick="copyAiPromptToScope()" title="Copy project description into Step 3 below">
-                                            <i class="bi bi-clipboard-check me-1"></i>Copy Description to Step 3
+                                        <button type="button" class="btn btn-sm btn-outline-light text-white" onclick="copyAiPromptToScope()" title="Copy your text to the project description field below">
+                                            <i class="bi bi-clipboard-check me-1"></i>Use This as Project Description
                                         </button>
                                     </div>
                                 </div>
@@ -572,9 +574,9 @@
         if (matchBtn) matchBtn.disabled = true;
         if (btnSpinner) btnSpinner.classList.remove("d-none");
         if (btnIcon) btnIcon.classList.add("d-none");
-        if (btnText) btnText.textContent = "Analyzing Scope...";
+        if (btnText) btnText.textContent = "Matching...";
         if (feedbackElem) {
-            feedbackElem.innerHTML = '<span class="text-info"><i class="bi bi-gear-wide-connected spin me-1"></i>Running TF-IDF & Cosine Similarity vector matching...</span>';
+            feedbackElem.innerHTML = '<span class="text-info"><i class="bi bi-gear-wide-connected spin me-1"></i>Analyzing requirements to find the best match...</span>';
         }
 
         try {
@@ -624,31 +626,34 @@
                 const svcNameElem = document.getElementById("ai-matched-service-name");
                 const svcConfBadge = document.getElementById("ai-service-confidence-badge");
                 if (svcNameElem) svcNameElem.textContent = data.matched_service.name;
-                if (svcConfBadge) svcConfBadge.textContent = `Match: ${data.matched_service.similarity_score}% Confidence`;
+                if (svcConfBadge) svcConfBadge.textContent = `⭐ Top Service Match`;
             }
 
             if (data.top_engineer) {
                 const engNameElem = document.getElementById("ai-top-engineer-name");
                 const engScoreBadge = document.getElementById("ai-engineer-score-badge");
                 if (engNameElem) engNameElem.textContent = `${data.top_engineer.name} (${data.top_engineer.designation})`;
-                if (engScoreBadge) engScoreBadge.textContent = `⭐ ${data.top_engineer.score}% Compatibility - Top Match`;
+                if (engScoreBadge) engScoreBadge.textContent = `⭐ ${data.top_engineer.score}% Match — Top Specialist`;
             }
 
             // Keywords Badges
             const keywordsContainer = document.getElementById("ai-keywords-container");
             if (keywordsContainer && data.extracted_keywords) {
-                keywordsContainer.innerHTML = '<span class="text-white-50 small me-1">Detected Keywords:</span>';
+                keywordsContainer.innerHTML = '<span class="text-white-50 small fw-medium me-2"><i class="bi bi-tags me-1"></i>Key Topics Found:</span>';
                 data.extracted_keywords.slice(0, 8).forEach(function(kw) {
                     const badge = document.createElement("span");
-                    badge.className = "badge bg-secondary-subtle text-light border border-secondary px-2 py-1 small me-1";
-                    badge.style.fontSize = "0.74rem";
+                    badge.className = "badge bg-white text-dark fw-bold px-2.5 py-1.5 shadow-sm me-1";
+                    badge.style.fontSize = "0.8rem";
+                    badge.style.color = "#0f172a";
+                    badge.style.backgroundColor = "#ffffff";
+                    badge.style.border = "1px solid #cbd5e1";
                     badge.textContent = kw;
                     keywordsContainer.appendChild(badge);
                 });
             }
 
             if (feedbackElem) {
-                feedbackElem.innerHTML = '<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Analysis complete! Optimal domain and lead engineer auto-selected below.</span>';
+                feedbackElem.innerHTML = '<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Matched! Recommended service & lead engineer selected below.</span>';
             }
         } catch (err) {
             console.error("AI Matcher error:", err);
@@ -659,7 +664,7 @@
             if (matchBtn) matchBtn.disabled = false;
             if (btnSpinner) btnSpinner.classList.add("d-none");
             if (btnIcon) btnIcon.classList.remove("d-none");
-            if (btnText) btnText.textContent = "Analyze & Match";
+            if (btnText) btnText.textContent = "Find Best Match";
         }
     }
 

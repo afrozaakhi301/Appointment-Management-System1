@@ -1,23 +1,73 @@
+from datetime import datetime, timedelta
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from scheduling.models import EngineerAvailability, EngineerLeave
+
+MIN_SESSION_DURATION_MINUTES = 30
+MIN_BOOKING_LEAD_HOURS = 6
+MAX_DAILY_ENGINEER_SESSIONS = 4
 
 
 def validate_appointment_booking(engineer, appointment_date, start_time, end_time, exclude_appointment_id=None):
     """
-    Validates complete booking constraints:
-    1. start_time < end_time
-    2. Engineer is not on leave
-    3. Requested slot falls within an active EngineerAvailability period for that weekday
-    4. No overlapping appointments with status in [Pending, Approved, Rescheduled]
+    Validates complete booking constraints and business policies:
+    1. start_time < end_time and session duration >= MIN_SESSION_DURATION_MINUTES (30 mins)
+    2. Booking lead time >= MIN_BOOKING_LEAD_HOURS (6 hours ahead of now)
+    3. Maximum daily sessions per engineer <= MAX_DAILY_ENGINEER_SESSIONS (4 sessions)
+    4. Engineer is not on leave
+    5. Requested slot falls within an active EngineerAvailability period for that weekday
+    6. No overlapping appointments with status in [Pending, Approved, Rescheduled]
     """
     if not engineer or not appointment_date or not start_time or not end_time:
         return
 
-    # 1. Time range check
+    # 1. Time range & Session Duration Policy Check
     if start_time >= end_time:
-        raise ValidationError({"end_time": "Appointment end time must be after start time."})
+        raise ValidationError({"end_time": "[Policy Rule] Appointment end time must be after start time."})
 
-    # 2. Leave check
+    start_dt = datetime.combine(appointment_date, start_time)
+    end_dt = datetime.combine(appointment_date, end_time)
+    duration_minutes = (end_dt - start_dt).total_seconds() / 60
+
+    if duration_minutes < MIN_SESSION_DURATION_MINUTES:
+        raise ValidationError(
+            f"[Policy Rule] Consultation session duration must be at least {MIN_SESSION_DURATION_MINUTES} minutes. "
+            f"Requested duration: {int(duration_minutes)} minutes."
+        )
+
+    # 2. Advance Booking Lead Time Policy Check
+    now = timezone.now()
+    booking_dt = timezone.make_aware(start_dt) if timezone.is_aware(now) else start_dt
+    if booking_dt < now + timedelta(hours=MIN_BOOKING_LEAD_HOURS):
+        raise ValidationError(
+            f"[Policy Rule] Minimum advance booking lead time is {MIN_BOOKING_LEAD_HOURS} hours. "
+            f"Requested slot is on {appointment_date} at {start_time.strftime('%I:%M %p')}, which violates this policy."
+        )
+
+    # 3. Maximum Daily Capacity Policy Check
+    from .models import Appointment
+    blocking_statuses = [
+        Appointment.Status.PENDING,
+        Appointment.Status.APPROVED,
+        Appointment.Status.RESCHEDULED,
+    ]
+
+    daily_active_qs = Appointment.objects.filter(
+        engineer=engineer,
+        appointment_date=appointment_date,
+        status__in=blocking_statuses
+    )
+    if exclude_appointment_id:
+        daily_active_qs = daily_active_qs.exclude(id=exclude_appointment_id)
+
+    if daily_active_qs.count() >= MAX_DAILY_ENGINEER_SESSIONS:
+        eng_name = engineer.get_full_name() or engineer.username
+        raise ValidationError(
+            f"[Policy Rule] Engineer {eng_name} has reached the maximum capacity limit of {MAX_DAILY_ENGINEER_SESSIONS} "
+            f"consultation sessions for {appointment_date}. Please select another date or choose an alternative engineer."
+        )
+
+    # 4. Leave check
     leave_record = EngineerLeave.objects.filter(
         engineer=engineer,
         start_date__lte=appointment_date,
@@ -32,7 +82,7 @@ def validate_appointment_booking(engineer, appointment_date, start_time, end_tim
             f"Please select an available date after {leave_record.end_date.strftime('%b %d, %Y')}."
         )
 
-    # 3. Weekday & Working hours availability check
+    # 5. Weekday & Working hours availability check
     weekday = appointment_date.weekday()
     day_name = appointment_date.strftime("%A")
     availabilities = EngineerAvailability.objects.filter(
@@ -70,15 +120,7 @@ def validate_appointment_booking(engineer, appointment_date, start_time, end_tim
             f"Available working hours on {day_name}: {slots_str}."
         )
 
-    # 4. Double-booking conflict check
-    # Blocking statuses: Pending, Approved, Rescheduled
-    from .models import Appointment
-    blocking_statuses = [
-        Appointment.Status.PENDING,
-        Appointment.Status.APPROVED,
-        Appointment.Status.RESCHEDULED,
-    ]
-
+    # 6. Double-booking conflict check
     conflicting_query = Appointment.objects.filter(
         engineer=engineer,
         appointment_date=appointment_date,
