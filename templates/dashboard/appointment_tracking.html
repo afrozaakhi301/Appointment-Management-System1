@@ -68,7 +68,7 @@
                 <i class="bi bi-graph-up-arrow text-primary me-2"></i>Appointment Completion Tracker
             </h2>
             <p class="text-muted small mb-0">
-                Track how many consultations have been successfully completed <strong>daily, weekly, and monthly</strong>.
+                Track how many consultations have been successfully completed <strong>weekly, monthly, and across engineer distribution</strong>.
             </p>
         </div>
         <div class="d-flex gap-2 no-print">
@@ -203,11 +203,6 @@
                 <div class="col-12 mb-2">
                     <ul class="nav nav-pills bg-light p-1 rounded-3">
                         <li class="nav-item">
-                            <a class="nav-link {% if timeframe == 'daily' %}active{% endif %}" href="javascript:void(0)" onclick="setTimeframe('daily')">
-                                <i class="bi bi-calendar-day me-1"></i>Daily Tracking
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link {% if timeframe == 'weekly' %}active{% endif %}" href="javascript:void(0)" onclick="setTimeframe('weekly')">
                                 <i class="bi bi-calendar-week me-1"></i>Weekly Tracking
                             </a>
@@ -252,7 +247,7 @@
                 </div>
 
                 <!-- Year Filter -->
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label class="form-label small fw-semibold text-muted mb-1">Target Year</label>
                     <select name="year" class="form-select form-select-sm" onchange="document.getElementById('trackingFilterForm').submit();">
                         {% for y in available_years %}
@@ -261,21 +256,8 @@
                     </select>
                 </div>
 
-                <!-- Month / Range Filter (Contextual) -->
-                {% if timeframe == 'daily' %}
-                    <div class="col-md-2">
-                        <label class="form-label small fw-semibold text-muted mb-1">Specific Month</label>
-                        <select name="month" class="form-select form-select-sm" onchange="document.getElementById('trackingFilterForm').submit();">
-                            <option value="">Last 30 Days</option>
-                            {% for m_num, m_name in available_months %}
-                                <option value="{{ m_num }}" {% if month_param == m_num|stringformat:"i" %}selected{% endif %}>{{ m_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                {% endif %}
-
                 <!-- Action buttons -->
-                <div class="col-md-2 d-flex gap-2">
+                <div class="col-md-3 d-flex gap-2">
                     <button type="submit" class="btn btn-primary btn-sm flex-grow-1 fw-semibold">
                         <i class="bi bi-funnel-fill me-1"></i>Filter
                     </button>
@@ -291,77 +273,7 @@
     <!-- TIMEFRAME CONTENT PANELS -->
     <!-- ============================================================= -->
 
-    {% if timeframe == 'daily' %}
-        <!-- DAILY TRACKING VIEW -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-bar-chart-fill text-primary me-2"></i>Daily Completed Consultations
-                    </h5>
-                    <small class="text-muted">
-                        Showing daily record from <strong>{{ daily_data.start_date|date:"M d, Y" }}</strong> to <strong>{{ daily_data.end_date|date:"M d, Y" }}</strong> (Total: {{ daily_data.total_in_period }} completed)
-                    </small>
-                </div>
-                <span class="badge bg-primary px-3 py-2 fs-6">{{ daily_data.total_in_period }} Completed</span>
-            </div>
-            <div class="card-body p-4">
-                <div class="chart-container mb-4">
-                    <canvas id="dailyChart"></canvas>
-                </div>
-
-                <h6 class="fw-bold text-dark mt-4 mb-3"><i class="bi bi-calendar3 me-2 text-primary"></i>Day-by-Day Breakdown</h6>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Date</th>
-                                <th>Day</th>
-                                <th>Completed Count</th>
-                                <th>Consultations Summary</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for day in daily_data.daily_breakdown reversed %}
-                                <tr>
-                                    <td><strong>{{ day.formatted_date }}</strong></td>
-                                    <td><span class="badge bg-light text-dark border">{{ day.day_name }}</span></td>
-                                    <td>
-                                        {% if day.count > 0 %}
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-3 py-1">
-                                                <i class="bi bi-check-circle-fill me-1"></i>{{ day.count }} Completed
-                                            </span>
-                                        {% else %}
-                                            <span class="text-muted small">0 sessions</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if day.appointments %}
-                                            <div class="d-flex flex-wrap gap-2">
-                                                {% for appt in day.appointments %}
-                                                    <a href="{% url 'appointments:appointment_detail' appt.id %}" class="badge bg-white text-dark border p-2 text-decoration-none shadow-sm" title="{{ appt.project_title }} (Client: {{ appt.client.username }}, Consultant: {{ appt.engineer.username }})">
-                                                        <span class="fw-semibold text-primary">#{{ appt.id }}</span> {{ appt.project_title|truncatewords:3 }} 
-                                                        <small class="text-muted">({{ appt.engineer.first_name|default:appt.engineer.username }})</small>
-                                                    </a>
-                                                {% endfor %}
-                                            </div>
-                                        {% else %}
-                                            <span class="text-muted small italic">&mdash;</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">No completed appointments recorded for this timeframe.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-    {% elif timeframe == 'weekly' %}
+    {% if timeframe == 'weekly' %}
         <!-- WEEKLY TRACKING VIEW -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
@@ -591,7 +503,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="{% url 'dashboard:appointment_tracking' %}?timeframe=daily&engineer={{ eng.engineer__username }}" class="btn btn-outline-primary btn-sm">
+                                        <a href="{% url 'dashboard:appointment_tracking' %}?timeframe=weekly&engineer={{ eng.engineer__username }}" class="btn btn-outline-primary btn-sm">
                                             View Timeline <i class="bi bi-arrow-right"></i>
                                         </a>
                                     </td>
@@ -623,52 +535,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         const timeframe = "{{ timeframe }}";
 
-        // 1. Daily Chart
-        const dailyCanvas = document.getElementById("dailyChart");
-        if (dailyCanvas) {
-            const dailyData = JSON.parse('{{ daily_chart_json|escapejs }}');
-            new Chart(dailyCanvas, {
-                type: 'bar',
-                data: {
-                    labels: dailyData.labels,
-                    datasets: [{
-                        label: 'Completed Consultations',
-                        data: dailyData.data,
-                        backgroundColor: 'rgba(13, 110, 253, 0.75)',
-                        borderColor: '#0d6efd',
-                        borderWidth: 1.5,
-                        borderRadius: 6,
-                        maxBarThickness: 32,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1, precision: 0 },
-                            grid: { color: 'rgba(0,0,0,0.05)' }
-                        },
-                        x: {
-                            grid: { display: false }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(ctx) {
-                                    return ctx.parsed.y + ' consultation(s) completed';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 2. Weekly Chart
+        // 1. Weekly Chart
         const weeklyCanvas = document.getElementById("weeklyChart");
         if (weeklyCanvas) {
             const weeklyData = JSON.parse('{{ weekly_chart_json|escapejs }}');

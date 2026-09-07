@@ -1,4 +1,4 @@
-from datetime import date, time
+from datetime import date, time, timedelta
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -32,8 +32,12 @@ class AppointmentBusinessLogicTests(TestCase):
             description="High-level system design consultation."
         )
 
-        # 2026-09-07 is a Monday (weekday=0)
-        self.booking_date = date(2026, 9, 7)
+        # Ensure a future Monday (weekday=0)
+        today = date.today()
+        days_ahead = (0 - today.weekday() + 7) % 7
+        if days_ahead < 3:
+            days_ahead += 7
+        self.booking_date = today + timedelta(days=days_ahead)
         EngineerAvailability.objects.create(
             engineer=self.engineer_user,
             day_of_week=0,  # Monday
@@ -60,8 +64,8 @@ class AppointmentBusinessLogicTests(TestCase):
         # Schedule leave covering the date
         EngineerLeave.objects.create(
             engineer=self.engineer_user,
-            start_date=date(2026, 9, 7),
-            end_date=date(2026, 9, 8),
+            start_date=self.booking_date,
+            end_date=self.booking_date + timedelta(days=1),
             reason="Vacation"
         )
 
@@ -74,8 +78,8 @@ class AppointmentBusinessLogicTests(TestCase):
             )
 
     def test_booking_rejected_when_outside_engineer_availability(self):
-        # 2026-09-08 is a Tuesday (weekday=1), no availability created
-        tuesday_date = date(2026, 9, 8)
+        # Tuesday (weekday=1), no availability created
+        tuesday_date = self.booking_date + timedelta(days=1)
         with self.assertRaises(ValidationError):
             validate_appointment_booking(
                 engineer=self.engineer_user,
@@ -165,9 +169,9 @@ class AppointmentBusinessLogicTests(TestCase):
             self.fail("Self-conflict exclusion failed during rescheduling.")
 
     def test_rejection_during_inclusive_engineer_leave_dates(self):
-        # Schedule leave from 2026-09-14 (Monday) to 2026-09-21 (next Monday)
-        leave_start = date(2026, 9, 14)
-        leave_end = date(2026, 9, 21)
+        # Schedule leave covering Mondays in future
+        leave_start = self.booking_date + timedelta(days=7)
+        leave_end = self.booking_date + timedelta(days=14)
         EngineerLeave.objects.create(
             engineer=self.engineer_user,
             start_date=leave_start,
@@ -193,8 +197,8 @@ class AppointmentBusinessLogicTests(TestCase):
                 end_time=time(11, 0)
             )
 
-        # Test 3: Booking after leave ends (2026-09-28 is a Monday) -> Must succeed
-        after_leave_monday = date(2026, 9, 28)
+        # Test 3: Booking after leave ends -> Must succeed
+        after_leave_monday = leave_end + timedelta(days=7)
         try:
             validate_appointment_booking(
                 engineer=self.engineer_user,

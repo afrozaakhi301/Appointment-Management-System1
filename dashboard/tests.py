@@ -190,7 +190,7 @@ class AppointmentTrackingViewsTests(TestCase):
 
     def test_admin_tracking_timeframes(self):
         self.client_http.login(username="admin_user", password="AdminPassword123!")
-        for tf in ["daily", "weekly", "monthly", "overview"]:
+        for tf in ["weekly", "monthly", "overview"]:
             response = self.client_http.get(reverse("dashboard:appointment_tracking") + f"?timeframe={tf}")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.context["timeframe"], tf)
