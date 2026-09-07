@@ -528,9 +528,9 @@ def admin_reports(request):
 
 @admin_required
 def admin_appointment_tracking(request):
-    timeframe = request.GET.get("timeframe", "weekly").strip().lower()
-    if timeframe not in ["weekly", "monthly", "overview"]:
-        timeframe = "weekly"
+    timeframe = request.GET.get("timeframe", "monthly").strip().lower()
+    if timeframe not in ["monthly", "overview"]:
+        timeframe = "monthly"
 
     engineer_id = request.GET.get("engineer", "").strip()
     service_id = request.GET.get("service", "").strip()

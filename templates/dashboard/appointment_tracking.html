@@ -68,7 +68,7 @@
                 <i class="bi bi-graph-up-arrow text-primary me-2"></i>Appointment Completion Tracker
             </h2>
             <p class="text-muted small mb-0">
-                Track how many consultations have been successfully completed <strong>weekly, monthly, and across engineer distribution</strong>.
+                Track how many consultations have been successfully completed <strong>monthly and across engineer distribution</strong>.
             </p>
         </div>
         <div class="d-flex gap-2 no-print">
@@ -203,11 +203,6 @@
                 <div class="col-12 mb-2">
                     <ul class="nav nav-pills bg-light p-1 rounded-3">
                         <li class="nav-item">
-                            <a class="nav-link {% if timeframe == 'weekly' %}active{% endif %}" href="javascript:void(0)" onclick="setTimeframe('weekly')">
-                                <i class="bi bi-calendar-week me-1"></i>Weekly Tracking
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link {% if timeframe == 'monthly' %}active{% endif %}" href="javascript:void(0)" onclick="setTimeframe('monthly')">
                                 <i class="bi bi-calendar-month me-1"></i>Monthly Tracking
                             </a>
@@ -273,80 +268,7 @@
     <!-- TIMEFRAME CONTENT PANELS -->
     <!-- ============================================================= -->
 
-    {% if timeframe == 'weekly' %}
-        <!-- WEEKLY TRACKING VIEW -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-graph-up text-success me-2"></i>Weekly Completed Consultations
-                    </h5>
-                    <small class="text-muted">
-                        Aggregated completed consultations by calendar week (Monday to Sunday) &bull; Total: {{ weekly_data.total_in_period }} completed
-                    </small>
-                </div>
-                <span class="badge bg-success px-3 py-2 fs-6">{{ weekly_data.total_in_period }} Completed</span>
-            </div>
-            <div class="card-body p-4">
-                <div class="chart-container mb-4">
-                    <canvas id="weeklyChart"></canvas>
-                </div>
-
-                <h6 class="fw-bold text-dark mt-4 mb-3"><i class="bi bi-calendar-week me-2 text-success"></i>Week-by-Week Breakdown</h6>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Week</th>
-                                <th>Date Range</th>
-                                <th>Completed Count</th>
-                                <th>Completed Consultations</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for week in weekly_data.weekly_breakdown reversed %}
-                                <tr>
-                                    <td><strong class="text-primary">Week {{ week.week_num }}</strong></td>
-                                    <td>
-                                        <span class="badge bg-light text-dark border">
-                                            {{ week.start_date|date:"M d, Y" }} &ndash; {{ week.end_date|date:"M d, Y" }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {% if week.count > 0 %}
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-3 py-1">
-                                                <i class="bi bi-check2-all me-1"></i>{{ week.count }} Done
-                                            </span>
-                                        {% else %}
-                                            <span class="text-muted small">0 sessions</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if week.appointments %}
-                                            <div class="d-flex flex-wrap gap-2">
-                                                {% for appt in week.appointments %}
-                                                    <a href="{% url 'appointments:appointment_detail' appt.id %}" class="badge bg-white text-dark border p-2 text-decoration-none shadow-sm">
-                                                        <span class="fw-semibold text-primary">#{{ appt.id }}</span> {{ appt.project_title|truncatewords:3 }} &bull; <small class="text-muted">{{ appt.appointment_date|date:"M d" }}</small>
-                                                    </a>
-                                                {% endfor %}
-                                            </div>
-                                        {% else %}
-                                            <span class="text-muted small">&mdash;</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">No weekly records found.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-    {% elif timeframe == 'monthly' %}
+    {% if timeframe == 'monthly' %}
         <!-- MONTHLY TRACKING VIEW -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
@@ -503,7 +425,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="{% url 'dashboard:appointment_tracking' %}?timeframe=weekly&engineer={{ eng.engineer__username }}" class="btn btn-outline-primary btn-sm">
+                                        <a href="{% url 'dashboard:appointment_tracking' %}?timeframe=monthly&engineer={{ eng.engineer__username }}" class="btn btn-outline-primary btn-sm">
                                             View Timeline <i class="bi bi-arrow-right"></i>
                                         </a>
                                     </td>
@@ -535,52 +457,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         const timeframe = "{{ timeframe }}";
 
-        // 1. Weekly Chart
-        const weeklyCanvas = document.getElementById("weeklyChart");
-        if (weeklyCanvas) {
-            const weeklyData = JSON.parse('{{ weekly_chart_json|escapejs }}');
-            new Chart(weeklyCanvas, {
-                type: 'bar',
-                data: {
-                    labels: weeklyData.labels,
-                    datasets: [{
-                        label: 'Completed Consultations',
-                        data: weeklyData.data,
-                        backgroundColor: 'rgba(25, 135, 84, 0.75)',
-                        borderColor: '#198754',
-                        borderWidth: 1.5,
-                        borderRadius: 6,
-                        maxBarThickness: 40,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1, precision: 0 },
-                            grid: { color: 'rgba(0,0,0,0.05)' }
-                        },
-                        x: {
-                            grid: { display: false }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(ctx) {
-                                    return ctx.parsed.y + ' consultation(s) completed';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 3. Monthly Chart
+        // 1. Monthly Chart
         const monthlyCanvas = document.getElementById("monthlyChart");
         if (monthlyCanvas) {
             const monthlyData = JSON.parse('{{ monthly_chart_json|escapejs }}');

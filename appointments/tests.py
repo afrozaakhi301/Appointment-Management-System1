@@ -767,14 +767,25 @@ class BusinessPolicyAndTieredCancellationTests(TestCase):
         from datetime import timedelta
 
         # Slot 2 hours from now -> MUST FAIL
-        now = timezone.now()
-        near_slot = now + timedelta(hours=2)
+        current_tz = timezone.get_current_timezone()
+        now_local = timezone.localtime(timezone.now(), current_tz)
+        near_slot = now_local + timedelta(hours=2)
+        end_slot = near_slot + timedelta(minutes=45)
+        if end_slot.date() != near_slot.date():
+            start_t = time(0, 30)
+            end_t = time(1, 30)
+            slot_date = end_slot.date()
+        else:
+            start_t = near_slot.time()
+            end_t = end_slot.time()
+            slot_date = near_slot.date()
+
         with self.assertRaises(ValidationError) as ctx:
             validate_appointment_booking(
                 engineer=self.engineer_user,
-                appointment_date=near_slot.date(),
-                start_time=near_slot.time(),
-                end_time=(near_slot + timedelta(minutes=45)).time()
+                appointment_date=slot_date,
+                start_time=start_t,
+                end_time=end_t
             )
         self.assertIn("[Policy Rule]", str(ctx.exception))
         self.assertIn("6 hours", str(ctx.exception))
