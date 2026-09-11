@@ -1,37 +1,14 @@
-<svg width="250" height="56" viewBox="0 0 250 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Symmetric 19-Dot Hexagonal Grid -->
-  <g transform="translate(4, 0)">
-    <!-- Column 1 (3 Green Dots) -->
-    <circle cx="10" cy="19" r="3.2" fill="#22c55e"/>
-    <circle cx="10" cy="28" r="3.2" fill="#22c55e"/>
-    <circle cx="10" cy="37" r="3.2" fill="#22c55e"/>
-    
-    <!-- Column 2 (4 Green Dots) -->
-    <circle cx="19" cy="14.5" r="3.2" fill="#22c55e"/>
-    <circle cx="19" cy="23.5" r="3.2" fill="#22c55e"/>
-    <circle cx="19" cy="32.5" r="3.2" fill="#22c55e"/>
-    <circle cx="19" cy="41.5" r="3.2" fill="#22c55e"/>
-    
-    <!-- Column 3 (5 Light/Cyan Dots - Center Column) -->
-    <circle cx="28" cy="10" r="3.2" fill="#ffffff"/>
-    <circle cx="28" cy="19" r="3.2" fill="#ffffff"/>
-    <circle cx="28" cy="28" r="3.2" fill="#ffffff"/>
-    <circle cx="28" cy="37" r="3.2" fill="#ffffff"/>
-    <circle cx="28" cy="46" r="3.2" fill="#ffffff"/>
-    
-    <!-- Column 4 (4 Light Dots) -->
-    <circle cx="37" cy="14.5" r="3.2" fill="#ffffff"/>
-    <circle cx="37" cy="23.5" r="3.2" fill="#ffffff"/>
-    <circle cx="37" cy="32.5" r="3.2" fill="#ffffff"/>
-    <circle cx="37" cy="41.5" r="3.2" fill="#ffffff"/>
-    
-    <!-- Column 5 (3 Light Dots) -->
-    <circle cx="46" cy="19" r="3.2" fill="#ffffff"/>
-    <circle cx="46" cy="28" r="3.2" fill="#ffffff"/>
-    <circle cx="46" cy="37" r="3.2" fill="#ffffff"/>
-  </g>
-  
-  <!-- Company Name & Slogan (White / Light) -->
-  <text x="64" y="29" font-family="'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="24" fill="#ffffff" letter-spacing="-0.5">Touch &amp; Solve</text>
-  <text x="65" y="42" font-family="'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="7" fill="#94a3b8" letter-spacing="2.6">WE SOLVE JUST IN TOUCH</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 42" height="38" fill="none">
+  <!-- Rounded Blue Icon Box -->
+  <rect x="1" y="3" width="36" height="36" rx="8" fill="#1877F2"/>
+  <!-- Code brackets </> inside icon box -->
+  <path d="M14.5 15L9.5 21L14.5 27" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M19 28L23 14" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M27.5 15L32.5 21L27.5 27" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- TNS AMS Typography -->
+  <text x="47" y="29" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="23" font-weight="800" letter-spacing="0.5">
+    <tspan fill="#FFFFFF">TNS</tspan>
+    <tspan fill="#1877F2" dx="6">AMS</tspan>
+  </text>
 </svg>
