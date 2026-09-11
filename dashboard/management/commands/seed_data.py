@@ -172,10 +172,10 @@ class Command(BaseCommand):
                 ]
             },
             {
-                "username": "mahin_khan",
-                "first_name": "Mahin",
+                "username": "mahim_khan",
+                "first_name": "Mahim",
                 "last_name": "Khan",
-                "email": "mahin.khan@tns-software.com",
+                "email": "mahim.khan@tns-software.com",
                 "phone": "+880 1917-000707",
                 "designation": "Senior Backend & Mobile Cloud Systems Engineer",
                 "experience": 5,
@@ -476,7 +476,7 @@ Test Credentials created:
    - aizah_ayat      (Password: Engineer123!) -> Staff DevOps & Security Engineer
    - rashed_rana     (Password: Engineer123!) -> Senior Microservices Architect
    - shamsun_lata    (Password: Engineer123!) -> Lead QA & AppSec Specialist
-   - mahin_khan      (Password: Engineer123!) -> Senior Cloud Native Engineer
+   - mahim_khan      (Password: Engineer123!) -> Senior Cloud Native Engineer
    - suyeb_ali       (Password: Engineer123!) -> Principal Cloud Architect
    - nadia_hossain   (Password: Engineer123!) -> Staff Database & Backend Engineer
    - wasim_kamal     (Password: Engineer123!) -> Lead DevOps & Platform Security Engineer

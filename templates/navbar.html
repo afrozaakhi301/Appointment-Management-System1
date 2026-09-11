@@ -1,11 +1,9 @@
+{% load static %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm py-2">
     <div class="container">
         <!-- Brand -->
-        <a class="navbar-brand d-flex align-items-center fw-bold text-white fs-4" href="{% url 'home' %}">
-            <span class="bg-primary text-white rounded p-1 px-2 me-2 shadow-sm">
-                <i class="bi bi-code-slash"></i>
-            </span>
-            <span>TNS <span class="text-primary">AMS</span></span>
+        <a class="navbar-brand d-flex align-items-center py-1" href="{% url 'home' %}">
+            <img src="{% static 'img/tns_logo_white.svg' %}" alt="Touch &amp; Solve" height="38" class="d-inline-block">
         </a>
 
         <!-- Mobile toggle button -->

@@ -1,0 +1,37 @@
+<svg width="250" height="56" viewBox="0 0 250 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Symmetric 19-Dot Hexagonal Grid -->
+  <g transform="translate(4, 0)">
+    <!-- Column 1 (3 Green Dots) -->
+    <circle cx="10" cy="19" r="3.2" fill="#22c55e"/>
+    <circle cx="10" cy="28" r="3.2" fill="#22c55e"/>
+    <circle cx="10" cy="37" r="3.2" fill="#22c55e"/>
+    
+    <!-- Column 2 (4 Green Dots) -->
+    <circle cx="19" cy="14.5" r="3.2" fill="#22c55e"/>
+    <circle cx="19" cy="23.5" r="3.2" fill="#22c55e"/>
+    <circle cx="19" cy="32.5" r="3.2" fill="#22c55e"/>
+    <circle cx="19" cy="41.5" r="3.2" fill="#22c55e"/>
+    
+    <!-- Column 3 (5 Navy Dots - Center Column) -->
+    <circle cx="28" cy="10" r="3.2" fill="#0c2340"/>
+    <circle cx="28" cy="19" r="3.2" fill="#0c2340"/>
+    <circle cx="28" cy="28" r="3.2" fill="#0c2340"/>
+    <circle cx="28" cy="37" r="3.2" fill="#0c2340"/>
+    <circle cx="28" cy="46" r="3.2" fill="#0c2340"/>
+    
+    <!-- Column 4 (4 Navy Dots) -->
+    <circle cx="37" cy="14.5" r="3.2" fill="#0c2340"/>
+    <circle cx="37" cy="23.5" r="3.2" fill="#0c2340"/>
+    <circle cx="37" cy="32.5" r="3.2" fill="#0c2340"/>
+    <circle cx="37" cy="41.5" r="3.2" fill="#0c2340"/>
+    
+    <!-- Column 5 (3 Navy Dots) -->
+    <circle cx="46" cy="19" r="3.2" fill="#0c2340"/>
+    <circle cx="46" cy="28" r="3.2" fill="#0c2340"/>
+    <circle cx="46" cy="37" r="3.2" fill="#0c2340"/>
+  </g>
+  
+  <!-- Company Name & Slogan -->
+  <text x="64" y="29" font-family="'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="24" fill="#0c2340" letter-spacing="-0.5">Touch &amp; Solve</text>
+  <text x="65" y="42" font-family="'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="7" fill="#8898aa" letter-spacing="2.6">WE SOLVE JUST IN TOUCH</text>
+</svg>

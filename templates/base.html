@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}TNS AMS | Software Consultation Booking System{% endblock %}</title>
     
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     
@@ -18,93 +13,7 @@
     
     <!-- Custom CSS -->
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=6">
-    <style>
-        /* Force Header-matching Footer Background & Remove All Underlines */
-        footer.footer-odoo {
-            background-color: #0f172a !important;
-            color: #94a3b8 !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-        }
-        footer.footer-odoo * {
-            text-decoration: none !important;
-        }
-        footer.footer-odoo a {
-            color: #94a3b8 !important;
-            text-decoration: none !important;
-            transition: color 0.15s ease, transform 0.15s ease;
-        }
-        footer.footer-odoo a:hover {
-            color: #ffffff !important;
-            text-decoration: none !important;
-        }
-        footer.footer-odoo ul {
-            list-style: none !important;
-            padding-left: 0 !important;
-            margin-bottom: 0 !important;
-        }
-        footer.footer-odoo li {
-            list-style: none !important;
-            margin-bottom: 0.35rem !important;
-        }
-        .footer-odoo-logo {
-            color: #ffffff !important;
-            font-size: 2.25rem !important;
-            font-weight: 800 !important;
-            letter-spacing: -0.04em !important;
-            text-decoration: none !important;
-        }
-        .footer-odoo-logo:hover {
-            color: #ffffff !important;
-            text-decoration: none !important;
-        }
-        .footer-odoo-bottom {
-            background-color: #0b1120 !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
-        }
-        .footer-odoo-bottom a {
-            color: #94a3b8 !important;
-            text-decoration: none !important;
-        }
-        .footer-odoo-bottom a:hover {
-            color: #ffffff !important;
-            text-decoration: none !important;
-        }
-
-        /* Floating WhatsApp Direct Support Button */
-        .floating-whatsapp-btn {
-            position: fixed !important;
-            bottom: 24px !important;
-            right: 24px !important;
-            width: 56px !important;
-            height: 56px !important;
-            border-radius: 50% !important;
-            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important;
-            color: #ffffff !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            font-size: 1.75rem !important;
-            box-shadow: 0 10px 25px -5px rgba(37, 211, 102, 0.5), 0 8px 10px -6px rgba(37, 211, 102, 0.3) !important;
-            z-index: 99999 !important;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-            text-decoration: none !important;
-        }
-        .floating-whatsapp-btn:hover {
-            transform: scale(1.1) translateY(-3px) !important;
-            color: #ffffff !important;
-            box-shadow: 0 15px 30px -5px rgba(37, 211, 102, 0.7) !important;
-        }
-        @media (max-width: 576px) {
-            .floating-whatsapp-btn {
-                bottom: 18px !important;
-                right: 18px !important;
-                width: 50px !important;
-                height: 50px !important;
-                font-size: 1.5rem !important;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
@@ -130,119 +39,84 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer (Odoo Style Multi-Column) -->
-    <footer class="footer-odoo mt-5 text-white" style="background-color: #0f172a !important;">
-        <div class="container">
-            <!-- Top Centered Minimal Brand Logo -->
-            <div class="text-center pt-5 pb-5">
-                <a href="{% url 'home' %}" class="footer-odoo-logo text-decoration-none text-white" style="text-decoration: none !important; color: #ffffff !important;">
-                    touch<span class="text-primary">&bull;</span>solve
-                </a>
-            </div>
+    <!-- Footer -->
+    <footer class="tns-custom-footer mt-auto">
+        <div class="container py-3 py-md-4">
+            <div class="row gy-3 gx-lg-4 justify-content-between align-items-start">
+                
+                <!-- Left Column: Company Logo, About, & Contact Info -->
+                <div class="col-lg-7 col-md-8">
+                    <!-- Brand Logo -->
+                    <div class="mb-2">
+                        <a href="{% url 'home' %}" class="text-decoration-none d-inline-block">
+                            <img src="{% static 'img/tns_logo_white.svg' %}" alt="Touch &amp; Solve" height="38" class="img-fluid">
+                        </a>
+                    </div>
 
-            <!-- Footer Columns Grid -->
-            <div class="row gy-4 pb-5">
-                <!-- Column 1: Community & Open Source -->
-                <div class="col-lg-2 col-md-4 col-6">
-                    <h6 class="fw-bold mb-3 text-white">Community</h6>
-                    <ul class="list-unstyled footer-nav-list mb-0">
-                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Tutorials</a></li>
-                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Documentation</a></li>
-                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Forum</a></li>
-                        <li><a href="{% url 'home' %}#client-reviews" class="text-decoration-none">Client Reviews</a></li>
-                    </ul>
-
-                    <h6 class="fw-bold mb-3 mt-4 text-white">Open Source</h6>
-                    <ul class="list-unstyled footer-nav-list mb-0">
-                        <li><a href="{% url 'services:engineer_list' %}" class="text-decoration-none">Download</a></li>
-                        <li><a href="https://github.com/afrozaakhi301/Appointment-Management-System1" target="_blank" class="text-decoration-none">GitHub</a></li>
-                        <li><a href="{% url 'services:engineer_list' %}" class="text-decoration-none">Runbot</a></li>
-                    </ul>
-                </div>
-
-                <!-- Column 2: Services -->
-                <div class="col-lg-2 col-md-4 col-6">
-                    <h6 class="fw-bold mb-3 text-white">Services</h6>
-                    <ul class="list-unstyled footer-nav-list mb-0">
-                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Cloud Architecture</a></li>
-                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Database Optimization</a></li>
-                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">DevOps CI/CD</a></li>
-                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Upgrade &amp; Migration</a></li>
-                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Custom Developments</a></li>
-                        <li><a href="{% url 'services:service_list' %}" class="text-decoration-none">Education &amp; Training</a></li>
-                        <li><a href="{% url 'services:engineer_list' %}" class="text-decoration-none">Find an Engineer</a></li>
-                        <li><a href="{% url 'appointments:book_appointment' %}" class="text-decoration-none">Book Consultation</a></li>
-                    </ul>
-                </div>
-
-                <!-- Column 3: About us -->
-                <div class="col-lg-2 col-md-4 col-6">
-                    <h6 class="fw-bold mb-3 text-white">About us</h6>
-                    <ul class="list-unstyled footer-nav-list mb-0">
-                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Our company</a></li>
-                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Brand Assets</a></li>
-                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Contact us</a></li>
-                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Jobs</a></li>
-                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Events</a></li>
-                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Podcast</a></li>
-                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Blog</a></li>
-                        <li><a href="{% url 'home' %}#client-reviews" class="text-decoration-none">Customers</a></li>
-                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Legal &bull; Privacy</a></li>
-                        <li><a href="{% url 'services:about_contact' %}" class="text-decoration-none">Security</a></li>
-                    </ul>
-                </div>
-
-                <!-- Column 4: Platform Narrative & Social Links -->
-                <div class="col-lg-6 col-md-12 ps-lg-5 mt-4 mt-lg-0">
-                    <!-- Platform Description Narrative -->
-                    <p class="footer-narrative mb-2" style="color: #94a3b8; font-size: 0.84rem; line-height: 1.65;">
-                        Touch &amp; Solve is a suite of professional software engineering consultation apps and services that cover all your company needs: Cloud Architecture, Database Optimization, CI/CD Automation, Code Review, and 1-on-1 Lead Engineer sessions.
-                    </p>
-                    <p class="footer-narrative mb-4" style="color: #94a3b8; font-size: 0.84rem; line-height: 1.65;">
-                        Touch &amp; Solve&rsquo;s unique value proposition is to be at the same time very easy to use and fully integrated.
+                    <!-- Company Statement -->
+                    <p class="tns-footer-desc mb-3">
+                        We work with a passion of taking challenges and creating new ones in advertising sector.
                     </p>
 
-                    <!-- Social Media & Contact Links -->
-                    <div class="d-flex flex-wrap align-items-center gap-3 footer-odoo-social">
-                        <a href="https://facebook.com" target="_blank" title="Facebook" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-facebook fs-5"></i></a>
-                        <a href="https://x.com" target="_blank" title="X" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-twitter-x fs-5"></i></a>
-                        <a href="https://linkedin.com" target="_blank" title="LinkedIn" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-linkedin fs-5"></i></a>
-                        <a href="https://github.com/afrozaakhi301/Appointment-Management-System1" target="_blank" title="GitHub" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-github fs-5"></i></a>
-                        <a href="https://instagram.com" target="_blank" title="Instagram" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-instagram fs-5"></i></a>
-                        <a href="https://discord.com" target="_blank" title="Discord" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-discord fs-5"></i></a>
-                        <a href="tel:+8801958227203" title="Call Us" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-telephone-fill fs-5"></i></a>
-                        <a href="mailto:info@touchandsolve.com" title="Email Us" class="text-decoration-none" style="text-decoration: none !important;"><i class="bi bi-envelope-fill fs-5"></i></a>
+                    <!-- Contact Details with Blue Icons -->
+                    <ul class="list-unstyled d-flex flex-column gap-2 mb-0 tns-footer-contact">
+                        <li class="d-flex align-items-center">
+                            <div class="tns-contact-icon me-2">
+                                <i class="bi bi-telephone-fill"></i>
+                            </div>
+                            <a href="tel:+8801958227203" class="text-decoration-none tns-contact-text">
+                                +880 1958227203
+                            </a>
+                        </li>
+                        <li class="d-flex align-items-center">
+                            <div class="tns-contact-icon me-2">
+                                <i class="bi bi-envelope-fill"></i>
+                            </div>
+                            <a href="mailto:info@touchandsolve.com" class="text-decoration-none tns-contact-text">
+                                info@touchandsolve.com
+                            </a>
+                        </li>
+                        <li class="d-flex align-items-start">
+                            <div class="tns-contact-icon me-2 mt-1">
+                                <i class="bi bi-geo-alt-fill"></i>
+                            </div>
+                            <span class="tns-contact-text">
+                                Plot 6 (3rd Floor &amp; 6th Floor), Road 1/A, Sector 17, Uttara, Dhaka 1230, Bangladesh.
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Right Column: Quick Link -->
+                <div class="col-lg-4 col-md-4 ps-lg-4">
+                    <div class="tns-quick-links-box">
+                        <h4 class="tns-footer-heading">Quick Link</h4>
+                        <div class="tns-heading-line"></div>
+                        <ul class="list-unstyled d-flex flex-column gap-2 mb-0 tns-quick-links-list">
+                            <li>
+                                <a href="{% url 'services:service_list' %}" class="tns-quick-link">
+                                    Our Services
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'services:engineer_list' %}" class="tns-quick-link">
+                                    Our Team
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
+
             </div>
         </div>
 
-        <!-- Bottom Sub-Footer Bar -->
-        <div class="footer-odoo-bottom py-3 text-center" style="background-color: #0b1120 !important; border-top: 1px solid rgba(255,255,255,0.06) !important;">
-            <div class="container">
-                <span class="text-secondary opacity-75">Developed by</span>
-                <a href="{% url 'home' %}" class="text-white text-decoration-none ms-1 fw-semibold" style="color: #ffffff !important; text-decoration: none !important;">Touch and Solve</a>
+        <!-- Sub-footer Bottom Bar -->
+        <div class="tns-footer-bottom py-2">
+            <div class="container text-center">
+                <span class="text-muted small" style="font-size: 0.8rem;">&copy; 2026 <strong>Touch &amp; Solve</strong>. All rights reserved.</span>
             </div>
         </div>
     </footer>
-
-    <!-- Floating WhatsApp Support Button (Clients & Public Guests only, excluded on Login & Register) -->
-    {% block floating_support %}
-        {% if request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' %}
-            {% if not user.is_authenticated or user.role == 'Client' %}
-            <a href="https://wa.me/8801700000000?text=Hello%20TNS%20Support,%20I%20need%20assistance%20with%20my%20consultation%20booking." 
-               class="floating-whatsapp-btn" 
-               target="_blank" 
-               rel="noopener noreferrer" 
-               title="Chat with TNS Support on WhatsApp"
-               aria-label="Chat with TNS Support on WhatsApp">
-                <i class="bi bi-whatsapp"></i>
-            </a>
-            {% endif %}
-        {% endif %}
-    {% endblock %}
-
-
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

@@ -1,0 +1,33 @@
+<svg width="600" height="300" viewBox="0 0 600 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g opacity="0.12" stroke="#0284c7" stroke-width="1.2">
+    <!-- Main circuit lines -->
+    <path d="M0 60 H 120 L 160 100 H 280 L 320 60 H 450" fill="none"/>
+    <path d="M0 140 H 80 L 120 180 H 220 L 260 140 H 380 L 420 180 H 550" fill="none"/>
+    <path d="M60 260 H 180 L 220 220 H 340 L 380 260 H 500" fill="none"/>
+    <path d="M140 0 V 40 L 180 80 V 160" fill="none"/>
+    <path d="M300 120 V 200 L 340 240 V 300" fill="none"/>
+  </g>
+  <g opacity="0.18" fill="#0284c7">
+    <!-- Nodes / Dots -->
+    <circle cx="120" cy="60" r="3.5" />
+    <circle cx="160" cy="100" r="3.5" />
+    <circle cx="280" cy="100" r="3.5" />
+    <circle cx="320" cy="60" r="3.5" />
+    <circle cx="80" cy="140" r="3.5" />
+    <circle cx="120" cy="180" r="3.5" />
+    <circle cx="220" cy="180" r="3.5" />
+    <circle cx="260" cy="140" r="3.5" />
+    <circle cx="380" cy="140" r="3.5" />
+    <circle cx="420" cy="180" r="3.5" />
+    <circle cx="180" cy="220" r="3.5" />
+    <circle cx="220" cy="220" r="3.5" />
+    <circle cx="340" cy="220" r="3.5" />
+    <circle cx="380" cy="260" r="3.5" />
+  </g>
+  <g opacity="0.08" stroke="#0284c7" stroke-width="1">
+    <!-- Diamond chips -->
+    <rect x="156" y="96" width="8" height="8" rx="1" fill="#0284c7" fill-opacity="0.2"/>
+    <rect x="256" y="136" width="8" height="8" rx="1" fill="#0284c7" fill-opacity="0.2"/>
+    <rect x="336" y="216" width="8" height="8" rx="1" fill="#0284c7" fill-opacity="0.2"/>
+  </g>
+</svg>

@@ -67,13 +67,9 @@
                                 <td class="text-muted fw-bold">{{ eng.id }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        {% if eng.engineer_profile.profile_photo %}
-                                            <img src="{{ eng.engineer_profile.profile_photo.url }}" alt="{{ eng.get_full_name }}" class="avatar-img me-2 border">
-                                        {% else %}
-                                            <div class="avatar-img bg-primary text-white d-flex align-items-center justify-content-center fw-bold me-2">
-                                                {{ eng.first_name|first|default:eng.username|first|upper }}
-                                            </div>
-                                        {% endif %}
+                                        <div class="avatar-img bg-primary text-white d-flex align-items-center justify-content-center fw-bold me-2 rounded-circle">
+                                            {{ eng.first_name|first|default:eng.username|first|upper }}
+                                        </div>
                                         <div>
                                             <strong>{{ eng.get_full_name|default:eng.username }}</strong>
                                             <small class="text-muted d-block">@{{ eng.username }}</small>

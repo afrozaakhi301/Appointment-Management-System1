@@ -5,33 +5,28 @@
 {% block content %}
 <div class="container py-5">
     <div class="text-center mb-4">
-        <span class="badge bg-primary text-white mb-2 px-3 py-2 fw-semibold">Consultation Domains</span>
         <h1 class="fw-bold mb-2">Our Consultation Services</h1>
         <p class="text-muted">Specialized software engineering domains available for booking with Touch & Solve lead engineers</p>
     </div>
 
-    <!-- Prominent Non-Technical Guidance Banner -->
-    <div class="card border-0 shadow-sm mb-5 text-white overflow-hidden" 
-         style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%); border-radius: 1rem;">
-        <div class="card-body p-4 p-lg-5">
-            <div class="row align-items-center g-4">
+    <!-- Scoping Session Card -->
+    <div class="card border mb-4">
+        <div class="card-body p-4">
+            <div class="row align-items-center g-3">
                 <div class="col-lg-8">
-                    <span class="badge bg-warning text-dark px-3 py-2 fw-bold mb-3 rounded-pill shadow-sm">
-                        <i class="bi bi-lightbulb-fill me-1"></i>Need Help Choosing?
-                    </span>
-                    <h3 class="fw-bold mb-2 text-white">Not sure what technical service fits your project?</h3>
-                    <p class="text-light opacity-90 mb-0" style="font-size: 1.05rem; line-height: 1.6;">
-                        Book a <strong>General Architecture & Technical Scoping Session</strong>. Work 1-on-1 with a lead architect to clarify requirements, evaluate tech trade-offs, estimate timelines, and select the optimal stack for your business.
+                    <h5 class="fw-bold mb-1"><i class="bi bi-compass-fill text-primary me-2"></i>Not sure which technical service fits your project?</h5>
+                    <p class="text-muted mb-0">
+                        Book a <strong>General Architecture & Technical Scoping Session</strong>. Work 1-on-1 with a lead architect to clarify requirements, evaluate tech trade-offs, and select the optimal stack.
                     </p>
                 </div>
                 <div class="col-lg-4 text-lg-end">
                     {% if general_service %}
-                        <a href="{% url 'appointments:book_appointment' %}?service={{ general_service.id }}" class="btn btn-warning btn-lg fw-bold px-4 py-3 shadow-sm text-dark text-nowrap">
-                            <i class="bi bi-compass-fill me-2"></i>Book Scoping Session
+                        <a href="{% url 'appointments:book_appointment' %}?service={{ general_service.id }}" class="btn btn-primary">
+                            Book Scoping Session
                         </a>
                     {% else %}
-                        <a href="{% url 'appointments:book_appointment' %}" class="btn btn-warning btn-lg fw-bold px-4 py-3 shadow-sm text-dark text-nowrap">
-                            <i class="bi bi-compass-fill me-2"></i>Book Scoping Session
+                        <a href="{% url 'appointments:book_appointment' %}" class="btn btn-primary">
+                            Book Scoping Session
                         </a>
                     {% endif %}
                 </div>
@@ -43,128 +38,37 @@
     <div class="row g-4">
         {% for service in services %}
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100 service-catalog-card border-0 shadow-sm overflow-hidden rounded-3 d-flex flex-column" 
-                     id="catalog-service-{{ service.id }}" 
-                     onclick="markCatalogService('{{ service.id }}')">
-                    
-                    <!-- Related Service Image -->
-                    <div class="position-relative" style="height: 170px; overflow: hidden;">
-                        {% if "General Architecture" in service.name or "Scoping" in service.name %}
-                            <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
-                        {% elif "Cloud" in service.name %}
-                            <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
-                        {% elif "Database" in service.name or "Backend" in service.name %}
-                            <img src="https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
-                        {% elif "DevOps" in service.name or "Infrastructure" in service.name or "CI/CD" in service.name %}
-                            <img src="https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
-                        {% elif "Code Review" in service.name or "Python" in service.name or "Django" in service.name %}
-                            <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
-                        {% elif "Microservice" in service.name or "API" in service.name %}
-                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
-                        {% elif "Mobile" in service.name or "Cross-Platform" in service.name %}
-                            <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
-                        {% elif "Cybersecurity" in service.name or "Hardening" in service.name or "Security" in service.name %}
-                            <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
-                        {% else %}
-                            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80" alt="{{ service.name }}" class="w-100 h-100 object-fit-cover">
-                        {% endif %}
-                        
-                        <div class="position-absolute top-0 start-0 m-2">
-                            <span class="badge bg-primary px-2 py-1 small">
-                                <i class="bi bi-cpu-fill me-1"></i>Engineering Domain
-                            </span>
-                        </div>
-
-                        <!-- Top-Right Marked Icon Badge -->
-                        <div class="catalog-mark-icon" id="cat-mark-{{ service.id }}">
-                            <i class="bi bi-bookmark-check-fill"></i> <span class="mark-label">Select</span>
-                        </div>
-                    </div>
-
-                    <div class="card-body p-4 d-flex flex-column flex-grow-1">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="service-icon-box me-2" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                <div class="card h-100 border p-3">
+                    <div class="card-body d-flex flex-column p-2">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="service-icon-box me-3">
                                 {% if "General Architecture" in service.name or "Scoping" in service.name %}
                                     <i class="bi bi-compass-fill text-warning"></i>
                                 {% elif "Cloud" in service.name or "AWS" in service.name %}
-                                    <i class="bi bi-cloud-arrow-up-fill"></i>
+                                    <i class="bi bi-cloud-arrow-up-fill text-primary"></i>
                                 {% elif "Database" in service.name or "Backend" in service.name %}
-                                    <i class="bi bi-database-fill-gear"></i>
+                                    <i class="bi bi-database-fill-gear text-success"></i>
                                 {% elif "DevOps" in service.name or "CI/CD" in service.name or "Infrastructure" in service.name %}
-                                    <i class="bi bi-hdd-network-fill"></i>
+                                    <i class="bi bi-hdd-network-fill text-danger"></i>
                                 {% elif "Microservice" in service.name or "API" in service.name %}
-                                    <i class="bi bi-diagram-3-fill"></i>
+                                    <i class="bi bi-diagram-3-fill text-primary"></i>
                                 {% elif "Python" in service.name or "Django" in service.name or "Code Review" in service.name %}
-                                    <i class="bi bi-code-slash"></i>
+                                    <i class="bi bi-code-slash text-warning"></i>
                                 {% elif "Mobile" in service.name or "Cross-Platform" in service.name %}
                                     <i class="bi bi-phone-fill text-primary"></i>
                                 {% elif "Cybersecurity" in service.name or "Hardening" in service.name or "Security" in service.name %}
                                     <i class="bi bi-shield-lock-fill text-danger"></i>
                                 {% else %}
-                                    <i class="bi bi-cpu-fill"></i>
+                                    <i class="bi bi-cpu-fill text-secondary"></i>
                                 {% endif %}
                             </div>
                             <h5 class="fw-bold mb-0 text-dark">{{ service.name }}</h5>
                         </div>
-                        <p class="text-muted small mb-3">{{ service.description }}</p>
+                        <p class="text-muted small mb-4 flex-grow-1">{{ service.description }}</p>
 
-                        <!-- Typical Use Cases for Non-Technical Clients -->
-                        <div class="mb-4 text-start">
-                            <small class="text-muted fw-bold text-uppercase d-block mb-2" style="font-size: 0.72rem; letter-spacing: 0.04em;">
-                                <i class="bi bi-tags-fill text-primary me-1"></i>Typical Use Cases
-                            </small>
-                            <div class="d-flex flex-wrap gap-1">
-                                {% if "General Architecture" in service.name or "Scoping" in service.name %}
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-rocket-takeoff text-primary me-1"></i>MVP Development</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-layers text-info me-1"></i>Tech Stack Selection</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-graph-up text-success me-1"></i>Timeline & Budgeting</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-cart-check text-warning me-1"></i>E-Commerce / Online Store</span>
-                                {% elif "Cloud" in service.name or "AWS" in service.name or "GCP" in service.name %}
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-cloud-arrow-up text-info me-1"></i>AWS / GCP Migration</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-speedometer2 text-success me-1"></i>High Traffic Scaling</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-shield-check text-primary me-1"></i>Server Cost Reduction</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-activity text-danger me-1"></i>Zero-Downtime Setup</span>
-                                {% elif "Database" in service.name or "Performance" in service.name or "Backend" in service.name %}
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Fixing Site Slowness</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-cart3 text-success me-1"></i>E-Commerce / Online Store</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-database-exclamation text-danger me-1"></i>Database Bottlenecks</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-repeat text-primary me-1"></i>Query Optimization</span>
-                                {% elif "DevOps" in service.name or "CI/CD" in service.name or "Infrastructure" in service.name %}
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-arrow-repeat text-primary me-1"></i>Automated Deployments</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-box-seam text-info me-1"></i>Docker & Kubernetes</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-shield-x text-danger me-1"></i>Release Failure Prevention</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-gear-wide-connected text-success me-1"></i>CI/CD Pipelines</span>
-                                {% elif "Microservice" in service.name or "API" in service.name %}
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-diagram-3 text-primary me-1"></i>Monolith to Microservices</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-credit-card text-success me-1"></i>Payment Gateways</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-link-45deg text-info me-1"></i>3rd-Party API Integrations</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-send-check text-warning me-1"></i>Real-Time Messaging</span>
-                                {% elif "Code Review" in service.name or "Django" in service.name or "Python" in service.name %}
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-shield-lock text-danger me-1"></i>Security Audit</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-check-all text-success me-1"></i>Pre-Launch Readiness</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-tools text-primary me-1"></i>Code Refactoring</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-bug text-warning me-1"></i>Technical Debt Cleanup</span>
-                                {% elif "Mobile" in service.name or "Cross-Platform" in service.name %}
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-phone text-primary me-1"></i>iOS & Android Apps</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-layers text-info me-1"></i>Flutter vs React Native</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-cloud-arrow-down text-success me-1"></i>Offline Data Sync</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-shop text-warning me-1"></i>App Store / Play Store</span>
-                                {% elif "Cybersecurity" in service.name or "Hardening" in service.name or "Security" in service.name %}
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-shield-shaded text-danger me-1"></i>OWASP Top 10 Audit</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-key-fill text-warning me-1"></i>Auth & Session Protection</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-bug-fill text-primary me-1"></i>Penetration Testing</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-file-earmark-lock text-success me-1"></i>Data Privacy & Hardening</span>
-                                {% else %}
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-rocket-takeoff text-primary me-1"></i>MVP Development</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-cart3 text-success me-1"></i>E-Commerce / Online Store</span>
-                                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-lightning-charge text-warning me-1"></i>Fixing Site Slowness</span>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="pt-3 border-top mt-auto">
-                            <a href="{% url 'appointments:book_appointment' %}?service={{ service.id }}" class="btn btn-primary w-100 fw-semibold">
-                                <i class="bi bi-calendar-plus me-1"></i>Book This Consultation
+                        <div class="pt-2 border-top mt-auto">
+                            <a href="{% url 'appointments:book_appointment' %}?service={{ service.id }}" class="btn btn-outline-primary btn-sm w-100">
+                                Book Consultation
                             </a>
                         </div>
                     </div>
@@ -179,29 +83,3 @@
     </div>
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-    function markCatalogService(serviceId) {
-        document.querySelectorAll(".service-catalog-card").forEach(function(card) {
-            const cardId = card.id.replace("catalog-service-", "");
-            const badge = document.getElementById("cat-mark-" + cardId);
-            if (cardId === String(serviceId)) {
-                card.classList.toggle("is-marked");
-                const isNowMarked = card.classList.contains("is-marked");
-                if (badge) {
-                    badge.innerHTML = isNowMarked 
-                        ? '<i class="bi bi-check-circle-fill text-warning"></i> <span class="mark-label">Marked</span>'
-                        : '<i class="bi bi-bookmark-check-fill"></i> <span class="mark-label">Select</span>';
-                }
-            } else {
-                card.classList.remove("is-marked");
-                if (badge) {
-                    badge.innerHTML = '<i class="bi bi-bookmark-check-fill"></i> <span class="mark-label">Select</span>';
-                }
-            }
-        });
-    }
-</script>
-{% endblock %}
-
