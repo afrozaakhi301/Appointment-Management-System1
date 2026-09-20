@@ -187,6 +187,12 @@ class AppointmentTrackingViewsTests(TestCase):
         self.assertIn("daily_data", response.context)
         self.assertIn("weekly_data", response.context)
         self.assertIn("monthly_data", response.context)
+        self.assertIn("monthly_chart_json", response.context)
+        self.assertIn("service_chart_json", response.context)
+        self.assertContains(response, "Monthly Consultation Completion Trend")
+        self.assertContains(response, "By Service Domain")
+        self.assertContains(response, "monthlyCompletionTrendChart")
+        self.assertContains(response, "serviceDomainDistributionChart")
 
     def test_admin_tracking_timeframes(self):
         self.client_http.login(username="admin_user", password="AdminPassword123!")

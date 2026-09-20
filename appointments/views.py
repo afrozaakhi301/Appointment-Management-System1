@@ -38,17 +38,7 @@ def book_appointment_view(request):
         avg_rating=Avg("engineer_appointments__feedback__rating"),
         review_count=Count("engineer_appointments__feedback", distinct=True)
     )
-    services = Service.objects.filter(is_active=True).annotate(
-        priority=Case(
-            When(name__icontains="General Architecture", then=Value(0)),
-            default=Value(1),
-            output_field=IntegerField(),
-        )
-    ).order_by("priority", "name")
-    general_service = services.filter(
-        Q(name__icontains="General Architecture") | 
-        Q(name__icontains="Scoping")
-    ).first()
+    services = Service.objects.filter(is_active=True).order_by("name")
 
     # Prepare serialized data for dynamic frontend filtering
     all_engineers_data = []
@@ -82,10 +72,7 @@ def book_appointment_view(request):
             desig_lower = eng["designation"].lower()
 
             is_match = False
-            if "general architecture" in svc_name_lower or "scoping" in svc_name_lower:
-                # General Architecture & Scoping can be taken by all qualified engineers/architects
-                is_match = True
-            elif "cloud" in svc_name_lower or "aws" in svc_name_lower or "gcp" in svc_name_lower:
+            if "cloud" in svc_name_lower or "aws" in svc_name_lower or "gcp" in svc_name_lower:
                 if any("cloud" in e or "aws" in e or "devops" in e or "kubernetes" in e or "terraform" in e for e in exp_lower) or "cloud" in desig_lower or "architect" in desig_lower:
                     is_match = True
             elif "database" in svc_name_lower or "performance" in svc_name_lower:
@@ -150,7 +137,6 @@ def book_appointment_view(request):
                             "form": form,
                             "engineers": engineers,
                             "services": services,
-                            "general_service": general_service,
                             "engineer_service_map": engineer_service_map,
                             "all_engineers_data": all_engineers_data,
                             "engineer_service_map_json": json.dumps(engineer_service_map),
@@ -189,7 +175,6 @@ def book_appointment_view(request):
             "form": form,
             "engineers": engineers,
             "services": services,
-            "general_service": general_service,
             "engineer_service_map": engineer_service_map,
             "all_engineers_data": all_engineers_data,
             "engineer_service_map_json": json.dumps(engineer_service_map),

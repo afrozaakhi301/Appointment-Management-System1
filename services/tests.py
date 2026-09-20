@@ -254,29 +254,17 @@ class ServiceAndReviewViewsTestCase(TestCase):
         self.assertEqual(ee.proficiency_level, EngineerExpertise.ProficiencyLevel.INTERMEDIATE)
         self.assertEqual(ee.admin_notes, "")
 
-    def test_service_list_displays_scoping_banner_and_use_cases(self):
-        # Create General Architecture service
-        general_svc, _ = Service.objects.get_or_create(
-            name="General Architecture & Technical Scoping",
-            defaults={
-                "description": "Scoping session for non-technical clients.",
-                "is_active": True
-            }
+    def test_service_list_displays_services(self):
+        svc = Service.objects.create(
+            name="Cloud Migration & AWS Architecture",
+            description="Cloud consultation session.",
+            is_active=True
         )
 
         response = self.client.get(reverse("services:service_list"))
         self.assertEqual(response.status_code, 200)
-        self.assertIn("general_service", response.context)
-        self.assertEqual(response.context["general_service"], general_svc)
-
-        # Verify banner text and button
-        self.assertContains(response, "Not sure what technical service fits your project?")
-        self.assertContains(response, "Book a <strong>General Architecture & Technical Scoping Session</strong>")
-        self.assertContains(response, "Book Scoping Session")
-
-        # Verify typical use cases section
-        self.assertContains(response, "Typical Use Cases")
-        self.assertContains(response, "MVP Development")
-        self.assertContains(response, "AWS / GCP Migration")
+        self.assertIn("services", response.context)
+        self.assertContains(response, "Cloud Migration")
+        self.assertNotContains(response, "Book Scoping Session")
 
 

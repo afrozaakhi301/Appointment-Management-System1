@@ -314,28 +314,18 @@ class AppointmentBusinessLogicTests(TestCase):
         self.assertContains(response, 'id="engineer-service-map-data"')
         self.assertContains(response, 'id="all-engineers-data"')
 
-    def test_book_appointment_displays_scoping_card_highlight_and_sequential_badges(self):
-        general_svc, _ = Service.objects.get_or_create(
-            name="General Architecture & Technical Scoping",
-            defaults={
-                "description": "Scoping session for non-technical clients.",
-                "is_active": True
-            }
+    def test_book_appointment_displays_service_cards(self):
+        svc = Service.objects.create(
+            name="Cloud Architecture Consultation",
+            description="System review session.",
+            is_active=True
         )
         self.client.login(username="client1", password="Password123!")
         response = self.client.get(reverse("appointments:book_appointment"))
         self.assertEqual(response.status_code, 200)
-
-        # Context has general_service as the first item in services list
-        self.assertIn("general_service", response.context)
-        self.assertEqual(response.context["general_service"], general_svc)
-        self.assertEqual(list(response.context["services"])[0], general_svc)
-
-        # Sequential badges and highlight on Service #1
-        self.assertContains(response, "Service #1")
-        self.assertContains(response, "💡 Not sure which service fits? Start Here")
-        self.assertContains(response, "Work directly with a lead software architect to define requirements")
-        self.assertContains(response, "scoping-highlight-card")
+        self.assertContains(response, "Cloud Architecture Consultation")
+        self.assertNotContains(response, "scoping-highlight-card")
+        self.assertNotContains(response, "💡 Not sure which service fits? Start Here")
 
 
 class FullVivaScenarioEndToEndTest(TestCase):
@@ -704,6 +694,19 @@ class AIMatchApiEndpointTests(TestCase):
         url = reverse("appointments:ai_match")
         response = self.client.get(url)
         self.assertEqual(response.status_code, 405)
+
+    def test_ai_match_endpoint_no_direct_service_keyword_overlap(self):
+        import json
+
+        url = reverse("appointments:ai_match")
+        payload = {"text": "uniquequerywithoutkeywords12345"}
+        response = self.client.post(url, data=json.dumps(payload), content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["status"], "success")
+        self.assertIsNotNone(data["matched_service"])
+        self.assertEqual(data["matched_service"]["id"], self.service.id)
+
 
 
 class BusinessPolicyAndTieredCancellationTests(TestCase):

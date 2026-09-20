@@ -95,9 +95,7 @@
                     <div class="card-body d-flex flex-column p-2">
                         <div class="d-flex align-items-center mb-3">
                             <div class="service-icon-box me-3">
-                                {% if "General Architecture" in service.name or "Scoping" in service.name %}
-                                <i class="bi bi-compass-fill text-warning"></i>
-                                {% elif "Cloud" in service.name or "AWS" in service.name %}
+                                {% if "Cloud" in service.name or "AWS" in service.name %}
                                 <i class="bi bi-cloud-arrow-up-fill text-primary"></i>
                                 {% elif "Database" in service.name or "Backend" in service.name %}
                                 <i class="bi bi-database-fill-gear text-success"></i>

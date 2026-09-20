@@ -123,13 +123,9 @@ def calculate_match_scores(project_text: str) -> dict:
                 best_service_sim = sim
                 best_service = svc
 
-        # If no service had direct keyword overlap, pick General Architecture or first service
-        if not best_service:
-            general_svc = next(
-                (s for s in services if "general" in s.name.lower() or "scoping" in s.name.lower()),
-                services[0]
-            )
-            best_service = general_svc
+        # If no service had direct keyword overlap, pick the first available service
+        if not best_service and services:
+            best_service = services[0]
             best_service_sim = 0.50
 
     # 2. Evaluate Active Engineers Against Verified Expertises & Proficiency
@@ -201,9 +197,7 @@ def calculate_match_scores(project_text: str) -> dict:
         domain_bonus = 0.0
         if best_service:
             best_svc_lower = best_service.name.lower()
-            if "general" in best_svc_lower or "scoping" in best_svc_lower:
-                domain_bonus = 8.0
-            elif any(s.lower() in best_svc_lower for s in matched_skills):
+            if any(s.lower() in best_svc_lower for s in matched_skills):
                 domain_bonus = 10.0
             elif any(t in best_svc_lower for t in desig_tokens):
                 domain_bonus = 8.0
@@ -258,7 +252,7 @@ def calculate_match_scores(project_text: str) -> dict:
         "status": "success",
         "matched_service": {
             "id": best_service.id if best_service else None,
-            "name": best_service.name if best_service else "General Architecture",
+            "name": best_service.name if best_service else "Software Consultation",
             "description": best_service.description if best_service else "",
             "similarity_score": round(best_service_sim * 100, 1),
         } if best_service else None,

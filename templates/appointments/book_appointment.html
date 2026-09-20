@@ -122,18 +122,11 @@
                             <div class="row g-3 mb-2" id="serviceCardGrid">
                                 {% for svc in services %}
                                     <div class="col-md-6 col-lg-4">
-                                        <div class="service-select-card h-100 d-flex flex-column justify-content-between {% if forloop.first or 'General Architecture' in svc.name or 'Scoping' in svc.name %}scoping-highlight-card border-primary shadow-sm{% endif %}" 
+                                        <div class="service-select-card h-100 d-flex flex-column justify-content-between" 
                                              data-service-id="{{ svc.id }}" 
                                              data-service-name="{{ svc.name }}"
                                              id="service-card-{{ svc.id }}"
                                              onclick="selectServiceCard('{{ svc.id }}')">
-                                            
-                                            <!-- Top Ribbon Bar for Card #1 -->
-                                            {% if forloop.first or "General Architecture" in svc.name or "Scoping" in svc.name %}
-                                                <div class="bg-warning text-dark text-center fw-bold py-1 small rounded-top border-bottom" style="font-size: 0.78rem; letter-spacing: 0.01em;">
-                                                    💡 Not sure which service fits? Start Here
-                                                </div>
-                                            {% endif %}
 
                                             <!-- Inner Card Body Container -->
                                             <div class="service-card-body d-flex flex-column justify-content-between flex-grow-1 position-relative p-3">
@@ -145,9 +138,7 @@
                                                 <div>
                                                     <div class="d-flex align-items-center mb-2 pe-4">
                                                         <div class="service-icon-box me-3 flex-shrink-0">
-                                                            {% if "General Architecture" in svc.name or "Scoping" in svc.name %}
-                                                                <i class="bi bi-compass-fill text-warning"></i>
-                                                            {% elif "Cloud" in svc.name or "AWS" in svc.name %}
+                                                            {% if "Cloud" in svc.name or "AWS" in svc.name %}
                                                                 <i class="bi bi-cloud-arrow-up-fill"></i>
                                                             {% elif "Database" in svc.name or "Backend" in svc.name %}
                                                                 <i class="bi bi-database-fill-gear"></i>
@@ -170,11 +161,7 @@
                                                         </div>
                                                     </div>
                                                     <p class="text-muted small mb-2 line-clamp-2" style="font-size: 0.8rem; min-height: 2.4rem;">
-                                                        {% if forloop.first or "General Architecture" in svc.name or "Scoping" in svc.name %}
-                                                            Work directly with a lead software architect to define requirements, choose tech stacks, and plan timelines.
-                                                        {% else %}
-                                                            {{ svc.description|truncatewords:14 }}
-                                                        {% endif %}
+                                                        {{ svc.description|truncatewords:14 }}
                                                     </p>
                                                 </div>
 
@@ -302,7 +289,6 @@
 
     const engineerServiceMap = parseJsonScript("engineer-service-map-data", {});
     const allEngineers = parseJsonScript("all-engineers-data", []);
-
     function updateMarkedServiceUI(selectedId) {
         document.querySelectorAll(".service-select-card").forEach(function(card) {
             const cardId = card.getAttribute("data-service-id");
@@ -420,27 +406,6 @@
             serviceSelect.value = serviceId;
             updateMarkedServiceUI(serviceId);
             filterEngineersByService(serviceId);
-        }
-    }
-
-    function selectScopingService(serviceId) {
-        let targetId = serviceId;
-        if (!targetId || targetId === "" || targetId === "None") {
-            const allCards = document.querySelectorAll(".service-select-card");
-            for (let card of allCards) {
-                const name = (card.getAttribute("data-service-name") || "").toLowerCase();
-                if (name.includes("general") || name.includes("scoping")) {
-                    targetId = card.getAttribute("data-service-id");
-                    break;
-                }
-            }
-        }
-        if (targetId) {
-            selectServiceCard(targetId);
-            const cardElem = document.getElementById("service-card-" + targetId);
-            if (cardElem) {
-                cardElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
         }
     }
 

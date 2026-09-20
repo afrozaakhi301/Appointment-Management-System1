@@ -590,7 +590,9 @@ def admin_appointment_tracking(request):
 
     distribution_data = get_service_and_engineer_breakdown(
         engineer=selected_engineer,
-        service=selected_service
+        service=selected_service,
+        start_date=date(target_year, 1, 1),
+        end_date=date(target_year, 12, 31),
     )
 
     # Form options

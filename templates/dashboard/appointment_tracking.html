@@ -193,6 +193,57 @@
         </div>
     </div>
 
+    <!-- Visual Analytics Charts Row (Monthly Completion Trend & Service Domain Distribution) -->
+    <div class="row g-3 mb-4">
+        <!-- Left Column (col-lg-8): Monthly Consultation Completion Trend (Bar Chart) -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-bar-chart-line-fill text-primary me-2"></i>Monthly Consultation Completion Trend ({{ target_year }})
+                        </h6>
+                        <small class="text-muted">Monthly completed sessions across the calendar year</small>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 small fw-semibold">
+                        {{ monthly_data.total_in_period }} Completed
+                    </span>
+                </div>
+                <div class="card-body p-3">
+                    <div style="position: relative; height: 260px; width: 100%;">
+                        <canvas id="monthlyCompletionTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column (col-lg-4): Consultations by Service Domain (Doughnut Chart) -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-pie-chart-fill text-info me-2"></i>By Service Domain
+                        </h6>
+                        <small class="text-muted">Completed consultations distribution</small>
+                    </div>
+                    <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 small fw-semibold">
+                        {{ distribution_data.service_breakdown|length }} Domains
+                    </span>
+                </div>
+                <div class="card-body p-3 d-flex flex-column justify-content-center">
+                    <div style="position: relative; height: 260px; width: 100%;">
+                        <canvas id="serviceDomainDistributionChart"></canvas>
+                        <div id="serviceDomainEmptyState" class="d-none h-100 flex-column align-items-center justify-content-center text-muted small">
+                            <i class="bi bi-pie-chart text-secondary fs-1 mb-2 opacity-50"></i>
+                            <span>No completed consultations recorded</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Filter Bar -->
     <div class="card border-0 shadow-sm mb-4 no-print">
         <div class="card-body p-3">
@@ -297,4 +348,155 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Monthly Consultation Completion Trend (Bar Chart)
+        const monthlyTrendCanvas = document.getElementById("monthlyCompletionTrendChart");
+        if (monthlyTrendCanvas) {
+            const monthlyData = JSON.parse('{{ monthly_chart_json|escapejs }}');
+            new Chart(monthlyTrendCanvas, {
+                type: 'bar',
+                data: {
+                    labels: monthlyData.labels,
+                    datasets: [{
+                        label: 'Completed Sessions',
+                        data: monthlyData.data,
+                        backgroundColor: 'rgba(13, 110, 253, 0.82)',
+                        borderColor: '#0d6efd',
+                        hoverBackgroundColor: '#0b5ed7',
+                        borderWidth: 1.5,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        maxBarThickness: 38,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                precision: 0,
+                                color: '#6c757d'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#6c757d'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            padding: 10,
+                            cornerRadius: 6,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(ctx) {
+                                    const val = ctx.parsed.y;
+                                    return val + ' consultation' + (val === 1 ? '' : 's') + ' completed';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Consultations by Service Domain (Doughnut Chart)
+        const serviceDomainCanvas = document.getElementById("serviceDomainDistributionChart");
+        if (serviceDomainCanvas) {
+            const serviceData = JSON.parse('{{ service_chart_json|escapejs }}');
+            const hasData = serviceData.data && serviceData.data.length > 0 && serviceData.data.some(v => v > 0);
+
+            if (hasData) {
+                // Curated palette harmonious with Bootstrap 5
+                const domainPalette = [
+                    '#0d6efd', // Primary Blue
+                    '#0dcaf0', // Cyan
+                    '#198754', // Forest Green
+                    '#ffc107', // Amber
+                    '#6f42c1', // Purple
+                    '#fd7e14', // Warm Orange
+                    '#20c997', // Teal
+                    '#d63384'  // Rose Pink
+                ];
+
+                new Chart(serviceDomainCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: serviceData.labels,
+                        datasets: [{
+                            data: serviceData.data,
+                            backgroundColor: domainPalette.slice(0, serviceData.labels.length),
+                            borderWidth: 2,
+                            borderColor: '#ffffff',
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 10,
+                                    font: {
+                                        size: 11
+                                    },
+                                    color: '#495057'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#1e293b',
+                                titleColor: '#ffffff',
+                                bodyColor: '#e2e8f0',
+                                padding: 10,
+                                cornerRadius: 6,
+                                callbacks: {
+                                    label: function(ctx) {
+                                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                        const val = ctx.parsed;
+                                        const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                                        return ` ${ctx.label}: ${val} (${pct}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '62%'
+                    }
+                });
+            } else {
+                serviceDomainCanvas.classList.add('d-none');
+                const emptyState = document.getElementById("serviceDomainEmptyState");
+                if (emptyState) {
+                    emptyState.classList.remove('d-none');
+                    emptyState.classList.add('d-flex');
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}

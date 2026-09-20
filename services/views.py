@@ -60,13 +60,11 @@ def about_contact_view(request):
 
 def service_list_view(request):
     services = Service.objects.filter(is_active=True)
-    general_service = Service.objects.filter(name__icontains="General Architecture", is_active=True).first()
     return render(
         request,
         "services/service_list.html",
         {
             "services": services,
-            "general_service": general_service,
         }
     )
 

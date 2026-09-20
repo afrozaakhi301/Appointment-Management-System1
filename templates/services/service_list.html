@@ -9,31 +9,6 @@
         <p class="text-muted">Specialized software engineering domains available for booking with Touch & Solve lead engineers</p>
     </div>
 
-    <!-- Scoping Session Card -->
-    <div class="card border mb-4">
-        <div class="card-body p-4">
-            <div class="row align-items-center g-3">
-                <div class="col-lg-8">
-                    <h5 class="fw-bold mb-1"><i class="bi bi-compass-fill text-primary me-2"></i>Not sure which technical service fits your project?</h5>
-                    <p class="text-muted mb-0">
-                        Book a <strong>General Architecture & Technical Scoping Session</strong>. Work 1-on-1 with a lead architect to clarify requirements, evaluate tech trade-offs, and select the optimal stack.
-                    </p>
-                </div>
-                <div class="col-lg-4 text-lg-end">
-                    {% if general_service %}
-                        <a href="{% url 'appointments:book_appointment' %}?service={{ general_service.id }}" class="btn btn-primary">
-                            Book Scoping Session
-                        </a>
-                    {% else %}
-                        <a href="{% url 'appointments:book_appointment' %}" class="btn btn-primary">
-                            Book Scoping Session
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Services Grid -->
     <div class="row g-4">
         {% for service in services %}
@@ -42,9 +17,7 @@
                     <div class="card-body d-flex flex-column p-2">
                         <div class="d-flex align-items-center mb-3">
                             <div class="service-icon-box me-3">
-                                {% if "General Architecture" in service.name or "Scoping" in service.name %}
-                                    <i class="bi bi-compass-fill text-warning"></i>
-                                {% elif "Cloud" in service.name or "AWS" in service.name %}
+                                {% if "Cloud" in service.name or "AWS" in service.name %}
                                     <i class="bi bi-cloud-arrow-up-fill text-primary"></i>
                                 {% elif "Database" in service.name or "Backend" in service.name %}
                                     <i class="bi bi-database-fill-gear text-success"></i>
